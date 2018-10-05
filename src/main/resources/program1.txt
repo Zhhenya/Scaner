@@ -1,0 +1,18 @@
+public class Main{
+    int a, b = 0;
+
+   public class Arial{
+        int global;
+        boolean back = false;
+    }
+
+    void Func(int g){
+        Arial myIdent;
+        myIdent.global = 5;
+
+        if(5 + myIdent.global > 0)
+            b = 5 + myIdent.global;
+        }else
+            if(!myIdent.back)
+                return ;
+ }#

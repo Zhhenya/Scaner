@@ -1,0 +1,29 @@
+/**********/public class Main(){
+  //fghjk
+    public void main(){
+        int temp = 0, a = 0;
+        int ertyuioplkjhgfdssdf;
+        temp++;
+        temp = temp + 90;
+        temp = a % 8;
+        boolean f = true;
+        a = a / 76;
+        if(56 && a)
+            temp = 0;
+        else
+            if(9 || a)
+                temp = 95;
+        if(f == true){
+            temp = 6 + a;
+            a = temp -+ 9;
+        }
+        //khuhkij
+
+/*dfklhg
+       */
+    }
+
+    public boolean getF(boolean f){
+        return f;
+    }
+}#
