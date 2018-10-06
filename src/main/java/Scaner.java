@@ -40,7 +40,7 @@ public class Scaner {
                             }
                             newLine();
                             if (text.charAt(currentIndexPosition) == '#')
-                                return Types.Type_end;
+                                return Types.TypeEnd;
                             else
                                 currentIndexPosition++;
                         }
@@ -55,7 +55,7 @@ public class Scaner {
         //если встретился символ конца
         if (text.charAt(currentIndexPosition) == '\0' || text.charAt(currentIndexPosition) == '#') {
             lexeme.append("#");
-            return Types.Type_end;
+            return Types.TypeEnd;
         }
 
 
@@ -69,7 +69,7 @@ public class Scaner {
                 else
                     currentIndexPosition++;
             }
-            return Types.Type_ConstInt;
+            return Types.TypeConstInt;
         } else if (text.charAt(currentIndexPosition) >= 'a' && text.charAt(currentIndexPosition) <= 'z' ||
                 text.charAt(currentIndexPosition) >= 'A' && text.charAt(currentIndexPosition) <= 'Z') {
             lexeme.append(text.charAt(currentIndexPosition++));
@@ -86,75 +86,75 @@ public class Scaner {
                 }
 
             for (int j = 0; j < MAX_NUMBER_KEYWORDS; j++) {
-                if (KeyWords.keyWords[j].compareTo(lexeme.toString()) == 0)
-                    return Types.valueOf("Type_" + KeyWords.keyWords[j]);
+                if (KeyWords.keyWords[j].equalsIgnoreCase(lexeme.toString()))
+                    return Types.valueOf("Type" + KeyWords.keyWords[j]);
             }
-            return Types.Type_ident;
+            return Types.TypeIdent;
         } else if (text.charAt(currentIndexPosition) == ',')
-            return getTypes(lexeme, Types.Type_comma);
+            return getTypes(lexeme, Types.TypeComma);
         else if (text.charAt(currentIndexPosition) == ';')
-            return getTypes(lexeme, Types.Type_Semicolon);
+            return getTypes(lexeme, Types.TypeSemicolon);
         else if (text.charAt(currentIndexPosition) == '(')
-            return getTypes(lexeme, Types.Type_openParenthesis);
+            return getTypes(lexeme, Types.TypeOpenParenthesis);
         else if (text.charAt(currentIndexPosition) == ')')
-            return getTypes(lexeme, Types.Type_closeParenthesis);
+            return getTypes(lexeme, Types.TypeCloseParenthesis);
         else if (text.charAt(currentIndexPosition) == '{')
-            return getTypes(lexeme, Types.Type_openBrace);
+            return getTypes(lexeme, Types.TypeOpenBrace);
         else if (text.charAt(currentIndexPosition) == '}')
-            return getTypes(lexeme, Types.Type_closeBrace);
+            return getTypes(lexeme, Types.TypeCloseBrace);
         else if (text.charAt(currentIndexPosition) == '+') {
             if (text.charAt(currentIndexPosition + 1) == '+') {
                 lexeme.append(text.charAt(currentIndexPosition++));
-                return getTypes(lexeme, Types.Type_PlusPlus);
+                return getTypes(lexeme, Types.TypePlusPlus);
             }
-            return getTypes(lexeme, Types.Type_Plus);
+            return getTypes(lexeme, Types.TypePlus);
         } else if (text.charAt(currentIndexPosition) == '-') {
             if (text.charAt(currentIndexPosition + 1) == '-') {
                 lexeme.append(text.charAt(currentIndexPosition++));
-                return getTypes(lexeme, Types.Type_MinusMinus);
+                return getTypes(lexeme, Types.TypeMinusMinus);
             }
-            return getTypes(lexeme, Types.Type_Minus);
+            return getTypes(lexeme, Types.TypeMinus);
         } else if (text.charAt(currentIndexPosition) == '/')
-            return getTypes(lexeme, Types.Type_division);
+            return getTypes(lexeme, Types.TypeDivision);
         else if(text.charAt(currentIndexPosition) == '.')
-                return getTypes(lexeme, Types.Type_dot);
+                return getTypes(lexeme, Types.TypeDot);
         else if (text.charAt(currentIndexPosition) == '%')
-            return getTypes(lexeme, Types.Type_mod);
+            return getTypes(lexeme, Types.TypeMod);
         else if (text.charAt(currentIndexPosition) == '*')
-            return getTypes(lexeme, Types.Type_Multiply);
+            return getTypes(lexeme, Types.TypeMultiply);
         else if (text.charAt(currentIndexPosition) == '<') {
             if (text.charAt(currentIndexPosition + 1) == '=') {
                 lexeme.append(text.charAt(currentIndexPosition++));
-                return getTypes(lexeme, Types.Type_le);
+                return getTypes(lexeme, Types.TypeLe);
             }
-            return getTypes(lexeme, Types.Type_lt);
+            return getTypes(lexeme, Types.TypeLt);
         } else if (text.charAt(currentIndexPosition) == '>') {
             if (text.charAt(currentIndexPosition + 1) == '=') {
                 lexeme.append(text.charAt(currentIndexPosition++));
-                return getTypes(lexeme, Types.Type_ge);
+                return getTypes(lexeme, Types.TypeGe);
             }
-            return getTypes(lexeme, Types.Type_gt);
+            return getTypes(lexeme, Types.TypeGt);
         } else if (text.charAt(currentIndexPosition) == '!') {
             if (text.charAt(currentIndexPosition + 1) == '=') {
                 lexeme.append(text.charAt(currentIndexPosition++));
                 lexeme.append(text.charAt(currentIndexPosition++));
-                return getTypes(lexeme, Types.Type_Negation);
+                return getTypes(lexeme, Types.TypeNegation);
             }
             // return printError("Неверный входной символ", lexeme, new StringBuilder().append(text.charAt(currentIndexPosition)));
-            return getTypes(lexeme, Types.Type_Negation);
+            return getTypes(lexeme, Types.TypeNegation);
         }
         if (text.charAt(currentIndexPosition) == '=') {
             if (text.charAt(currentIndexPosition + 1) == '=') {
                 lexeme.append(text.charAt(currentIndexPosition++));
                 lexeme.append(text.charAt(currentIndexPosition++));
-                return getTypes(lexeme, Types.Type_comparison);
+                return getTypes(lexeme, Types.TypeComparison);
             }
-            return getTypes(lexeme, Types.Type_assign);
+            return getTypes(lexeme, Types.TypeAssign);
         } else if (text.charAt(currentIndexPosition) == '&') {
             if (text.charAt(currentIndexPosition + 1) == '&') {
                 lexeme.append(text.charAt(currentIndexPosition++));
                 lexeme.append(text.charAt(currentIndexPosition++));
-                return getTypes(lexeme, Types.Type_and);
+                return getTypes(lexeme, Types.TypeAnd);
             } else
                 return printError("Неверный входной символ", lexeme, new StringBuilder().append(text.charAt(currentIndexPosition)));
 
@@ -162,7 +162,7 @@ public class Scaner {
             if (text.charAt(currentIndexPosition) == '|') {
                 lexeme.append(text.charAt(currentIndexPosition++));
                 lexeme.append(text.charAt(currentIndexPosition++));
-                return getTypes(lexeme, Types.Type_or);
+                return getTypes(lexeme, Types.TypeOr);
             }
             return printError("Неверный входной символ", lexeme, new StringBuilder().append(text.charAt(currentIndexPosition)));
         } else
@@ -201,7 +201,7 @@ public class Scaner {
     public Types printError(String error, StringBuilder lexeme, StringBuilder errorItem) {
         System.out.println("строка" + numberOfRow + ": " + error + ": " + " позиция " + currentIndexPosition + ": " + errorItem.toString());
         currentIndexPosition++;
-        return Types.Type_error;
+        return Types.TypeError;
     }
 
   /*  public void readNextLine(BufferedReader reader){

@@ -20,13 +20,13 @@ public class Main {
             System.out.println("строка 1:" );
             types = diagrams.S();
 
-            if(types != Types.Type_error)
+            if(types != Types.TypeError)
                 System.out.println("Завершено без ошибок");
             /*do{
                 types = scaner.scaner(lexeme);
-                if(types != Types.Type_forReturn)
+                if(types != Types.TypeForReturn)
                     System.out.println("\t; тип " + types + " "  +lexeme.toString());
-            }while (types != Types.Type_end );*/
+            }while (types != Types.TypeEnd );*/
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (DiagramsException e) {
