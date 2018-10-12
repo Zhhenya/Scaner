@@ -27,3 +27,40 @@
         return f;
     }
 }#
+
+
+public class Main{
+
+    int a, b = 0;
+
+
+   public class Arial{
+        int global;
+        boolean back = false;
+        public class Dual{
+            int Func1(boolean m){
+             int s = 8;
+                s++;
+                s--;
+             !s;
+             --s;
+             ++s;
+             return ++s;
+            }
+    }
+
+    void Func(Arial y){
+        Arial myIdent;
+        myIdent.global = 5;
+        Func1(b);
+        if(5 + myIdent.global > 0){
+               b = 0;
+               5 + myIdent.global;
+            }
+        else{
+            if(!!myIdent.back){
+                return 9;
+
+        }
+ }}}
+ }#

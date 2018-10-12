@@ -199,7 +199,8 @@ public class Scaner {
     }
 
     public Types printError(String error, StringBuilder lexeme, StringBuilder errorItem) {
-        System.out.println("строка" + numberOfRow + ": " + error + ": " + " позиция " + currentIndexPosition + ": " + errorItem.toString());
+       // System.out.println("строка" + numberOfRow + ": " + error + ": " + " позиция " + currentIndexPosition + ": " + errorItem.toString() + "лексемма " + lexeme);
+        System.out.println(error + ": " + " позиция " + currentIndexPosition + ": " + errorItem.toString() + "лексемма " + lexeme);
         currentIndexPosition++;
         return Types.TypeError;
     }

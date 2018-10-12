@@ -1,478 +1,578 @@
-/*
-import java.net.Proxy;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Diagrams {
     private Scaner scaner;
     private StringBuilder lexeme;
+    private int position;
+    private int row;
+    private List<Boolean> brace = new ArrayList<Boolean>();
+    private List<Boolean> func = new ArrayList<Boolean>();
+
 
     public Diagrams(Scaner scaner, StringBuilder lexeme){
         this.scaner = scaner;
         this.lexeme = lexeme;
     }
 
-    public Scaner getScaner() {
-        return scaner;
+    private void setPositionAndLine(int position, int numberOfRow){
+        scaner.setCurrentIndexPosition(position);
+        scaner.setNumberOfRow(row);
+    }
+    private void getPositionAndLine () {
+        position = scaner.getCurrentIndexPosition();
+        row = scaner.getNumberOfRow();
     }
 
-    public void setScaner(Scaner scaner) {
-        this.scaner = scaner;
-    }
-
-    public StringBuilder getLexeme() {
-        return lexeme;
-    }
-
-    public void setLexeme(StringBuilder lexeme) {
-        this.lexeme = lexeme;
-    }
-*/
-/*
-    // public class Main{ [C]}
-    public Types S(){
+    public Types S() throws DiagramsException{
         Types t;
 
         if((t = scaner.scaner(lexeme)) != Types.TypePublic)
-            return printError("Ожидалось 'public'");
+            throw new DiagramsException("Ожидалось 'public", lexeme, scaner);
 
         if((t = scaner.scaner(lexeme)) != Types.TypeClass)
-            return printError("Ожидалось 'class'");
+            throw new DiagramsException("Ожидалось 'class'", lexeme, scaner);
 
         if((t = scaner.scaner(lexeme)) != Types.TypeMain && t != Types.TypeIdent)
-          return printError("Ожидалось Main");
+            throw new DiagramsException("Ожидалось имя класса", lexeme, scaner);
 
         if((t = scaner.scaner(lexeme)) != Types.TypeOpenBrace)
-          return printError("Ожидалось {");
+            throw new DiagramsException("Ожидалось {", lexeme, scaner);
 
+        Content();
 
-        if(C() == Types.TypeError)
-            return Types.TypeError;
 
         if((t = scaner.scaner(lexeme)) != Types.TypeCloseBrace)
-          return  printError("Ожидалось }");
+            throw new DiagramsException("Ожидалось }", lexeme, scaner);
 
+        getPositionAndLine();
 
-        return Types.TypeForReturn;
-    }
-
-    public Types C(){
-        Types t = null;
-
-        int startPosition, currentPosition = -1;
-        do {
-            startPosition = scaner.getCurrentIndexPosition();
-                if((t = scaner.scaner(lexeme)) == Types.TypeIdent || t == Types.TypeInt || (t) == Types.TypeBoolean ||t == Types.TypeVoid) {
-                    startPosition = scaner.getCurrentIndexPosition();
-                    if((t = scaner.scaner(lexeme)) == Types.TypeIdent || t == Types.Typemain) {
-                        scaner.setCurrentIndexPosition(startPosition);
-                        t = M();
-                    }
-                }
-                else {
-                    scaner.setCurrentIndexPosition(startPosition);
-                    t = Types.TypeError;
-                }
-
-                if(t == Types.TypeError) {
-                    scaner.setCurrentIndexPosition(startPosition);
-
-                    t = I();
-                    currentPosition = scaner.getCurrentIndexPosition();
-                }
-                if(t == Types.TypeError) {
-                    scaner.setCurrentIndexPosition(startPosition);
-                    if ((t = scaner.scaner(lexeme)) !=Types.TypePublic)
-                        return printError("Ожидалось 'public'");
-                    else {
-                        scaner.setCurrentIndexPosition(startPosition);
-                        t = S();
-                    }
-
-                }
-                else
-                    scaner.setCurrentIndexPosition(currentPosition);
-            }while(t == Types.TypeForReturn);
-
-     *//*
-*/
-/*   if((t = scaner.scaner(lexeme)) != Types.TypeCloseBrace)
-            return printError("Ожидалось '}'");*//*
-*/
-/*
-        if(t == Types.TypeComma)
-            return printError("Ожидалось ';'");
-        if(t == Types.TypeError)
-            return Types.TypeError;
-
-        return Types.TypeForReturn;
-
-    }*//*
-
-
-
-   */
-/* public Types M() {
-        Types t;
-
-        if (R() == Types.TypeForReturn) {
-            if ((t = scaner.scaner(lexeme)) != Types.TypeIdent && t != Types.Typemain)
-                return Types.TypeError;
-               // return printError("Ожидалось идентификатор или main");
-            if (scaner.scaner(lexeme) != Types.TypeOpenParenthesis)
-                return Types.TypeError;
-              //  return printError("Ожидалось (");
-
-            if (F() == Types.TypeError)
-                return Types.TypeError;
-
-            if (scaner.scaner(lexeme) != Types.TypeCloseParenthesis)
-                return printError("Ожидалось )");
-
-            if (B() == Types.TypeError)
-                return Types.TypeError;
-        }
-        else
-            return Types.TypeError;
-        return Types.TypeForReturn;
-    }*//*
-
-
-   */
-/* public Types R(){
-        Types t;
-        if((t = scaner.scaner(lexeme)) != Types.TypeVoid &&
-            t != Types.TypeIdent && t != Types.TypeBoolean &&
-            t != Types.TypeInt)
-         //   return printError("Ожидался тип возвращаемого значения или идентификатор");
-            return Types.TypeError;
-        return Types.TypeForReturn;
-    }*//*
-
-
-    public Types F(){
-        Types t;
-        int startPosition = 0;
-        do{
-            if((t = scaner.scaner(lexeme)) != Types.TypeBoolean &&
-                    t != Types.TypeInt && t != Types.TypeIdent)
-                return printError("Ожидался тип или идентификатор");
-            else
-                if((t =scaner.scaner(lexeme)) != Types.TypeIdent)
-                    return Types.TypeError;
-                  //  return printError("Ожидался идентификатор");
-            startPosition = scaner.getCurrentIndexPosition();
-            t = scaner.scaner(lexeme);
-        }while(t == Types.TypeComma);
-        scaner.setCurrentIndexPosition(startPosition);
-
-        return Types.TypeForReturn;
-    }
-
-   */
-/* public Types B(){
-        Types t;
-
-        if((t = scaner.scaner(lexeme)) != Types.TypeOpenBrace)
-            return printError("Ожидалось {");
-
-        O();
-
-        if((t = scaner.scaner(lexeme)) != Types.TypeCloseBrace)
-            return printError("Ожидалось }");
-
-        return null;
-    }*//*
-
-
-    public Types O(){
-        Types t = null;
-        int startPosition = scaner.getCurrentIndexPosition();
-
-        while(t != Types.TypeError && t != Types.TypeForReturn) {
-            startPosition = scaner.getCurrentIndexPosition();
-            if ((t = scaner.scaner(lexeme)) == Types.TypeIdent || t != Types.TypeBoolean || t != Types.TypeInt) {
-                scaner.setCurrentIndexPosition(startPosition);
-                    t = V1();
-            } else
-                if (t == Types.TypePublic && t == Types.TypeClass) {
-                    scaner.setCurrentIndexPosition(startPosition);
-                    t = S();
-                }
-                else
-                    t = O1();
-        }
-
-        if(t == Types.TypeError)
-            return Types.TypeError;
-
-
-
-        return Types.TypeForReturn;
-    }
-
-   */
-/* public Types V1(){
-        Types t;
-
-        if((t = scaner.scaner(lexeme)) != Types.TypeIdent && t != Types.TypeBoolean && t != Types.TypeInt)
-            return printError("Ожидался тип");
-        if(I() == Types.TypeError)
-            return Types.TypeError;
-
-        if(scaner.scaner(lexeme) != Types.TypeSemicolon)
-            return printError("Ожидалась ;");
-
-        return Types.TypeForReturn;
-    }*//*
-
-
-    */
-/*public Types I(){
-        Types t = null;
-        int startPosition  = -1, count = 0;
-         do{
-            if((t = scaner.scaner(lexeme)) != Types.TypeIdent)
-                return Types.TypeError;
-               // return printError("Ожидался идентификатор");
-             startPosition = scaner.getCurrentIndexPosition();
-             if((t = scaner.scaner(lexeme)) == Types.TypeAssign) {
-                 if (V() == Types.TypeError)
-                     return Types.TypeError;
-                  count++;             //   startPosition = scaner.getCurrentIndexPosition();
-             }else
-                 scaner.setCurrentIndexPosition(startPosition);
-             startPosition = scaner.getCurrentIndexPosition();
-         }while((t = scaner.scaner(lexeme)) == Types.TypeComma);
-        if(t != Types.TypeSemicolon && count == 0)
-             return Types.TypeError;
-         if(t != Types.TypeSemicolon)
-            scaner.setCurrentIndexPosition(startPosition);
-
-        return Types.TypeForReturn;
-    }*//*
-
-
-    public Types O1(){
-        Types t = null;
-        int startPosition = scaner.getCurrentIndexPosition();
-        if((t = scaner.scaner(lexeme)) == Types.TypeIf) {
-            if ((t = scaner.scaner(lexeme)) != Types.TypeOpenParenthesis)
-                return printError("Ожидалось (");
-            else {
-                scaner.setCurrentIndexPosition(startPosition);
-                return U();
-            }
-        }else
-            if(t == Types.TypeIdent){
-                if((t = scaner.scaner(lexeme)) == Types.TypeDot) {
-                    scaner.setCurrentIndexPosition(startPosition);
-                    return N2();
-                }
-                else
-                    if(t == Types.TypeOpenBrace){
-                        scaner.setCurrentIndexPosition(startPosition);
-                        return H();
-                    }
-            }
-            else
-                if(t == Types.TypeOpenBrace){
-                    scaner.setCurrentIndexPosition(startPosition);
-                    return B();
-                }
+        t = scaner.scaner(lexeme);
+        if(t != Types.TypeEnd)
+            setPositionAndLine(position, row);
 
         return t;
     }
 
-    public Types N2(){
-        Types t;
-        if((t = scaner.scaner(lexeme)) != Types.TypeIdent)
-            return Types.TypeError;
-          //  return printError("Ожидался идентификатор");
-        while((t = scaner.scaner(lexeme))== Types.TypeDot ){
+
+    public void Content() throws DiagramsException{
+        Types t = null;
+        do {
+            getPositionAndLine();
+
+            if ((t = scaner.scaner(lexeme)) == Types.TypeIdent || t == Types.TypeInt || (t) == Types.TypeBoolean || t == Types.TypeVoid) {
+                if ((t = scaner.scaner(lexeme)) == Types.TypeIdent || t == Types.Typemain)
+                    if ((t = scaner.scaner(lexeme)) == Types.TypeOpenParenthesis) {
+                        if(func.size() == 0 || ! func.get(func.size() - 1)) {
+                            setPositionAndLine(position, row);
+                            Method();
+                            // setPositionAndLine(position, row);
+                            continue;
+                        }else
+                            throw new DiagramsException("Здесь не может быть объявлена функция", lexeme, scaner);
+                    }
+            }
+
+            setPositionAndLine(position, row);
             t = scaner.scaner(lexeme);
-            if(t != Types.TypeIdent)
-                return printError("Ожидался идентификатор");
+            if ((t == Types.TypeIdent || t == Types.TypeInt) && ((t = scaner.scaner(lexeme)) == Types.TypeOpenBrace || t == Types.TypeOpenParenthesis))
+                throw new DiagramsException("Ожидалось объявление класса или функции", lexeme, scaner);
+
+
+
+            setPositionAndLine(position, row);
+            if ((t = scaner.scaner(lexeme)) == Types.TypeIdent || t == Types.TypeInt || (t) == Types.TypeBoolean)
+                getPositionAndLine();
+            if ((t = scaner.scaner(lexeme)) == Types.TypeIdent) {
+                if ((t = scaner.scaner(lexeme)) == Types.TypeComma || t == Types.TypeSemicolon || t == Types.TypeAssign) {
+                    setPositionAndLine(position, row);
+                    ListOfIdentifiers();
+                    continue;
+                }
+                else
+                if(t == Types.TypeIdent || t == Types.TypeConstInt || t == Types.TypeFalse || t == Types.TypeTrue)
+                    throw new DiagramsException("Ожидалось ',' , ';', '='", lexeme, scaner);
+            }
+            setPositionAndLine(position, row);
+            if (((t = scaner.scaner(lexeme)) == Types.TypePublic || t == Types.TypeClass) && (func.size() == 0 || !func.get(func.size() - 1))) {
+                setPositionAndLine(position, row);
+                S();
+                continue;
+            } else
+                if((t == Types.TypePublic || t == Types.TypeClass) && func.size() != 0 && func.get(func.size() - 1))
+                    throw new DiagramsException("Здесь не может быть объявление нового класса", lexeme, scaner);
+
+
+            setPositionAndLine(position, row);
+            if ((t = scaner.scaner(lexeme)) == Types.TypeOpenBrace)
+                throw new DiagramsException("Блок может объявляться только в функции", lexeme, scaner);
+
+
+
+            break;
+        }while(true);
+
+        if(t == Types.TypeComma)
+            throw new DiagramsException("Ожидалось ';'", lexeme, scaner);
+        if(t == Types.TypeError)
+            throw new DiagramsException("Ошибка: ", lexeme, scaner);
+        if(t == Types.TypeCloseBrace)
+            scaner.setCurrentIndexPosition(position);
+    }
+
+    public void Method() throws DiagramsException {
+        Types t;
+
+        func.add(true);
+        ReturnType();
+        if ((t = scaner.scaner(lexeme)) != Types.TypeIdent && t != Types.Typemain)
+            throw new DiagramsException("Ожидалось идентификатор или main", lexeme, scaner);
+        if (scaner.scaner(lexeme) != Types.TypeOpenParenthesis)
+            throw new DiagramsException("Ожидалось (", lexeme, scaner);
+
+        FormalParameterList();
+
+        if (scaner.scaner(lexeme) != Types.TypeCloseParenthesis)
+            throw new DiagramsException("Ожидалось )", lexeme, scaner);
+
+        Block();
+        if(func.size() != 0)
+            func.remove(func.size() - 1);
+    }
+
+    public void ReturnType() throws DiagramsException{
+        Types t;
+        if((t = scaner.scaner(lexeme)) != Types.TypeVoid &&
+                t != Types.TypeIdent && t != Types.TypeBoolean &&
+                t != Types.TypeInt)
+            throw new DiagramsException("Ожидался тип или идентификатор", lexeme, scaner);
+    }
+
+    public void FormalParameterList() throws DiagramsException{
+        Types t;
+        do{
+            Parameter();
+            getPositionAndLine();
+        }while((t = scaner.scaner(lexeme))== Types.TypeComma);
+        setPositionAndLine(position, row);
+    }
+
+    public void Parameter() throws DiagramsException{
+        Types t;
+        if((t = scaner.scaner(lexeme)) != Types.TypeIdent && t != Types.TypeBoolean &&
+                t != Types.TypeInt)
+            throw new DiagramsException("Ожидался тип", lexeme, scaner);
+        if((t = scaner.scaner(lexeme)) != Types.TypeIdent)
+            throw new DiagramsException("Ожидался идентификатор", lexeme, scaner);
+
+    }
+
+    public void Block() throws DiagramsException{
+        Types t;
+
+        if((t = scaner.scaner(lexeme)) != Types.TypeOpenBrace)
+            throw new DiagramsException("Ожидалось {", lexeme, scaner);
+
+        Operators();
+
+        if((t = scaner.scaner(lexeme)) != Types.TypeCloseBrace)
+            throw new DiagramsException("Ожидалось }", lexeme, scaner);
+
+    }
+
+    public void Operators() throws DiagramsException {
+        Types t;
+
+        while (true) {
+            getPositionAndLine();
+            t = scaner.scaner(lexeme);
+            if (t == Types.TypeIdent && ((t = scaner.scaner(lexeme)) == Types.TypePlusPlus || t == Types.TypeMinusMinus)) {
+                setPositionAndLine(position, row);
+                V();
+                continue;
+            }
+            setPositionAndLine(position, row);
+            if ((t = scaner.scaner(lexeme))  == Types.TypePlusPlus  || t == Types.TypeMinusMinus || t == Types.TypeNegation) {
+                setPositionAndLine(position, row);
+                V();
+                continue;
+            }
+            setPositionAndLine(position, row);
+            if (((t = scaner.scaner(lexeme)) == Types.TypeIdent || t == Types.TypeConstInt)&& ((t = scaner.scaner(lexeme)) == Types.TypePlus || t == Types.TypeMinus)) {
+                setPositionAndLine(position, row);
+                V();
+                continue;
+            }
+
+
+            setPositionAndLine(position, row);
+            if ((((t = scaner.scaner(lexeme))) == Types.TypeIdent || t == Types.TypeBoolean || t == Types.TypeInt) &&
+                    (t = scaner.scaner(lexeme)) != Types.TypeDot && t != Types.TypeOpenParenthesis) {
+                setPositionAndLine(position, row);
+                VariableDescription();
+                continue;
+            }
+
+
+            setPositionAndLine(position, row);
+            if (((t = scaner.scaner(lexeme)) == Types.TypePublic || t == Types.TypeClass) && !func.get(func.size() - 1)) {
+                setPositionAndLine(position, row);
+                S();
+                continue;
+            } else
+                if(t == Types.TypePublic || t == Types.TypeClass && func.get(func.size() - 1))
+                    throw new DiagramsException("Здесь не может быть объявление другого класса", lexeme, scaner);
+            setPositionAndLine(position, row);
+            if ((t = scaner.scaner(lexeme)) == Types.TypeIf) {
+                setPositionAndLine(position, row);
+                Operator();
+                continue;
+            } else  if (t == Types.TypeIdent) {
+                    if ((t = scaner.scaner(lexeme)) == Types.TypeDot) {
+                        setPositionAndLine(position, row);
+                        Operator();
+                        continue;
+                    } else
+                        if (t  == Types.TypeOpenParenthesis) {
+                            setPositionAndLine(position, row);
+                            Operator();
+                            continue;
+                        }
+                }else   if (t == Types.TypeOpenBrace) {
+                            setPositionAndLine(position, row);
+                            Block();
+                         //   brace.add(true);
+                            continue;
+                        }    else if(t == Types.TypeReturn){
+                            getPositionAndLine();
+                            if((t = scaner.scaner(lexeme)) == Types.TypeSemicolon)
+                                continue;
+                            setPositionAndLine(position, row);
+                            if(((t = scaner.scaner(lexeme)) == Types.TypeIdent || t == Types.TypeConstInt || t == Types.TypeFalse || t == Types.TypeFalse)
+                                    && (t = scaner.scaner(lexeme)) == Types.TypeSemicolon)
+                                continue;
+
+                            if((t = scaner.scaner(lexeme)) != Types.TypeSemicolon)
+                                if (t != Types.TypeIdent && t != Types.TypePlusPlus && t != Types.TypeMinusMinus && t != Types.TypeNegation &&
+                                        t != Types.TypeTrue && t != Types.TypeFalse && t != Types.TypeConstInt)
+                                    throw new DiagramsException("Ожидалсась ';' или идентификатор или выражение", lexeme, scaner);
+
+
+                            setPositionAndLine(position, row);
+                                     /*  setPositionAndLine(position, row);
+                                       Operator();*/
+                                       continue;
+                        }   else if(t == Types.TypeSemicolon)
+                                    continue;
+                            else if(t == Types.TypeCloseBrace && brace.size() != 0) {
+                                    brace.remove(brace.size() - 1);
+                                    continue;
+                                }
+                            else {
+                                setPositionAndLine(position, row);
+                                return;
+                            }
+                    }
+    }
+
+    public void VariableDescription() throws DiagramsException{
+        Types t;
+        int currentPos = -1;
+
+        getPositionAndLine();
+        if((t = scaner.scaner(lexeme)) != Types.TypeIdent && t != Types.TypeBoolean && t != Types.TypeInt)
+            throw new DiagramsException("Ожидался тип переменной", lexeme, scaner);
+        currentPos = scaner.getCurrentIndexPosition();
+        if((t = scaner.scaner(lexeme)) == Types.TypeAssign)
+            setPositionAndLine(position, row);
+        else
+            setPositionAndLine(currentPos, row);
+        ListOfIdentifiers();
+    }
+
+    public void ListOfIdentifiers() throws DiagramsException{
+        Types t = null;
+        int count = 0;
+        do{
+
+            if((t = scaner.scaner(lexeme)) != Types.TypeIdent)
+                throw new DiagramsException("Ожидался идентификатор", lexeme, scaner);
+
+            getPositionAndLine();
+            if((t = scaner.scaner(lexeme)) == Types.TypeAssign) {
+                V();
+                count++;
+            }else
+                setPositionAndLine(position , row);
+
+            getPositionAndLine();
+        }while((t = scaner.scaner(lexeme)) == Types.TypeComma);
+        if(t != Types.TypeSemicolon && count == 0)
+            throw new DiagramsException("Ожидалось ';' или ',' или '='", lexeme, scaner);
+        if(t != Types.TypeSemicolon)
+            setPositionAndLine(position , row);
+
+    }
+
+    public void Operator() throws DiagramsException {
+        Types t = null;
+        getPositionAndLine();
+        if ((t = scaner.scaner(lexeme)) == Types.TypeIf) {
+            /*if ((t = scaner.scaner(lexeme)) != Types.TypeOpenParenthesis)
+                throw new DiagramsException("Ожидалось (", lexeme, scaner);
+            else {*/
+                setPositionAndLine(position, row);
+                OperatorIF();
+                return;
+          //  }
         }
 
-        return Types.TypeForReturn;
+
+        setPositionAndLine(position, row);
+        if((t =  scaner.scaner(lexeme)) == Types.TypeIdent && (t =  scaner.scaner(lexeme)) == Types.TypeOpenParenthesis) {
+            setPositionAndLine(position, row);
+            FunctionCall();
+            return;
+        }
+
+        setPositionAndLine(position, row);
+        if ((t =  scaner.scaner(lexeme)) == Types.TypeIdent) {
+            if ((t = scaner.scaner(lexeme)) == Types.TypeDot) {
+                setPositionAndLine(position, row);
+                ObjectName();
+            } else
+                setPositionAndLine(position, row);
+            V();
+            return;
+        }
+
+       /* if(t == Types.TypeReturn || t == Types.TypeSemicolon) {
+            setPositionAndLine(position, row);
+            Operators();
+            return;
+        }*/
+
+       if(t == Types.TypeReturn){
+           getPositionAndLine();
+           if((t = scaner.scaner(lexeme)) == Types.TypeSemicolon)
+               return;
+
+           setPositionAndLine(position, row);
+           if(((t = scaner.scaner(lexeme)) == Types.TypeIdent || t == Types.TypeConstInt || t == Types.TypeFalse || t == Types.TypeFalse)
+                   && (t = scaner.scaner(lexeme)) == Types.TypeSemicolon)
+               return;
+
+           if((t = scaner.scaner(lexeme)) != Types.TypeSemicolon)
+               if (t != Types.TypeIdent && t != Types.TypePlusPlus && t != Types.TypeMinusMinus && t != Types.TypeNegation &&
+                       t != Types.TypeTrue && t != Types.TypeFalse && t != Types.TypeConstInt)
+                   throw new DiagramsException("Ожидалсась ';' или идентификатор или выражение", lexeme, scaner);
+           return;
+       }
+
+        setPositionAndLine(position, row);
+        if(t == Types.TypeOpenBrace){
+            setPositionAndLine(position, row);
+            Block();
+            return;
+        }
+
     }
 
-    public Types H(){
+    public void ObjectName() throws DiagramsException{
+        Types t;
+        getPositionAndLine();
+        if((t = scaner.scaner(lexeme)) != Types.TypeIdent)
+            throw new DiagramsException("Ожидался идентификатор", lexeme, scaner);
+        getPositionAndLine();
+        while((t = scaner.scaner(lexeme))== Types.TypeDot){
+            t = scaner.scaner(lexeme);
+            if(t != Types.TypeIdent)
+                throw new DiagramsException("Ожидался идентификатор", lexeme, scaner);
+            getPositionAndLine();
+        }
+        if(t != Types.TypeAssign)
+            setPositionAndLine(position, row);
+        if(t == Types.TypeError)
+            throw new DiagramsException("Ожидался идентификатор", lexeme, scaner);
+    }
+
+    public void FunctionCall() throws DiagramsException{
         Types t;
         if((t = scaner.scaner(lexeme)) != Types.TypeIdent)
-            return Types.TypeError;
-          //  return printError("Ожидался идентификатор");
+            throw new DiagramsException("Ожидался идентификатор", lexeme, scaner);
         if((t = scaner.scaner(lexeme)) != Types.TypeOpenParenthesis)
-            return Types.TypeError;
+            throw new DiagramsException("Ожидалось '('", lexeme, scaner);
 
-        //  return printError("Ожидалось (");
-
-        F1();
+        ActualParametrList();
 
         if((t = scaner.scaner(lexeme)) != Types.TypeCloseParenthesis)
-            return Types.TypeError;
-
-        //   return printError("Ожидалось )");
-
-        return Types.TypeForReturn;
+            throw new DiagramsException("Ожидалось ')'", lexeme, scaner);
+        if((t = scaner.scaner(lexeme)) != Types.TypeSemicolon)
+            throw new DiagramsException("Ожидалось ';'", lexeme, scaner);
     }
 
-   */
-/* public Types F1(){
+    public void ActualParametrList() throws DiagramsException{
         Types t;
         do{
             V();
+            getPositionAndLine();
         }while((t = scaner.scaner(lexeme)) == Types.TypeComma);
-        return Types.TypeForReturn;
-    }*//*
+        setPositionAndLine(position, row);
+    }
 
-
-    public Types V(){
+    public void OperatorIF() throws DiagramsException{
         Types t;
-        int start = scaner.getCurrentIndexPosition();
+        func.add(true);
+        if ((t = scaner.scaner(lexeme)) != Types.TypeIf)
+            throw new DiagramsException("Ожидалось if", lexeme, scaner);
+
+        if ((t = scaner.scaner(lexeme)) != Types.TypeOpenParenthesis)
+            throw new DiagramsException("Ожидалось (", lexeme, scaner);
+        V();
+
+        if ((t = scaner.scaner(lexeme)) != Types.TypeCloseParenthesis)
+            throw new DiagramsException("Ожидалось )", lexeme, scaner);
+
+        if ((t = scaner.scaner(lexeme)) != Types.TypeOpenBrace)
+            throw new DiagramsException("Ожидалось {", lexeme, scaner);
+
+        Operators();
+
+        if(func.size() != 0)
+            func.remove(func.size() - 1);
+
+        if ((t = scaner.scaner(lexeme)) != Types.TypeCloseBrace)
+            throw new DiagramsException("Ожидалось }", lexeme, scaner);
+
+        getPositionAndLine();
+        if((t = scaner.scaner(lexeme)) != Types.TypeElse && t == Types.TypeSemicolon) {
+            setPositionAndLine(position, row);
+            return;
+        }
+        if (t == Types.TypeElse) {
+
+            if ((t = scaner.scaner(lexeme)) != Types.TypeOpenBrace)
+                throw new DiagramsException("Ожидалось {", lexeme, scaner);
+
+            func.add(true);
+
+            Operators();
+
+            if(func.size() != 0)
+                func.remove(func.size() - 1);
+            if ((t = scaner.scaner(lexeme)) != Types.TypeCloseBrace)
+                throw new DiagramsException("Ожидалось }", lexeme, scaner);
+            return;
+        }
+        else setPositionAndLine(position,row);
+    }
+
+    public Types V() throws DiagramsException{
+        Types t;
+        getPositionAndLine();
         if(scaner.scaner(lexeme) == Types.TypeNegation)
-            V();
+            return V();
         else {
-            scaner.setCurrentIndexPosition(start);
+            setPositionAndLine(position, row);
             if ((t = scaner.scaner(lexeme)) == Types.TypeOr || t == Types.TypeAnd)
                 return A2();
             else
-                scaner.setCurrentIndexPosition(start);
+                setPositionAndLine(position, row);
         }
-
 
         return A2();
     }
 
-    public Types U() {
-        Types t;
-        int startPosition = 0;
-        if ((t = scaner.scaner(lexeme)) == Types.TypeIf)
-            return printError("Ожидалось if");
-
-        if ((t = scaner.scaner(lexeme)) != Types.TypeOpenParenthesis)
-            return printError("Ожидалось (");
-         V();
-
-        if ((t = scaner.scaner(lexeme)) != Types.TypeCloseParenthesis)
-            return printError("Ожидалось )");
-
-        O1();
-        startPosition = scaner.getCurrentIndexPosition();
-
-        if(scaner.scaner(lexeme) != Types.TypeElse) {
-            scaner.setCurrentIndexPosition(startPosition);
-            return Types.TypeForReturn;
-        }
-        else
-           return O();
-    }
-
-
-    public Types A2(){
+    public Types A2() throws DiagramsException{
         A3();
         Types t;
-        int startPosition = scaner.getCurrentIndexPosition();
         while((t = scaner.scaner(lexeme)) == Types.TypeLe || t == Types.TypeGe || t == Types.TypeGt || t == Types.TypeLt){
-            startPosition = scaner.getCurrentIndexPosition();
             if(A3() == Types.TypeError)
-                return printError("Ожидалось выражение");
-            startPosition = scaner.getCurrentIndexPosition();
+                throw new DiagramsException("Ожидалось выражение", lexeme, scaner);
         }
 
-       // scaner.setCurrentIndexPosition(startPosition);
-        if ((t != Types.TypeSemicolon))
-            return Types.TypeForReturn;
+        if ((t != Types.TypeSemicolon) && t != Types.TypeCloseParenthesis)
+            throw new DiagramsException("Ожидалось ';' или ')'", lexeme, scaner);
+        if(t == Types.TypeCloseParenthesis)
+            setPositionAndLine(position, row);
         return Types.TypeForReturn;
     }
 
-    public Types A3(){
+    public Types A3() throws DiagramsException{
         A4();
         Types t;
-        int startPosition = scaner.getCurrentIndexPosition();
+        getPositionAndLine();
 
         while((t = scaner.scaner(lexeme)) == Types.TypePlus || t == Types.TypeMinus){
-            startPosition = scaner.getCurrentIndexPosition();
             if(A4() == Types.TypeError)
-                return printError("Ожидалось выражение");
-            startPosition = scaner.getCurrentIndexPosition();
+                throw new DiagramsException("Ожидалось выражение", lexeme, scaner);
+            getPositionAndLine();
         }
-        scaner.setCurrentIndexPosition(startPosition);
+        setPositionAndLine(position, row);
 
         return Types.TypeForReturn;
     }
 
-    public Types A4(){
+    public Types A4() throws DiagramsException{
         A5();
         Types t;
-        int startPosition = scaner.getCurrentIndexPosition();
+        getPositionAndLine();
 
         while((t = scaner.scaner(lexeme)) == Types.TypeMultiply ||
                 t == Types.TypeDivision || t == Types.TypeMod) {
-            startPosition = scaner.getCurrentIndexPosition();
+            getPositionAndLine();
             if (A5() == Types.TypeError)
-                return printError("Ожидалось выражение");
-            startPosition = scaner.getCurrentIndexPosition();
+                throw new DiagramsException("Ожидалось выражение", lexeme, scaner);
+            getPositionAndLine();
         }
-        scaner.setCurrentIndexPosition(startPosition);
+        setPositionAndLine(position, row);
         return  Types.TypeForReturn;
     }
 
-    public Types A5() {
+    public Types A5() throws DiagramsException {
         Types t;
-        int start = scaner.getCurrentIndexPosition();
+        getPositionAndLine();
         if((t = scaner.scaner(lexeme)) == Types.TypePlusPlus || t == Types.TypeMinusMinus)
-            if(A6() == Types.TypeError)
-                return printError("Ожидалось выражение");
-            scaner.setCurrentIndexPosition(start);
+            return A6();
+        setPositionAndLine(position, row);
         return A6();
     }
 
-    public Types A6() {
+    public Types A6()throws DiagramsException {
         Types t;
         A7();
-        int start = scaner.getCurrentIndexPosition();
+        getPositionAndLine();
 
         while ((t = scaner.scaner(lexeme)) == Types.TypePlusPlus || t == Types.TypeMinusMinus){
-            */
-/*if ()
-                return printError("Ожидалось выражение");
-            else
-                scaner.setCurrentIndexPosition(start);*//*
-
-    }
-    scaner.setCurrentIndexPosition(start);
-       */
-/* if ((t == Types.TypeSemicolon))
-            return Types.TypeForReturn;*//*
-
+            getPositionAndLine();
+        }
+        setPositionAndLine(position, row);
         return Types.TypeForReturn;
     }
 
-    public Types A7(){
+    public Types A7() throws DiagramsException{
         Types t;
-        int startPosition = scaner.getCurrentIndexPosition();
-        if((t = scaner.scaner(lexeme)) == Types.TypeIdent)
-            return t;
+        getPositionAndLine();
+        if((t = scaner.scaner(lexeme)) == Types.TypeIdent) {
+            setPositionAndLine(position, row);
+            ObjectName();
+            return Types.TypeForReturn;
+        }
         else {
-            if (t == Types.TypeConstInt || t == Types.TypeBoolean || t == Types.TypeInt)
+            if (t == Types.TypeConstInt || t == Types.TypeTrue || t == Types.TypeFalse || t == Types.TypeInt)
                 return t;
             else if (t == Types.TypeOpenParenthesis) {
-                scaner.setCurrentIndexPosition(startPosition);
+                setPositionAndLine(position, row);
                 V();
             } else
-                return printError("Ожидалось: идентификатор/константа/(");
+                throw new DiagramsException("Ожидалось (/числовая константа/true/false", lexeme, scaner);
         }
         if((t = scaner.scaner(lexeme)) != Types.TypeCloseParenthesis)
-            return printError("Ожидалось )");
+            throw new DiagramsException("Ожидалось )", lexeme, scaner);
         return t;
     }
 
 
 
 
-
-    private Types printError(String messege){
-        scaner.printError(messege, lexeme, scaner.getCurrentItem());
-        return Types.TypeError;
-    }
-}*/
+}

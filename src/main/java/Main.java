@@ -11,14 +11,19 @@ public class Main {
         StringBuilder lexeme = new StringBuilder();
         BufferedReader reader;
         scaner.setFilePath(filePath);
-        Diagram diagrams;
+        Diagrams diagrams;
         try {
             reader = new BufferedReader(new InputStreamReader(new FileInputStream(filePath)));
             scaner.setText(scaner.reader(filePath, reader));
             scaner.setReader(reader);
-            diagrams = new Diagram(scaner, lexeme);
+            diagrams = new Diagrams(scaner, lexeme);
             System.out.println("строка 1:" );
             types = diagrams.S();
+
+            if(types != Types.TypeEnd) {
+                System.out.println("Ошибка: конец файла не достигнут, проверьте правильность расстановки фигурных скобок");
+                return;
+            }
 
             if(types != Types.TypeError)
                 System.out.println("Завершено без ошибок");
