@@ -63,13 +63,13 @@ public class Diagrams {
             if ((t = scaner.scaner(lexeme)) == Types.TypeIdent || t == Types.TypeInt || (t) == Types.TypeBoolean || t == Types.TypeVoid) {
                 if ((t = scaner.scaner(lexeme)) == Types.TypeIdent || t == Types.Typemain)
                     if ((t = scaner.scaner(lexeme)) == Types.TypeOpenParenthesis) {
-                        if(func.size() == 0 || ! func.get(func.size() - 1)) {
+                     //   if(func.size() == 0 || ! func.get(func.size() - 1)) {
                             setPositionAndLine(position, row);
                             Method();
                             // setPositionAndLine(position, row);
                             continue;
-                        }else
-                            throw new DiagramsException("Здесь не может быть объявлена функция", lexeme, scaner);
+                     //   }else
+                       //     throw new DiagramsException("Здесь не может быть объявлена функция", lexeme, scaner);
                     }
             }
 
@@ -123,7 +123,7 @@ public class Diagrams {
     public void Method() throws DiagramsException {
         Types t;
 
-        func.add(true);
+     //   func.add(true);
         ReturnType();
         if ((t = scaner.scaner(lexeme)) != Types.TypeIdent && t != Types.Typemain)
             throw new DiagramsException("Ожидалось идентификатор или main", lexeme, scaner);
@@ -136,8 +136,8 @@ public class Diagrams {
             throw new DiagramsException("Ожидалось )", lexeme, scaner);
 
         Block();
-        if(func.size() != 0)
-            func.remove(func.size() - 1);
+      /*  if(func.size() != 0)
+            func.remove(func.size() - 1);*/
     }
 
     public void ReturnType() throws DiagramsException{
@@ -215,7 +215,7 @@ public class Diagrams {
 
 
             setPositionAndLine(position, row);
-            if (((t = scaner.scaner(lexeme)) == Types.TypePublic || t == Types.TypeClass) && !func.get(func.size() - 1)) {
+            if (((t = scaner.scaner(lexeme)) == Types.TypePublic || t == Types.TypeClass) && ( func.size() == 0 || !func.get(func.size() - 1)) ){
                 setPositionAndLine(position, row);
                 S();
                 continue;
