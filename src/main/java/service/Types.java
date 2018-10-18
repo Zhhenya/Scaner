@@ -1,3 +1,5 @@
+package service;
+
 public enum Types {
     //константы
     TypeConstInt,

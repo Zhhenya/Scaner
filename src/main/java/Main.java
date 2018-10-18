@@ -1,3 +1,8 @@
+import diagrams.Diagrams;
+import scanner.Scaner;
+import service.DiagramsException;
+import service.Types;
+
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -29,9 +34,9 @@ public class Main {
                 System.out.println("Завершено без ошибок");
             /*do{
                 types = scaner.scaner(lexeme);
-                if(types != Types.TypeForReturn)
+                if(types != service.Types.TypeForReturn)
                     System.out.println("\t; тип " + types + " "  +lexeme.toString());
-            }while (types != Types.TypeEnd );*/
+            }while (types != service.Types.TypeEnd );*/
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (DiagramsException e) {

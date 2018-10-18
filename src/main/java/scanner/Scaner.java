@@ -1,3 +1,7 @@
+package scanner;
+
+import service.Types;
+
 import java.io.*;
 
 public class Scaner {

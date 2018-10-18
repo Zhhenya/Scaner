@@ -1,3 +1,9 @@
+package diagrams;
+
+import scanner.Scaner;
+import service.DiagramsException;
+import service.Types;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,7 +30,7 @@ public class Diagrams {
         row = scaner.getNumberOfRow();
     }
 
-    public Types S() throws DiagramsException{
+    public Types S() throws DiagramsException {
         Types t;
 
         if((t = scaner.scaner(lexeme)) != Types.TypePublic)
@@ -55,7 +61,7 @@ public class Diagrams {
     }
 
 
-    public void Content() throws DiagramsException{
+    public void Content() throws DiagramsException {
         Types t = null;
         do {
             getPositionAndLine();
@@ -69,7 +75,7 @@ public class Diagrams {
                             // setPositionAndLine(position, row);
                             continue;
                      //   }else
-                       //     throw new DiagramsException("Здесь не может быть объявлена функция", lexeme, scaner);
+                       //     throw new service.DiagramsException("Здесь не может быть объявлена функция", lexeme, scaner);
                     }
             }
 
@@ -140,7 +146,7 @@ public class Diagrams {
             func.remove(func.size() - 1);*/
     }
 
-    public void ReturnType() throws DiagramsException{
+    public void ReturnType() throws DiagramsException {
         Types t;
         if((t = scaner.scaner(lexeme)) != Types.TypeVoid &&
                 t != Types.TypeIdent && t != Types.TypeBoolean &&
@@ -148,7 +154,7 @@ public class Diagrams {
             throw new DiagramsException("Ожидался тип или идентификатор", lexeme, scaner);
     }
 
-    public void FormalParameterList() throws DiagramsException{
+    public void FormalParameterList() throws DiagramsException {
         Types t;
         do{
             Parameter();
@@ -157,7 +163,7 @@ public class Diagrams {
         setPositionAndLine(position, row);
     }
 
-    public void Parameter() throws DiagramsException{
+    public void Parameter() throws DiagramsException {
         Types t;
         if((t = scaner.scaner(lexeme)) != Types.TypeIdent && t != Types.TypeBoolean &&
                 t != Types.TypeInt)
@@ -167,7 +173,7 @@ public class Diagrams {
 
     }
 
-    public void Block() throws DiagramsException{
+    public void Block() throws DiagramsException {
         Types t;
 
         if((t = scaner.scaner(lexeme)) != Types.TypeOpenBrace)
@@ -275,7 +281,7 @@ public class Diagrams {
                     }
     }
 
-    public void VariableDescription() throws DiagramsException{
+    public void VariableDescription() throws DiagramsException {
         Types t;
         int currentPos = -1;
 
@@ -290,7 +296,7 @@ public class Diagrams {
         ListOfIdentifiers();
     }
 
-    public void ListOfIdentifiers() throws DiagramsException{
+    public void ListOfIdentifiers() throws DiagramsException {
         Types t = null;
         int count = 0;
         do{
@@ -318,8 +324,8 @@ public class Diagrams {
         Types t = null;
         getPositionAndLine();
         if ((t = scaner.scaner(lexeme)) == Types.TypeIf) {
-            /*if ((t = scaner.scaner(lexeme)) != Types.TypeOpenParenthesis)
-                throw new DiagramsException("Ожидалось (", lexeme, scaner);
+            /*if ((t = scaner.scaner(lexeme)) != service.Types.TypeOpenParenthesis)
+                throw new service.DiagramsException("Ожидалось (", lexeme, scaner);
             else {*/
                 setPositionAndLine(position, row);
                 OperatorIF();
@@ -346,7 +352,7 @@ public class Diagrams {
             return;
         }
 
-       /* if(t == Types.TypeReturn || t == Types.TypeSemicolon) {
+       /* if(t == service.Types.TypeReturn || t == service.Types.TypeSemicolon) {
             setPositionAndLine(position, row);
             Operators();
             return;
@@ -378,7 +384,7 @@ public class Diagrams {
 
     }
 
-    public void ObjectName() throws DiagramsException{
+    public void ObjectName() throws DiagramsException {
         Types t;
         getPositionAndLine();
         if((t = scaner.scaner(lexeme)) != Types.TypeIdent)
@@ -396,7 +402,7 @@ public class Diagrams {
             throw new DiagramsException("Ожидался идентификатор", lexeme, scaner);
     }
 
-    public void FunctionCall() throws DiagramsException{
+    public void FunctionCall() throws DiagramsException {
         Types t;
         if((t = scaner.scaner(lexeme)) != Types.TypeIdent)
             throw new DiagramsException("Ожидался идентификатор", lexeme, scaner);
@@ -411,7 +417,7 @@ public class Diagrams {
             throw new DiagramsException("Ожидалось ';'", lexeme, scaner);
     }
 
-    public void ActualParametrList() throws DiagramsException{
+    public void ActualParametrList() throws DiagramsException {
         Types t;
         do{
             V();
@@ -420,7 +426,7 @@ public class Diagrams {
         setPositionAndLine(position, row);
     }
 
-    public void OperatorIF() throws DiagramsException{
+    public void OperatorIF() throws DiagramsException {
         Types t;
         func.add(true);
         if ((t = scaner.scaner(lexeme)) != Types.TypeIf)
@@ -467,7 +473,7 @@ public class Diagrams {
         else setPositionAndLine(position,row);
     }
 
-    public Types V() throws DiagramsException{
+    public Types V() throws DiagramsException {
         Types t;
         getPositionAndLine();
         if(scaner.scaner(lexeme) == Types.TypeNegation)
@@ -483,7 +489,7 @@ public class Diagrams {
         return A2();
     }
 
-    public Types A2() throws DiagramsException{
+    public Types A2() throws DiagramsException {
         A3();
         Types t;
         while((t = scaner.scaner(lexeme)) == Types.TypeLe || t == Types.TypeGe || t == Types.TypeGt || t == Types.TypeLt){
@@ -498,7 +504,7 @@ public class Diagrams {
         return Types.TypeForReturn;
     }
 
-    public Types A3() throws DiagramsException{
+    public Types A3() throws DiagramsException {
         A4();
         Types t;
         getPositionAndLine();
@@ -513,7 +519,7 @@ public class Diagrams {
         return Types.TypeForReturn;
     }
 
-    public Types A4() throws DiagramsException{
+    public Types A4() throws DiagramsException {
         A5();
         Types t;
         getPositionAndLine();
@@ -550,7 +556,7 @@ public class Diagrams {
         return Types.TypeForReturn;
     }
 
-    public Types A7() throws DiagramsException{
+    public Types A7() throws DiagramsException {
         Types t;
         getPositionAndLine();
         if((t = scaner.scaner(lexeme)) == Types.TypeIdent) {

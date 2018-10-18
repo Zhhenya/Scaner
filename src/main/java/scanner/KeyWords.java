@@ -1,3 +1,5 @@
+package scanner;
+
 public class KeyWords {
     public static String[] keyWords = new String[]{
             "Return",
