@@ -3,6 +3,8 @@ package tree;
 import service.DateType;
 import service.SemanticsException;
 
+import java.util.Collections;
+
 public class Tree {
     public Node node;
     public Tree parent, left, right;
@@ -17,9 +19,10 @@ public class Tree {
 
     public Tree(){
         node = new Node();
-        parent = null;
+        parent = this;
         left = null;
         right = null;
+     //   current = this;
     }
 
     public  void setLeft(Node leftNode){
@@ -32,26 +35,78 @@ public class Tree {
         right = vertex;
     }
 
-    public Tree findUp(StringBuilder lexemeID){
+    public Tree findUp(String lexemeID){
         return findUp(this, lexemeID);
     }
 
-    public Tree findUp(Tree from, StringBuilder lexemeID){
+    public Tree findUp(Tree from, String lexemeID){
         Tree vertex = from;
-        while((vertex != null) /*page 127 */){
+        while((vertex != null) /*&& (vertex.parent != null)*/ && (vertex != vertex.parent)
+                && lexemeID.toString().compareTo(vertex.node.lexemeID.toString()) != 0)
+            vertex = vertex.parent;
+        if(vertex == vertex.parent)
+            return null;
 
-        }
         return vertex;
     }
 
-    public Tree findRightLeft(StringBuilder lexemeID){
+    public Tree findUp(){
+        Tree vertex = current;
+        while(vertex != null && vertex.node.type != DateType.TClass && vertex.node.type != DateType.TFunction && (vertex != vertex.parent))
+            vertex = vertex.parent;
+        if(vertex == vertex.parent)
+            return null;
+        return vertex;
+    }
+
+    public Tree findUpFunction(){
+        Tree vertex = current;
+        while(vertex != null && vertex.node.type != DateType.TFunction && (vertex != vertex.parent))
+            vertex = vertex.parent;
+        if(vertex == vertex.parent)
+            return null;
+        return vertex;
+    }
+
+
+    public Tree findUpName(String className){
+        Tree vertex = current;
+        while(vertex != null && (vertex != vertex.parent) &&
+                ((vertex.node.type == DateType.TClass || vertex.node.type == DateType.TFunction)   && vertex.node.lexemeID.compareTo(className) != 0) ||
+                (vertex.node.type != DateType.TClass && vertex.node.type != DateType.TFunction)   && vertex.node.lexemeID.compareTo(className) != 0) {
+                vertex = vertex.parent;
+        }
+        if(vertex == vertex.parent)
+            return null;
+        return vertex;
+    }
+
+    public Tree findRightLeft(String lexemeID){
         return findRightLeft(this, lexemeID);
     }
 
-    public Tree findRightLeft(Tree from, StringBuilder lexemeID){
+    public Tree findRightLeft(Tree from, String lexemeID){
         Tree vertex = from.right;
-        while((vertex != null) /*page 127*/)
+        while((vertex != null) && lexemeID.toString().compareTo(vertex.node.lexemeID.toString()) != 0)
             vertex = vertex.left;
+        return vertex;
+    }
+
+
+    public Tree findParameter(Tree from, String typeOfParameter) throws SemanticsException {
+        Tree vertex = from;
+        if(from.right != null)
+            vertex = from.right;
+
+        vertex = vertex.left;
+
+        if(vertex.node.type.toString() != typeOfParameter)
+            if(vertex.node.classLink != null ) {
+                if (vertex.node.classLink.node.lexemeID != typeOfParameter)
+                    throw new SemanticsException("Тип формальной и фактической переменной не совпадают: ", vertex.node.classLink.node.lexemeID + " " + typeOfParameter);
+            }else
+                throw new SemanticsException("Тип формальной и фактической переменной не совпадают: ", vertex.node.type.toString() + " " + typeOfParameter);
+
         return vertex;
     }
 
@@ -68,7 +123,7 @@ public class Tree {
             right.printTree();
     }
 
-    public Tree findUpOnLevel(Tree from, StringBuilder lexemeID){
+    public Tree findUpOnLevel(Tree from, String lexemeID){
         Tree vertex = from;
         while((vertex != null) && vertex.parent.right != vertex){
             if(lexemeID.toString().compareTo(vertex.node.lexemeID.toString()) == 0)
@@ -77,6 +132,8 @@ public class Tree {
         }
         return null;
     }
+
+
 
 
     /*
@@ -91,18 +148,22 @@ public class Tree {
         return current;
     }
 
-    public Tree include(StringBuilder lexeme, DateType lexemeType) throws SemanticsException {
-        if(duplicateControl(current, lexeme))
-            throw new SemanticsException("Повтроное объявление идентификатора", lexeme);
+    public Tree include(String lexeme, DateType lexemeType, String className) throws SemanticsException {
+        duplicateControl(current, lexeme);
         Tree vertex = new Tree();
         Node newNode = new Node();
-        newNode.lexemeID = lexeme;
+        newNode.lexemeID = lexeme.toString();
         newNode.type = lexemeType;
         /*и еще ссылка на значение*/
         current.setLeft(newNode);
         current = current.left;
-        if(lexemeType != DateType.TFunction && lexemeType !=DateType.TClass)
+        if(lexemeType != DateType.TFunction && lexemeType !=DateType.TClass) {
+            if(className != null)
+                newNode.classLink = findUpName(className);
+            else
+                newNode.classLink = findUp();
             return current;
+        }
         else{
             vertex = current;
             /*page 141*/
@@ -110,6 +171,30 @@ public class Tree {
             current = current.right;
             return vertex;
         }
+    }
+
+
+    public Tree include(String lexeme, DateType lexemeType, DateType returnType, String className) throws SemanticsException {
+        duplicateControl(current, lexeme);
+        Tree vertex = new Tree();
+        Node newNode = new Node();
+        newNode.lexemeID = lexeme.toString();
+        newNode.type = lexemeType;
+        newNode.returnType = returnType;
+        if(className != null)
+            newNode.classLink = findUpName(className);
+        else
+            newNode.classLink = findUp();
+
+
+        /*и еще ссылка на значение*/
+        current.setLeft(newNode);
+        current = current.left;
+        vertex = current;
+        /*page 141*/
+        current.setRight(new Node());
+        current = current.right;
+        return vertex;
     }
 
     public void setType(Tree vertex, DateType type){
@@ -125,7 +210,17 @@ public class Tree {
             throw new SemanticsException("Число параметров не совпадает");
     }
 
-    public Tree getTypeOfLexeme(StringBuilder lexeme) throws SemanticsException {
+
+    public DateType getType(String lexeme) throws SemanticsException {
+        switch(lexeme.toString()){
+            case "int" : return DateType.TInt;
+            case "boolean": return DateType.TBoolean;
+            case "void": return DateType.TVoid;
+            default: getClass(lexeme); return DateType.TClass;
+        }
+    }
+
+    public Tree getTypeOfLexeme(String lexeme) throws SemanticsException {
         Tree vertex = findUp(current, lexeme);
         if(vertex == null)
             throw new SemanticsException("Отсутствует описание идентификатора", lexeme);
@@ -136,7 +231,7 @@ public class Tree {
       return vertex;
     }
 
-    public Tree getFunction(StringBuilder lexeme) throws SemanticsException {
+    public Tree getFunction(String lexeme) throws SemanticsException {
         Tree vertex = findUp(current, lexeme);
         if(vertex == null)
             throw new SemanticsException("Отсутствует описание функции", lexeme);
@@ -146,7 +241,27 @@ public class Tree {
         return vertex;
     }
 
-    public Tree getClass(StringBuilder lexeme) throws SemanticsException {
+    public Tree getFunction() throws SemanticsException {
+        Tree vertex = findUpFunction();
+        if(vertex == null)
+            throw new SemanticsException("Отсутствует описание функции");
+        if(vertex.node.type != DateType.TFunction)
+            throw new SemanticsException("Неверный вызов функции");
+
+        return vertex;
+    }
+
+    public Tree getFunction(String lexeme, Tree from) throws SemanticsException {
+        Tree vertex = findRightLeft(from, lexeme);
+        if(vertex == null)
+            throw new SemanticsException("Отсутствует описание функции", lexeme);
+        if(vertex.node.type != DateType.TFunction)
+            throw new SemanticsException("Неверный вызов функции", lexeme);
+
+        return vertex;
+    }
+
+    public Tree getClass(String lexeme) throws SemanticsException {
         Tree vertex = findUp(current, lexeme);
         if(vertex == null)
             throw new SemanticsException("Отсутствует описание класса", lexeme);
@@ -156,14 +271,44 @@ public class Tree {
         return vertex;
     }
 
- /*   public Tree reset(Tree vertex){
 
-    }*/
+    public Tree getObjectName(String lexeme, Tree from) throws SemanticsException {
+        Tree vertex = findUp(from, lexeme);
+       // Tree vertex = findRightLeft(from, lexeme);
 
-    public boolean duplicateControl(Tree vertex, StringBuilder lexeme){
-        if(findUp(vertex, lexeme) == null)
-            return false;
-        return true;
+        if(vertex == null)
+            throw new SemanticsException("Отсутствует описание идентфикатора", lexeme);
+      /*  if(vertex.node.type != DateType.TClass && vertex.node.type != DateType.TBoolean && vertex.node.type != DateType.TInt && vertex.node.type != DateType.TFunction)
+            throw new SemanticsException("Такой идентификатор не объявлен", lexeme);*/
+
+
+        return vertex;
+    }
+
+    public Tree getObjectNameForClass(String lexeme, Tree from) throws SemanticsException {
+        // Tree vertex = findUp(from, lexeme);
+        Tree vertex = findRightLeft(from, lexeme);
+
+        if(vertex == null)
+            throw new SemanticsException("Отсутствует описание идентфикатора", lexeme);
+      /*  if(vertex.node.type != DateType.TClass && vertex.node.type != DateType.TBoolean && vertex.node.type != DateType.TInt && vertex.node.type != DateType.TFunction)
+            throw new SemanticsException("Такой идентификатор не объявлен", lexeme);*/
+
+
+        return vertex;
+    }
+
+
+
+    public Tree forReset(Tree vertex){
+        Tree newVertex = new Tree();
+
+        return newVertex;
+    }
+
+    public void duplicateControl(Tree vertex, String lexeme) throws SemanticsException {
+        if(findUp(vertex, lexeme) != null)
+            throw new SemanticsException("Повторное объявление идентификатора", lexeme);
     }
 
 

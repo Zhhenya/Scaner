@@ -1,6 +1,7 @@
 import diagrams.Diagrams;
 import scanner.Scaner;
 import service.DiagramsException;
+import service.SemanticsException;
 import service.Types;
 
 import java.io.BufferedReader;
@@ -23,6 +24,7 @@ public class Main {
             scaner.setReader(reader);
             diagrams = new Diagrams(scaner, lexeme);
             System.out.println("строка 1:" );
+            diagrams.setRoot();
             types = diagrams.S();
 
             if(types != Types.TypeEnd) {
@@ -40,6 +42,8 @@ public class Main {
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (DiagramsException e) {
+            e.printStackTrace();
+        } catch (SemanticsException e) {
             e.printStackTrace();
         }
 

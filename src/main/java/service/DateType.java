@@ -3,9 +3,12 @@ package service;
 public enum DateType {
     TInt,
     TBoolean,
+    TBooleanSign,
     TUserType,
     TUnknown,
     TFunction,
     TClass,
-    Empty
+    TConstant,
+    TVoid,
+    Empty;
 }

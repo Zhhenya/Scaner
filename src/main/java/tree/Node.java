@@ -7,17 +7,21 @@ import service.DateType;
 * */
 
 public class Node {
-    public StringBuilder lexemeID;
+    public String lexemeID;
     public DateType type;
     public Boolean constantFlag;
     public Constant constantValue;
     public Integer numberOfParameters;
+    public DateType returnType;
+    public Tree classLink;
 
     public Node(){
-        lexemeID = null;
-        type = null;
-        constantFlag = null;
-        constantValue = null;
-        numberOfParameters = null;
+        lexemeID = "";
+        type = DateType.TUnknown;
+        constantFlag = false;
+        constantValue = new Constant();
+        numberOfParameters = 0;
+        returnType = DateType.TVoid;
+        classLink = null;
     }
 }
