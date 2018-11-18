@@ -4,7 +4,7 @@ import service.Types;
 
 import java.io.*;
 
-public class Scaner {
+public class Scanner {
     private final int MAX_LENGTH_LEXEMES = 100;
     private final int MAX_NUMBER_KEYWORDS = 11;
     private String text;
@@ -13,6 +13,22 @@ public class Scaner {
     private String filePath;
     private BufferedReader reader;
 
+    private Lexeme lexeme = new Lexeme();
+
+
+    public static class Lexeme{
+        public String lexeme;
+        public Types type;
+
+        public Lexeme(String lexeme, Types type){
+            this.lexeme = lexeme;
+            this.type = type;
+        }
+
+        public Lexeme(){}
+    }
+
+
     public void setNumberOfRow(int numberOfRow){
         this.numberOfRow = numberOfRow;
     }
@@ -20,7 +36,7 @@ public class Scaner {
         return numberOfRow;
     }
 
-    public Types scaner(StringBuilder lexeme) {
+    public Types scanner(StringBuilder lexeme) {
         lexeme.delete(0, lexeme.length());
         while (true) {
             skipSymbols();

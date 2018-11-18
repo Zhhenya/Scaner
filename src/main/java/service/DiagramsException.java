@@ -1,9 +1,9 @@
 package service;
 
-import scanner.Scaner;
+import scanner.Scanner;
 
 public class DiagramsException extends Exception {
-    public DiagramsException(String message, StringBuilder lexeme, Scaner scaner){
-        scaner.printError(message, lexeme, scaner.getCurrentItem());
+    public DiagramsException(String message, StringBuilder lexeme, Scanner scanner){
+        scanner.printError(message, lexeme, scanner.getCurrentItem());
     }
 }

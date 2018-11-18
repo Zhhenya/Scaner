@@ -5,6 +5,7 @@
           int global;
           boolean back = false;
           public class Dual{
+
               int Func1(boolean m, int l){
 
               public class f{}
@@ -18,9 +19,10 @@
               }
       }
 
-      void Func(Arial y){
+      boolean Func(Arial y){
           Arial myIdent;
           boolean u;
+          boolean m = 2 + 3 == 4 + 5;
           int h;
           myIdent.global = 7;
           Dual f;
@@ -29,10 +31,12 @@
                  5 + myIdent.global;
               }
           else{
-              if(!!myIdent.back){
-                  return ;
+              if(!myIdent.back){
+                  return true;
           }
          }
+
    }}
+
    }#
 
