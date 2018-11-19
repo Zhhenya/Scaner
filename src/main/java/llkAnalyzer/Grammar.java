@@ -1,20 +1,26 @@
 package llkAnalyzer;
 
+
 import org.apache.commons.lang3.SerializationUtils;
+import scanner.Scanner;
 import service.Types;
 
 import java.io.*;
 import java.util.*;
-
-import static com.sun.tools.doclint.Entity.lang;
 
 public class Grammar implements Serializable {
 	
 	public HashMap<String, ArrayList<Rule>> map = new HashMap<>();
 	public ArrayList<String> nonTerminals = new ArrayList<>();
 	public HashMap<String, Types> terminals = new HashMap<>();
+
+	public Scanner scanner;
 	
 	private int surrogates = 0;
+
+	public void setScanner(Scanner scanner){
+		this.scanner = scanner;
+	}
 	
 	public Grammar(File file) throws Exception {
 		BufferedReader in = new BufferedReader(new FileReader(file));
@@ -52,13 +58,13 @@ public class Grammar implements Serializable {
 		switch(t) {
 			case "#":
 				return Types.TypeEnd;
-			case "Q10":
+			case "d":
 				return Types.TypeConstInt;
-			/*case "Q16":
-				return Type.ConstInt16;*/
+			case "a":
+				return Types.TypeIdent;
 			default:
-				InputStream stream = new ByteArrayInputStream(t.getBytes("UTF-8"));
-				return (new Scanner("String stream", new InputStreamReader(stream))).next().type;
+				//InputStream stream = new ByteArrayInputStream(t.getBytes("UTF-8"));
+				return scanner.scanner();
 		}
 	}
 	

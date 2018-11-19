@@ -1,6 +1,6 @@
 package llkAnalyzer;
 
-import lang.llk.Grammar.Rule;
+import llkAnalyzer.Grammar.Rule;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.SerializationUtils;
 
@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+
+import static com.sun.tools.doclint.Entity.lang;
 
 public class Generator {
 	
@@ -32,7 +34,7 @@ public class Generator {
 		// Вывод полученных first1 и follow1 для всех нетерминалов
 		for(String a : grammar.nonTerminals) {
 			HashSet<String> first = new HashSet<>();
-			for(Rule rule : grammar.map.get(a)) first.addAll(rule.first);
+			for(Grammar.Rule rule : grammar.map.get(a)) first.addAll(rule.first);
 			
 			System.out.format("%-3s %-38s %s\n", a, first, follow.get(a));
 		}
@@ -40,8 +42,8 @@ public class Generator {
 		
 		// Построение управляющей таблицы
 		Table table = new Table(grammar.nonTerminals, grammar.terminals, grammar.nonTerminals.get(0));
-		for(Map.Entry<String, ArrayList<Rule>> e : grammar.map.entrySet()) {
-			for(Rule rule : e.getValue()) {
+		for(Map.Entry<String, ArrayList<Grammar.Rule>> e : grammar.map.entrySet()) {
+			for(Grammar.Rule rule : e.getValue()) {
 				HashSet<String> set = rule.first;
 				if(set.size() == 1 && set.iterator().next().equals("#")) set = follow.get(e.getKey());
 				
@@ -51,8 +53,8 @@ public class Generator {
 				}
 			}
 		}
-		table.exportToExcel(new File("table.xls"));
-		System.out.println();
+	//	table.exportToExcel(new File("table.xls"));
+	//	System.out.println();
 		
 		// Сериализация полученной таблицы
 		File file = new File("table.llk");

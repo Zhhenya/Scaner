@@ -1,0 +1,22 @@
+S -> public class N { C }
+C ->  A C | M C | C W | #
+A -> T I ;
+I -> a P1 I1
+I1 -> , a P1 I1 | #
+T -> int | boolean | a
+W -> S
+N -> a | Main
+M -> R N1 ( F ) B
+N1 -> a | main
+R -> T | void | #
+F -> P F10
+F10 -> , P F10 | #
+B -> { O }
+P -> T a
+O -> O1 O | V1 O | C1 O | #
+O1 -> A1 | U | B | H | ;
+A1 -> N2 = V
+N2 -> N2.a | a
+U -> if ( V ) O1 else O1 | if ( V ) O1
+H -> a ( F1 ) ;
+K -> d | true | false

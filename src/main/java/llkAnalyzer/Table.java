@@ -1,9 +1,7 @@
 package llkAnalyzer;
 
-import lang.Type;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.ss.usermodel.Row;
+import service.Types;
+
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -16,14 +14,14 @@ public class Table implements Serializable {
 
 	private final HashMap<String, NonTerminal> nonTerminalsMapping = new HashMap<>();
 	private final HashMap<String, Terminal> terminalsMapping = new HashMap<>();
-	private final HashMap<Type, Integer> typesMapping = new HashMap<>();
+	private final HashMap<Types, Integer> typesMapping = new HashMap<>();
 	
 	private final Cell[][] cells;
 	
 	private final Terminal end;
 	private final NonTerminal axiom;
 	
-	public Table(ArrayList<String> nonTerminals, HashMap<String, Type> terminals, String s) {
+	public Table(ArrayList<String> nonTerminals, HashMap<String, Types> terminals, String s) {
 		cells = new Cell[nonTerminals.size()][terminals.size()];
 		for(int i = 0; i < nonTerminals.size(); i++)
 			for(int j = 0; j < terminals.size(); j++) cells[i][j] = new Cell();
@@ -33,12 +31,12 @@ public class Table implements Serializable {
 		axiom = nonTerminalsMapping.get(s);
 		
 		Terminal tmpEnd = null;
-		for(Map.Entry<String, Type> terminal : terminals.entrySet()) {
+		for(Map.Entry<String, Types> terminal : terminals.entrySet()) {
 			String name = terminal.getKey();
 			terminalsMapping.put(name, new Terminal(name, terminalsMapping.size(), terminal.getValue()));
 			typesMapping.put(terminal.getValue(), typesMapping.size());
 			
-			if(terminal.getValue() == Type.End) tmpEnd = terminalsMapping.get(name);
+			if(terminal.getValue() == Types.TypeEnd) tmpEnd = terminalsMapping.get(name);
 		}
 		end = tmpEnd;
 	}
@@ -57,11 +55,11 @@ public class Table implements Serializable {
 		cells[a][b].add(result);
 	}
 	
-	public Cell get(NonTerminal nonTerminal, Type type) {
+	public Cell get(NonTerminal nonTerminal, Types type) {
 		return cells[nonTerminal.index][typesMapping.get(type)];
 	}
 	
-	public void exportToExcel(File file) throws Exception {
+/*	public void exportToExcel(File file) throws Exception {
 		System.out.println("Writing control table to " + file.getName() + "...");
 		
 		HSSFWorkbook workbook = new HSSFWorkbook();
@@ -102,7 +100,7 @@ public class Table implements Serializable {
 		out.close();
 		
 		System.out.println("Successfully finished!");
-	}
+	}*/
 	
 	public NonTerminal getAxiom() {
 		return axiom;
@@ -132,9 +130,9 @@ public class Table implements Serializable {
 	
 	public static class Terminal extends Element {
 		
-		public final Type type;
+		public final Types type;
 		
-		public Terminal(String s, int i, Type t) {
+		public Terminal(String s, int i, Types t) {
 			super(s, i);
 			type = t;
 		}
