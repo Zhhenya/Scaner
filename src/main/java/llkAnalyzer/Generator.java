@@ -10,7 +10,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
-import static com.sun.tools.doclint.Entity.lang;
+
 
 public class Generator {
 	
@@ -18,7 +18,7 @@ public class Generator {
 	private static HashMap<String, HashSet<String>> follow = new HashMap<>();
 	
 	public static void main(String[] args) throws Exception {
-		grammar = new Grammar(new File("grammar.txt"));
+		grammar = new Grammar(new File("src/main/resources/grammar/grammar.txt"));
 		
 		// Вычисление first1 для всех правил грамматики
 		HashMap<String, HashSet<String>> used = new HashMap<>();

@@ -1,17 +1,16 @@
 import diagrams.Diagrams;
+import llkAnalyzer.AnalyzeError;
+import llkAnalyzer.LLkAnalyzer;
 import scanner.Scanner;
 import service.DiagramsException;
 import service.SemanticsException;
 import service.Types;
 
-import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStreamReader;
+import java.io.*;
 
 public class Main {
-    public static void main(String[] argv){
-        Scanner scanner = new Scanner();
+    public static void main(String[] argv) throws Exception {
+  /*      Scanner scanner = new Scanner();
         String filePath = "src/main/resources/program1.txt";
         Types types;
         StringBuilder lexeme = new StringBuilder();
@@ -26,7 +25,6 @@ public class Main {
             System.out.println("строка 1:" );
             diagrams.setRoot();
             types = diagrams.S();
-//            diagrams.printTree();
 
             if(types != Types.TypeEnd) {
                 System.out.println("Ошибка: конец файла не достигнут, проверьте правильность расстановки фигурных скобок");
@@ -35,17 +33,27 @@ public class Main {
 
             if(types != Types.TypeError)
                 System.out.println("Завершено без ошибок");
-            /*do{
-                types = scanner.scanner(lexeme);
-                if(types != service.Types.TypeForReturn)
-                    System.out.println("\t; тип " + types + " "  +lexeme.toString());
-            }while (types != service.Types.TypeEnd );*/
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (DiagramsException e) {
             e.printStackTrace();
         } catch (SemanticsException e) {
             e.printStackTrace();
+        }*/
+
+        Scanner scanner = new Scanner();
+        String filePath = "src/main/resources/program1.txt";
+        BufferedReader reader = null;
+        try {
+            reader = new BufferedReader(new InputStreamReader(new FileInputStream(filePath)));
+            scanner.setText(scanner.reader(filePath, reader));
+            scanner.setReader(reader);
+            LLkAnalyzer lLkAnalyzer = new LLkAnalyzer(new File("table.llk"), scanner);
+            lLkAnalyzer.program();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (AnalyzeError e) {
+            System.out.println(e.getDisplayMessage());
         }
 
 

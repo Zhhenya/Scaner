@@ -17,7 +17,7 @@ public class Scanner {
 
 
     public static class Lexeme{
-        public StringBuilder lexeme;
+        public StringBuilder lexeme = new StringBuilder();
         public Types type;
 
         public Lexeme(StringBuilder lexeme, Types type){
@@ -147,7 +147,7 @@ public class Scanner {
                 }
 
             for (int j = 0; j < MAX_NUMBER_KEYWORDS; j++) {
-                if (KeyWords.keyWords[j].equalsIgnoreCase(lexeme.toString()))
+                if (KeyWords.keyWords[j].equalsIgnoreCase(lexeme.lexeme.toString()))
                     return setGetType(Types.valueOf("Type" + KeyWords.keyWords[j]));
             }
 
@@ -231,6 +231,146 @@ public class Scanner {
             return printError("Неверный входной символ", lexeme.lexeme, new StringBuilder().append(text.charAt(currentIndexPosition)));
     }
 
+
+    public boolean isEndWord(int pos, int length){
+        if (pos >= length - 1)
+            return false;
+        return true;
+
+    }
+
+
+    public Types next(String grammarWord) {
+        //  lexeme.lexeme.delete(0, lexeme.lexeme.length());
+
+    //    grammarWord += "\n";
+
+        Lexeme lexeme = new Lexeme();
+        int currentIndexPosition = 0;
+        lexeme.delete();
+
+
+        //если встретился символ конца
+        if (grammarWord.charAt(currentIndexPosition) == '\0' || grammarWord.charAt(currentIndexPosition) == '#') {
+            lexeme.append("#");
+            return setGetType(Types.TypeEnd);
+        }
+
+       // if(!isEndWord(currentIndexPosition, grammarWord.length());
+
+
+        //константа
+        if (grammarWord.charAt(currentIndexPosition) >= '0' && grammarWord.charAt(currentIndexPosition) <= '9') {
+            lexeme.append(grammarWord.charAt(currentIndexPosition));
+            currentIndexPosition++;
+            while (isEndWord(currentIndexPosition, grammarWord.length()) && grammarWord.charAt(currentIndexPosition) >= '0' && grammarWord.charAt(currentIndexPosition) <= '9') {
+                if (lexeme.length() < MAX_LENGTH_LEXEMES - 1)
+                    lexeme.append(grammarWord.charAt(currentIndexPosition++));
+                else
+                    currentIndexPosition++;
+            }
+            return Types.TypeConstInt;
+        } else if (grammarWord.charAt(currentIndexPosition) >= 'a' && grammarWord.charAt(currentIndexPosition) <= 'z' ||
+                grammarWord.charAt(currentIndexPosition) >= 'A' && grammarWord.charAt(currentIndexPosition) <= 'Z') {
+            lexeme.append(grammarWord.charAt(currentIndexPosition++));
+
+
+
+            //идентификатор
+            while (isEndWord(currentIndexPosition, grammarWord.length()) && (grammarWord.charAt(currentIndexPosition) >= '0' && grammarWord.charAt(currentIndexPosition) <= '9' ||
+                    grammarWord.charAt(currentIndexPosition) >= 'a' && grammarWord.charAt(currentIndexPosition) <= 'z' ||
+                    grammarWord.charAt(currentIndexPosition) >= 'A' && grammarWord.charAt(currentIndexPosition) <= 'Z'))
+                if (lexeme.length() < MAX_LENGTH_LEXEMES - 1)
+                    lexeme.append(grammarWord.charAt(currentIndexPosition++));
+                else {
+                    currentIndexPosition++;
+                    return printError("Слишком длинный идентификатор", lexeme.lexeme, new StringBuilder());
+                }
+
+            for (int j = 0; j < MAX_NUMBER_KEYWORDS; j++) {
+                if (KeyWords.keyWords[j].equalsIgnoreCase(grammarWord.toString()))
+                    return setGetType(Types.valueOf("Type" + KeyWords.keyWords[j]));
+            }
+
+            return Types.TypeIdent;
+        } else if (grammarWord.charAt(currentIndexPosition) == ',')
+            return setGetType(Types.TypeComma);
+        else if (grammarWord.charAt(currentIndexPosition) == ';')
+            return setGetType( Types.TypeSemicolon);
+        else if (grammarWord.charAt(currentIndexPosition) == '(')
+            return setGetType(Types.TypeOpenParenthesis);
+        else if (grammarWord.charAt(currentIndexPosition) == ')')
+            return setGetType( Types.TypeCloseParenthesis);
+        else if (grammarWord.charAt(currentIndexPosition) == '{')
+            return setGetType(Types.TypeOpenBrace);
+        else if (grammarWord.charAt(currentIndexPosition) == '}')
+            return setGetType(Types.TypeCloseBrace);
+        else if (grammarWord.charAt(currentIndexPosition) == '+') {
+            if (isEndWord(currentIndexPosition, grammarWord.length()) && grammarWord.charAt(currentIndexPosition + 1) == '+') {
+                lexeme.append(grammarWord.charAt(currentIndexPosition++));
+                return setGetType( Types.TypePlusPlus);
+            }
+            return setGetType(Types.TypePlus);
+        } else if (grammarWord.charAt(currentIndexPosition) == '-') {
+            if (isEndWord(currentIndexPosition, grammarWord.length()) && grammarWord.charAt(currentIndexPosition + 1) == '-') {
+                lexeme.append(grammarWord.charAt(currentIndexPosition++));
+                return setGetType( Types.TypeMinusMinus);
+            }
+            return setGetType( Types.TypeMinus);
+        } else if (grammarWord.charAt(currentIndexPosition) == '/')
+            return setGetType( Types.TypeDivision);
+        else if(grammarWord.charAt(currentIndexPosition) == '.')
+            return setGetType( Types.TypeDot);
+        else if (grammarWord.charAt(currentIndexPosition) == '%')
+            return setGetType( Types.TypeMod);
+        else if (grammarWord.charAt(currentIndexPosition) == '*')
+            return setGetType( Types.TypeMultiply);
+        else if (grammarWord.charAt(currentIndexPosition) == '<') {
+            if (isEndWord(currentIndexPosition, grammarWord.length()) && grammarWord.charAt(currentIndexPosition + 1) == '=') {
+                lexeme.append(grammarWord.charAt(currentIndexPosition++));
+                return setGetType( Types.TypeLe);
+            }
+            return setGetType( Types.TypeLt);
+        } else if (grammarWord.charAt(currentIndexPosition) == '>') {
+            if (isEndWord(currentIndexPosition, grammarWord.length()) && grammarWord.charAt(currentIndexPosition + 1) == '=') {
+                lexeme.append(grammarWord.charAt(currentIndexPosition++));
+                return setGetType( Types.TypeGe);
+            }
+            return setGetType( Types.TypeGt);
+        } else if (grammarWord.charAt(currentIndexPosition) == '!') {
+            if (isEndWord(currentIndexPosition, grammarWord.length()) && grammarWord.charAt(currentIndexPosition + 1) == '=') {
+                lexeme.append(grammarWord.charAt(currentIndexPosition++));
+                lexeme.append(grammarWord.charAt(currentIndexPosition++));
+                return setGetType( Types.TypeNegation);
+            }
+            // return printError("Неверный входной символ", lexeme, new StringBuilder().append(grammarWord.charAt(currentIndexPosition)));
+            return setGetType( Types.TypeNegation);
+        }
+        if (grammarWord.charAt(currentIndexPosition) == '=') {
+            if (isEndWord(currentIndexPosition, grammarWord.length()) && grammarWord.charAt(currentIndexPosition + 1) == '=') {
+                lexeme.append(grammarWord.charAt(currentIndexPosition++));
+                lexeme.append(grammarWord.charAt(currentIndexPosition++));
+                return setGetType( Types.TypeComparison);
+            }
+            return setGetType(Types.TypeAssign);
+        } else if (grammarWord.charAt(currentIndexPosition) == '&') {
+            if (isEndWord(currentIndexPosition, grammarWord.length()) && grammarWord.charAt(currentIndexPosition + 1) == '&') {
+                lexeme.append(grammarWord.charAt(currentIndexPosition++));
+                lexeme.append(grammarWord.charAt(currentIndexPosition++));
+                return setGetType( Types.TypeAnd);
+            } else
+                return printError("Неверный входной символ", lexeme.lexeme, new StringBuilder().append(grammarWord.charAt(currentIndexPosition)));
+
+        } else if (grammarWord.charAt(currentIndexPosition) == '|') {
+            if (isEndWord(currentIndexPosition, grammarWord.length()) && grammarWord.charAt(currentIndexPosition) == '|') {
+                lexeme.append(grammarWord.charAt(currentIndexPosition++));
+                lexeme.append(grammarWord.charAt(currentIndexPosition++));
+                return setGetType(Types.TypeOr);
+            }
+            return printError("Неверный входной символ", lexeme.lexeme, new StringBuilder().append(grammarWord.charAt(currentIndexPosition)));
+        } else
+            return printError("Неверный входной символ", lexeme.lexeme, new StringBuilder().append(grammarWord.charAt(currentIndexPosition)));
+    }
 
 
     public String reader(String filePath, BufferedReader reader){

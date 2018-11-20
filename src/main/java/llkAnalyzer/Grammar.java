@@ -51,7 +51,8 @@ public class Grammar implements Serializable {
 				for(String t : rule) if(!map.containsKey(t)) terminalsSet.add(t);
 		
 		// Определение типов терминалов
-		for(String t : terminalsSet) terminals.put(t, getTerminalType(t));
+		for(String t : terminalsSet)
+			terminals.put(t, getTerminalType(t));
 	}
 
 	private Types getTerminalType(String t) throws Exception {
@@ -64,7 +65,7 @@ public class Grammar implements Serializable {
 				return Types.TypeIdent;
 			default:
 				//InputStream stream = new ByteArrayInputStream(t.getBytes("UTF-8"));
-				return scanner.scanner();
+				return new Scanner().next(t);
 		}
 	}
 	

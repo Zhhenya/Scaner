@@ -3,6 +3,8 @@ package llkAnalyzer;
 
 import org.apache.commons.lang3.SerializationUtils;
 import scanner.Scanner;
+import service.DiagramsException;
+import service.Types;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -16,13 +18,6 @@ public class LLkAnalyzer  {
 	
 	private final Table controlTable;
 	private final Scanner scanner;
-	public StringBuilder lexeme;
-
-
-	public LLkAnalyzer(Scanner scanner, StringBuilder lexeme){
-		this.scanner = scanner;
-		this.lexeme = lexeme;
-	}
 	
 	public LLkAnalyzer(File table, Scanner source) throws Exception {
 		controlTable = SerializationUtils.deserialize(new FileInputStream(table));
@@ -35,27 +30,32 @@ public class LLkAnalyzer  {
 		stack.add(controlTable.getEndTerminal());
 		stack.add(controlTable.getAxiom());
 		
-		scanner.scanner(lexeme);
+		scanner.scanner();
 		for(;;) {
-		//	if(DEBUG) System.out.format("%-17s %-2d %s\n", lexeme.type.name(), lexeme.line + 1, stack);
+		//	if(DEBUG) System.out.format("%-17s %-2d %s\n", scanner.getLexeme()..type.name(), scanner.getLexeme()..line + 1, stack);
 			Table.Element current = stack.pop();
 			
 			if(current instanceof Table.Terminal) {
 				Table.Terminal terminal = (Table.Terminal)current;
 				
-				if(lexeme.type != terminal.type) {
-					String line1 = "expected " + terminal.type, line2 = "but found " + lexeme.type;
-					throw new AnalyzeError(scanner, lexeme, line1, line2);
+				if(scanner.getLexeme().type != terminal.type) {
+					String line1 = "expected " + terminal.type, line2 = "but found " + scanner.getLexeme().type;
+					try {
+						throw new DiagramsException("Ошибка LLK", scanner.getLexeme().lexeme, scanner);
+					} catch (DiagramsException e) {
+						e.printStackTrace();
+					}
 				}
-				if(lexeme.type == Type.End) break;
-				lexeme = scanner.next();
+				if(scanner.getLexeme().type == Types.TypeEnd) break;
+				scanner.scanner();
 			} else {
-				NonTerminal nonTerminal = (NonTerminal)current;
+				Table.NonTerminal nonTerminal = (Table.NonTerminal)current;
 				
-				Cell cell = controlTable.get(nonTerminal, lexeme.type);
+				Table.Cell cell = controlTable.get(nonTerminal, scanner.getLexeme().type);
 				if(cell.isEmpty()) {
-					String line1 = "wrong character " + lexeme.type, line2 = "when analyzing " + nonTerminal;
-					throw new AnalyzeError(scanner, lexeme, line1, line2);
+					String line1 = "wrong character " + scanner.getLexeme().type, line2 = "when analyzing " + nonTerminal;
+					throw new AnalyzeError(scanner, scanner.getLexeme(), line1, line2);
+				//	throw new DiagramsException("Ошибка ", scanner.getLexeme().lexeme, scanner);
 				}
 				stack.addAll(cell.get(0));
 			}

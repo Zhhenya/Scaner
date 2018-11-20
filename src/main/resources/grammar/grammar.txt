@@ -1,0 +1,37 @@
+S -> public class N { C }
+C ->  A C | M C | W C | #
+A -> T I ;
+I -> a P1 I1
+I1 -> , a P1 I1 | #
+T -> int | boolean | a
+W -> S
+N -> a | Main
+M -> R N1 ( F ) B
+N1 -> a | main
+R -> T | void | #
+F -> P F10
+F10 -> , P F10 | #
+B -> { O }
+P -> T a
+O -> O1 O | A O | S O | #
+O1 -> A1 | U | B | H | ;
+A1 -> N2 = V
+N2 -> a N3
+N3 -> . a N3 | #
+U -> if ( V ) O1 else O1 | if ( V ) O1
+H -> a ( F1 ) ;
+F1 -> V F11
+F11 -> , V F11 | #
+K -> d | true | false
+V -> ! V | A2 D1
+D1 -> && A2 D1 | #
+A2 -> A3 D2
+D2 -> A3 D2 | < A3 D2 | <= A3 D2 | >= D2 | == A3 D2 | != A3 D2 | #
+A3 -> A4 D3
+D3 -> + A4 D3 | - A4 D3 | #
+A4 -> A5 D4
+D4 -> * A5 D4 | / A5 D4 | #
+A5 -> - A5 | + A5 | A6
+A6 -> a | K | ( V )
+
+
