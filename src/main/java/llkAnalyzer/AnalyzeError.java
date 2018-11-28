@@ -14,23 +14,23 @@ public class AnalyzeError extends RuntimeException {
 	public AnalyzeError(Scanner scanner, Scanner.Lexeme lexeme, Types... expected) {
 		this(scanner, lexeme, ((Supplier<String>)(() -> {
 			StringBuilder builder = new StringBuilder();
-			builder.append("Found ");
+			builder.append("Найдено ");
 			if(lexeme.type == Types.TypeEnd) {
-				builder.append("end of file");
+				builder.append("конец файла");
 			} else {
 				if(lexeme.type == Types.TypeError) builder.append("invalid ");
-				builder.append("character \"");
+				builder.append("символ \"");
 				builder.append(lexeme.lexeme);
 				builder.append("\"");
 			}
 			return builder.toString();
-		})).get(), "expected " + asList(expected));
+		})).get(), "ожидался " + asList(expected));
 	}
 	
 	public AnalyzeError(Scanner scanner, Scanner.Lexeme lexeme, String first, String... lines) {
 		StringBuilder builder = new StringBuilder();
-		builder.append("parseGrammar");
-		builder.append("(line ");
+		builder.append("парсер грамматики");
+		builder.append("(строка ");
 		builder.append(scanner.getNumberOfRow());
 		builder.append("): ");
 		int length = builder.length();
@@ -47,11 +47,11 @@ public class AnalyzeError extends RuntimeException {
 		}
 		builder.append("\n");
 		
-		if(lexeme.type != Types.TypeEnd) {
-			builder.append(scanner.getCurrentIndexPosition());
-			for(int i = 0; i < lexeme.lexeme.length(); i++) builder.append(" ");
-			builder.append("^");
-		}
+//		if(lexeme.type != Types.TypeEnd) {
+//			builder.append(scanner.getCurrentIndexPosition());
+//			for(int i = 0; i < lexeme.lexeme.length(); i++) builder.append(" ");
+//			builder.append("^");
+//		}
 
 		additional = builder.toString();
 	}
@@ -75,7 +75,7 @@ public class AnalyzeError extends RuntimeException {
 				builder.append(types[i]);
 			}
 		}
-		if(types.length > 1) builder.append(" or ");
+		if(types.length > 1) builder.append(" или ");
 		builder.append(types[types.length - 1]);
 		
 		return builder.toString();

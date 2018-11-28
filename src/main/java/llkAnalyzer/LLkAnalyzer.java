@@ -39,12 +39,10 @@ public class LLkAnalyzer  {
 				Table.Terminal terminal = (Table.Terminal)current;
 				
 				if(scanner.getLexeme().type != terminal.type) {
-					String line1 = "expected " + terminal.type, line2 = "but found " + scanner.getLexeme().type;
-					try {
-						throw new DiagramsException("Ошибка LLK", scanner.getLexeme().lexeme, scanner);
-					} catch (DiagramsException e) {
-						e.printStackTrace();
-					}
+					String line1 = "ожидался " + terminal.type, line2 = "но найден " + scanner.getLexeme().type;
+						//throw new DiagramsException("Ошибка LLK", scanner.getLexeme().lexeme, scanner);
+					throw new AnalyzeError(scanner, scanner.getLexeme(), line1, line2);
+
 				}
 				if(scanner.getLexeme().type == Types.TypeEnd) break;
 				scanner.scanner();
@@ -53,7 +51,7 @@ public class LLkAnalyzer  {
 				
 				Table.Cell cell = controlTable.get(nonTerminal, scanner.getLexeme().type);
 				if(cell.isEmpty()) {
-					String line1 = "wrong character " + scanner.getLexeme().type, line2 = "when analyzing " + nonTerminal;
+					String line1 = "ошибочная комбинация " + scanner.getLexeme().type, line2 = "при анализе " + nonTerminal;
 					throw new AnalyzeError(scanner, scanner.getLexeme(), line1, line2);
 				//	throw new DiagramsException("Ошибка ", scanner.getLexeme().lexeme, scanner);
 				}

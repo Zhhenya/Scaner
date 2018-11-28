@@ -1,40 +1,33 @@
-  public Main{
-      int a, b = 0;
-
+  public class Main {
+      int a, b = back = false;
      public class Arial{
-          int global;
+          int i;
           boolean back = false;
           public class Dual{
 
               int Func1(boolean m, int l){
 
-              public class f{}
+             public class f{}
               int s = 0;
-                  s++;
-                  s--;
-               !s;
-               --s;
-               ++s;
-               return 8;
-              }
+              Func1(b, n);
+              return 8;
+            }
       }
 
       boolean Func(Arial y){
-          Arial myIdent;
-          boolean u;
-          boolean m = 2 + 3 == 4 + 5;
-          int h;
+          Arial h;
+          boolean h;
+          boolean m = 9 + 3 >= 4 + 5;
           myIdent.global = 7;
-          Dual f;
           f.Func1(u, h);
           if(5 + myIdent.global > 0){
-                 5 + myIdent.global;
+              myIdent.dlobal = 5 + myIdent.global;
               }
-          else{
+            else{
               if(!myIdent.back){
-                  return true;
+                  return u = false;
+                  }
           }
-         }
 
    }}
 

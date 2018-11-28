@@ -53,8 +53,8 @@ public class Generator {
 				}
 			}
 		}
-	//	table.exportToExcel(new File("table.xls"));
-	//	System.out.println();
+		table.exportToExcel(new File("table.xls"));
+		System.out.println();
 		
 		// Сериализация полученной таблицы
 		File file = new File("table.llk");

@@ -1,5 +1,9 @@
 package llkAnalyzer;
 
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Row;
+import service.DiagramsException;
 import service.Types;
 
 
@@ -34,7 +38,11 @@ public class Table implements Serializable {
 		for(Map.Entry<String, Types> terminal : terminals.entrySet()) {
 			String name = terminal.getKey();
 			terminalsMapping.put(name, new Terminal(name, terminalsMapping.size(), terminal.getValue()));
-			typesMapping.put(terminal.getValue(), typesMapping.size());
+
+
+		//	Integer check = typesMapping.get(terminal.getValue());
+			//if(check == null)
+				typesMapping.put(terminal.getValue(), typesMapping.size());
 			
 			if(terminal.getValue() == Types.TypeEnd) tmpEnd = terminalsMapping.get(name);
 		}
@@ -56,15 +64,18 @@ public class Table implements Serializable {
 	}
 	
 	public Cell get(NonTerminal nonTerminal, Types type) {
+		Integer u = typesMapping.get(type);
+		if(u == null)
+			throw new DiagramsException("Символ такого типа не предусмотрен: "+ type);
 		return cells[nonTerminal.index][typesMapping.get(type)];
 	}
 	
-/*	public void exportToExcel(File file) throws Exception {
+	public void exportToExcel(File file) throws Exception {
 		System.out.println("Writing control table to " + file.getName() + "...");
 		
 		HSSFWorkbook workbook = new HSSFWorkbook();
 		HSSFSheet sheet = workbook.createSheet("Control table");
-		
+
 		for(int i = 0; i < cells.length + 1; i++) {
 			Row row = sheet.createRow(i);
 			for(int j = 0; j < cells[0].length + 1; j++) row.createCell(j).getCellStyle().setWrapText(true);
@@ -100,7 +111,7 @@ public class Table implements Serializable {
 		out.close();
 		
 		System.out.println("Successfully finished!");
-	}*/
+	}
 	
 	public NonTerminal getAxiom() {
 		return axiom;

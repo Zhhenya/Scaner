@@ -130,7 +130,7 @@ public class Scanner {
                 else
                     currentIndexPosition++;
             }
-            return Types.TypeConstInt;
+            return setGetType(Types.TypeConstInt);
         } else if (text.charAt(currentIndexPosition) >= 'a' && text.charAt(currentIndexPosition) <= 'z' ||
                 text.charAt(currentIndexPosition) >= 'A' && text.charAt(currentIndexPosition) <= 'Z') {
             lexeme.append(text.charAt(currentIndexPosition++));
@@ -146,12 +146,16 @@ public class Scanner {
                     return printError("Слишком длинный идентификатор", lexeme.lexeme, new StringBuilder());
                 }
 
-            for (int j = 0; j < MAX_NUMBER_KEYWORDS; j++) {
+            for (int j = 0; j < KeyWords.keyWords.length; j++) {
+                if(lexeme.lexeme.toString().equals("Main"))
+                    return  setGetType(Types.TypeMain);
+                if(lexeme.lexeme.toString().equals("main"))
+                    return  setGetType(Types.Typemain);
                 if (KeyWords.keyWords[j].equalsIgnoreCase(lexeme.lexeme.toString()))
                     return setGetType(Types.valueOf("Type" + KeyWords.keyWords[j]));
             }
 
-            return Types.TypeIdent;
+            return setGetType(Types.TypeIdent);
         } else if (text.charAt(currentIndexPosition) == ',')
             return setGetType(getTypes(lexeme.lexeme, Types.TypeComma));
         else if (text.charAt(currentIndexPosition) == ';')
@@ -287,8 +291,12 @@ public class Scanner {
                     return printError("Слишком длинный идентификатор", lexeme.lexeme, new StringBuilder());
                 }
 
-            for (int j = 0; j < MAX_NUMBER_KEYWORDS; j++) {
-                if (KeyWords.keyWords[j].equalsIgnoreCase(grammarWord.toString()))
+            for (int j = 0; j < KeyWords.keyWords.length; j++) {
+                if(grammarWord.equals("Main"))
+                    return  setGetType(Types.TypeMain);
+                if(grammarWord.equals("main"))
+                    return  setGetType(Types.Typemain);
+                if (KeyWords.keyWords[j].equalsIgnoreCase(grammarWord))
                     return setGetType(Types.valueOf("Type" + KeyWords.keyWords[j]));
             }
 
@@ -456,7 +464,7 @@ public class Scanner {
             numberOfRow++;
             currentIndexPosition++;
             change = true;
-            System.out.println("строка " + numberOfRow);
+         //   System.out.println("строка " + numberOfRow);
         }
         return change;
     }

@@ -1,37 +1,45 @@
 S -> public class N { C }
-C ->  A C | M C | W C | #
+C ->  GR D | S C | #
+GR -> T N1
+D -> I1 ; C | M C
 A -> T I ;
 I -> a P1 I1
-I1 -> , a P1 I1 | #
+I1 -> P1 | , a P1 I1 | #
+P1 -> = V | #
 T -> int | boolean | a
-W -> S
 N -> a | Main
-M -> R N1 ( F ) B
+M -> ( F ) B
 N1 -> a | main
 R -> T | void | #
 F -> P F10
 F10 -> , P F10 | #
 B -> { O }
 P -> T a
-O -> O1 O | A O | S O | #
-O1 -> A1 | U | B | H | ;
+O -> O1 O | S O | #
+O1 -> a OP | U | ; | RR | int | boolean | B | V ;
+OP -> = V | H ; | N3 ; | N2 ;
+RR -> return TR
+TR -> V P1 ; | K ; | ;
 A1 -> N2 = V
 N2 -> a N3
-N3 -> . a N3 | #
-U -> if ( V ) O1 else O1 | if ( V ) O1
-H -> a ( F1 ) ;
+N3 -> . a N3 | = V | H | #
+N5 -> a N6
+N6 -> . a N6 | #
+U -> if ( V ) { O1 } U1
+U1 -> # | else { O1 }
+H -> ( F1 )
 F1 -> V F11
 F11 -> , V F11 | #
 K -> d | true | false
 V -> ! V | A2 D1
 D1 -> && A2 D1 | #
 A2 -> A3 D2
-D2 -> A3 D2 | < A3 D2 | <= A3 D2 | >= D2 | == A3 D2 | != A3 D2 | #
+D2 ->  > A3 D2 | < A3 D2 | <= A3 D2 | >= D2 | == A3 D2 | ! = A3 D2 | #
 A3 -> A4 D3
 D3 -> + A4 D3 | - A4 D3 | #
 A4 -> A5 D4
 D4 -> * A5 D4 | / A5 D4 | #
 A5 -> - A5 | + A5 | A6
-A6 -> a | K | ( V )
+A6 -> N5 | K | ( V )
 
 

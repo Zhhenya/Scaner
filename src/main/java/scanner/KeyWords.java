@@ -12,7 +12,9 @@ public class KeyWords {
             "False",
             "Class",
             "Public",
-            "Void"
+            "Void",
+            "main",
+            "Main"
     };
 
 }

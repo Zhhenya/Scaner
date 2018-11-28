@@ -41,6 +41,8 @@ public class Main {
             e.printStackTrace();
         }*/
 
+
+
         Scanner scanner = new Scanner();
         String filePath = "src/main/resources/program1.txt";
         BufferedReader reader = null;
@@ -50,8 +52,9 @@ public class Main {
             scanner.setReader(reader);
             LLkAnalyzer lLkAnalyzer = new LLkAnalyzer(new File("table.llk"), scanner);
             lLkAnalyzer.program();
+            System.out.println("Анализ завершен без ошибок");
         } catch (FileNotFoundException e) {
-            e.printStackTrace();
+          //  e.printStackTrace();
         } catch (AnalyzeError e) {
             System.out.println(e.getDisplayMessage());
         }
