@@ -3,26 +3,32 @@ package llkAnalyzer;
 import llkAnalyzer.Grammar.Rule;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.SerializationUtils;
+import scanner.Scanner;
+import service.Types;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-
+import java.util.*;
+import java.util.stream.Collectors;
 
 
 public class Generator {
 	
 	private static Grammar grammar, grammar2;
 	private static HashMap<String, HashSet<String>> follow = new HashMap<>();
+	private static FirstFollowTable firstFollowTable = new FirstFollowTable();
+	private static Scanner scanner = new Scanner();
 	
 	public static void main(String[] args) throws Exception {
 		grammar = new Grammar(new File("src/main/resources/grammar/grammar.txt"));
-		
+
+		int maxSizeRow = 0;
+
 		// Вычисление first1 для всех правил грамматики
 		HashMap<String, HashSet<String>> used = new HashMap<>();
 		for(String a : grammar.nonTerminals) first1(a, used);
+
+		Map<String, Set<String>> used1 = new HashMap<>();
+		grammar.getNonTerminals().forEach(s -> last(s, used1));
 		
 		// Приведение грамматики к неукорачивающей форме
 		grammar2 = grammar.withoutEps();
@@ -30,16 +36,35 @@ public class Generator {
 		// Вычисление follow1 для всех правил грамматики
 		for(String a : grammar.nonTerminals) follow.put(a, new HashSet<>());
 		follow1(grammar.nonTerminals.get(0), "#", new HashSet<>());
-		
+
 		// Вывод полученных first1 и follow1 для всех нетерминалов
 		for(String a : grammar.nonTerminals) {
 			HashSet<String> first = new HashSet<>();
-			for(Grammar.Rule rule : grammar.map.get(a)) first.addAll(rule.first);
-			
+			ArrayList<String> firstValues = new ArrayList<>();
+			for(Grammar.Rule rule : grammar.map.get(a))
+				first.addAll(rule.first);
+
+			HashSet<String>  findType = new HashSet<>();
+			for(String set : first)
+				findType.add(scanner.next(set).toString());
+
+
+			firstFollowTable.firstFollow.put(a, new Pair(findType, firstFollowTable.firstFollow.size()));
+			if(maxSizeRow < first.size() + follow.get(a).size())
+				maxSizeRow = first.size() + follow.size();
 			System.out.format("%-3s %-38s %s\n", a, first, follow.get(a));
 		}
+		firstFollowTable.size = maxSizeRow;
+		firstFollowTable.exportToExcel(new File("firstFollowTable.xls"));
+
+		// Сериализация полученной таблицы
+		File fileFF = new File("firstFollowTable.fft");
+		FileUtils.writeByteArrayToFile(fileFF, SerializationUtils.serialize(firstFollowTable));
+		System.out.println("FirstFollow table serialized and saved to " + fileFF);
 		System.out.println();
-		
+
+
+
 		// Построение управляющей таблицы
 		Table table = new Table(grammar.nonTerminals, grammar.terminals, grammar.nonTerminals.get(0));
 		for(Map.Entry<String, ArrayList<Grammar.Rule>> e : grammar.map.entrySet()) {
@@ -53,6 +78,13 @@ public class Generator {
 				}
 			}
 		}
+
+		grammar.getGrammar()
+				.forEach((s, rules) -> table.setLastToNonTerminal(s,
+						rules.stream()
+								.flatMap(rule -> rule.getLast().stream())
+								.collect(Collectors.toSet())));
+
 		table.exportToExcel(new File("table.xls"));
 		System.out.println();
 		
@@ -77,6 +109,39 @@ public class Generator {
 						rule.first.add(s);
 				result.addAll(rule.first);
 			}
+		return result;
+	}
+
+	private static Set<String> last(String nonTerminal, Map<String, Set<String>> used) {
+		System.out.println(nonTerminal);
+		if (used.containsKey(nonTerminal))
+			return used.get(nonTerminal);
+		Set<String> result = new HashSet<>();
+		HashMap<String, ArrayList<Rule>> g = grammar.getGrammar();
+		if (!g.containsKey(nonTerminal)) {
+			result.add(nonTerminal);
+		} else {
+			for (Rule rule : g.get(nonTerminal)) {
+				String nextNonTerminal = rule.get(rule.size() - 1);
+				if (nextNonTerminal.equals(nonTerminal)) {
+					if (rule.size() > 1)
+						nextNonTerminal = rule.get(rule.size() - 2);
+					else
+						continue;
+					if (!g.containsKey(nextNonTerminal))
+						continue;
+				}
+				for (String ruleString : last(nextNonTerminal, used)) {
+					if (ruleString.equals("#") && rule.size() > 1 && g.containsKey(rule.get(rule.size() - 2))) {
+						rule.getLast().addAll(last(rule.get(rule.size() - 2), used));
+					} else {
+						rule.getLast().add(ruleString);
+					}
+				}
+				result.addAll(rule.getLast());
+			}
+			used.put(nonTerminal, result);
+		}
 		return result;
 	}
 	

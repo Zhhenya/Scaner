@@ -50,14 +50,17 @@ public class Main {
             reader = new BufferedReader(new InputStreamReader(new FileInputStream(filePath)));
             scanner.setText(scanner.reader(filePath, reader));
             scanner.setReader(reader);
-            LLkAnalyzer lLkAnalyzer = new LLkAnalyzer(new File("table.llk"), scanner);
-            lLkAnalyzer.program();
-            System.out.println("Анализ завершен без ошибок");
+            LLkAnalyzer lLkAnalyzer = new LLkAnalyzer(new File("table.llk"), scanner, new File("firstFollowTable.fft"));
+            boolean t = lLkAnalyzer.program();
+            if(!t)
+                System.out.println("Конец программы не достигнут");
+            else
+                System.out.println("Анализ завершен");
         } catch (FileNotFoundException e) {
           //  e.printStackTrace();
-        } catch (AnalyzeError e) {
+        } /*catch (AnalyzeError e) {
             System.out.println(e.getDisplayMessage());
-        }
+        }*/
 
 
     }

@@ -9,14 +9,23 @@ import java.io.*;
 import java.util.*;
 
 public class Grammar implements Serializable {
-	
+
+
+
 	public HashMap<String, ArrayList<Rule>> map = new HashMap<>();
 	public ArrayList<String> nonTerminals = new ArrayList<>();
 	public HashMap<String, Types> terminals = new HashMap<>();
 
 	public Scanner scanner;
-	
 	private int surrogates = 0;
+
+	public HashMap<String, ArrayList<Rule>> getGrammar() {
+		return map;
+	}
+
+	public ArrayList<String> getNonTerminals() {
+		return nonTerminals;
+	}
 
 	public void setScanner(Scanner scanner){
 		this.scanner = scanner;
@@ -43,12 +52,16 @@ public class Grammar implements Serializable {
 			
 			map.put(nt, list);
 		}
-		
+
 		// Определение терминалов
 		HashSet<String> terminalsSet = new HashSet<>();
-		for(ArrayList<Rule> rules : map.values())
-			for(Rule rule : rules)
-				for(String t : rule) if(!map.containsKey(t)) terminalsSet.add(t);
+		for(ArrayList<Rule> rules : map.values()) {
+			for (Rule rule : rules)
+				for (String t : rule)
+					if (!map.containsKey(t))
+						terminalsSet.add(t);
+
+		}
 		
 		// Определение типов терминалов
 		for(String t : terminalsSet)
@@ -138,7 +151,9 @@ public class Grammar implements Serializable {
 	public String hasRule(List<String> rule) {
 		for(Map.Entry<String, ArrayList<Rule>> e : map.entrySet())
 			for(Rule r : e.getValue())
-				if(/*e.getKey().startsWith("$") && */isRulesEquals(r, rule)) return e.getKey();
+				if(
+e.getKey().startsWith("$") &&
+isRulesEquals(r, rule)) return e.getKey();
 		return null;
 	}
 	
@@ -173,6 +188,10 @@ public class Grammar implements Serializable {
 		public Rule(String f, Collection<? extends String> c) { super(c); from = f; }
 		
 		public final HashSet<String> first = new HashSet<>();
+		private final Set<String> last = new HashSet<>();
+		public Set<String> getLast() {
+			return last;
+		}
 		
 	}
 	

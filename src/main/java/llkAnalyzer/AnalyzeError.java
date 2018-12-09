@@ -6,7 +6,7 @@ import service.Types;
 
 import java.util.function.Supplier;
 
-public class AnalyzeError extends RuntimeException {
+public class AnalyzeError extends RuntimeException{
 	
 	private final String message;
 	private final String additional;

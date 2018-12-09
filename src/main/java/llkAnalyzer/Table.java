@@ -10,16 +10,20 @@ import service.Types;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class Table implements Serializable {
 
 	private final HashMap<String, NonTerminal> nonTerminalsMapping = new HashMap<>();
 	private final HashMap<String, Terminal> terminalsMapping = new HashMap<>();
 	private final HashMap<Types, Integer> typesMapping = new HashMap<>();
-	
+
+	public NonTerminal getNonTerminals(String nonTerminal) {
+		return nonTerminalsMapping.get(nonTerminal);
+	}
+
+
 	private final Cell[][] cells;
 	
 	private final Terminal end;
@@ -112,7 +116,14 @@ public class Table implements Serializable {
 		
 		System.out.println("Successfully finished!");
 	}
-	
+
+	public void setLastToNonTerminal(String nonTerminal, Set<String> last) {
+		nonTerminalsMapping.get(nonTerminal).setLast(last.stream()
+				.map(s -> terminalsMapping.get(s).type)
+				.collect(Collectors.toSet()));
+	}
+
+
 	public NonTerminal getAxiom() {
 		return axiom;
 	}
@@ -151,11 +162,20 @@ public class Table implements Serializable {
 	}
 	
 	public static class NonTerminal extends Element {
-		
+
+		private Set<Types> last = new HashSet<>();
+
 		public NonTerminal(String s, int i) {
 			super(s, i);
 		}
-		
+
+		public void setLast(Set<Types> last) {
+			this.last = last;
+		}
+
+		public Set<Types> getLast() {
+			return last;
+		}
 	}
 	
 }

@@ -1,15 +1,13 @@
 S -> public class N { C }
-C ->  GR D | S C | #
+C ->  GR D C| S C | #
 GR -> T N1
-D -> I1 ; C | M C
-A -> T I ;
-I -> a P1 I1
+D -> I1 ; | M | #
 I1 -> P1 | , a P1 I1 | #
 P1 -> = V | #
 T -> int | boolean | a
 N -> a | Main
 M -> ( F ) B
-N1 -> a | main
+N1 -> a | main | ;
 R -> T | void | #
 F -> P F10
 F10 -> , P F10 | #
@@ -17,7 +15,7 @@ B -> { O }
 P -> T a
 O -> O1 O | S O | #
 O1 -> a OP | U | ; | RR | int | boolean | B | V ;
-OP -> = V | H ; | N3 ; | N2 ;
+OP -> = V | H ; | N3 ; | N2 ; | ,
 RR -> return TR
 TR -> V P1 ; | K ; | ;
 A1 -> N2 = V

@@ -1,0 +1,36 @@
+S -> public class N { C }
+C -> C A | C M | C S
+A -> T $9 ;
+$9 -> I;
+I -> I , a $5 | a $5 | a
+$5 ->PP
+PP -> = V
+T -> int | boolean | a
+N -> a | Main
+M -> T $76 ( F ) B
+$76 -> N1
+N1 -> a | main
+F -> F , P | P
+B -> { $25 } | { }
+$25 -> O
+P -> T $67
+O -> O O1 | S
+$55 -> O1
+O1 -> A1 | U | B | H | ; | RR
+RR -> $8
+$8 -> return V ;
+A1 -> N2 = $34
+N2 -> N2 . a | a
+U -> if ( V ) O1 else $55 | if ( V ) $55
+H -> a ( F1 )
+K -> d | true | false
+$34 -> V
+V -> V && $13 | $13
+A2 -> A2 > $10 | A2 < $10 | A2 >= $10 | A2 <= $10 | A2 >= $10 | A2 == $10 | A2 != $10 | $10
+A3 -> A3 + $20 | A3 - $20 | $20
+A4 -> A4 * A5 | A4 / A5 | A4 % A5 | A5
+A5 -> $67 | K | ( V )
+$13 -> A2
+$10 -> A3
+$20 -> A4
+$67 -> a
