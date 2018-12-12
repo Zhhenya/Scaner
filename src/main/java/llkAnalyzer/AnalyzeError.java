@@ -4,6 +4,7 @@ package llkAnalyzer;
 import scanner.Scanner;
 import service.Types;
 
+import java.util.Stack;
 import java.util.function.Supplier;
 
 public class AnalyzeError extends RuntimeException {
@@ -11,7 +12,7 @@ public class AnalyzeError extends RuntimeException {
 	private final String message;
 	private final String additional;
 	
-	public AnalyzeError(Scanner scanner, Scanner.Lexeme lexeme, Types... expected) {
+	/*public AnalyzeError(Scanner scanner, Scanner.Lexeme lexeme, Types... expected) {
 		this(scanner, lexeme, ((Supplier<String>)(() -> {
 			StringBuilder builder = new StringBuilder();
 			builder.append("Найдено ");
@@ -25,9 +26,9 @@ public class AnalyzeError extends RuntimeException {
 			}
 			return builder.toString();
 		})).get(), "ожидался " + asList(expected));
-	}
+	}*/
 	
-	public AnalyzeError(Scanner scanner, Scanner.Lexeme lexeme, String first, String... lines) {
+	public AnalyzeError(Scanner scanner, Scanner.Lexeme lexeme, Stack<String> reduce, String first, String... lines) {
 		StringBuilder builder = new StringBuilder();
 		builder.append("парсер грамматики");
 		builder.append("(строка ");
@@ -52,7 +53,37 @@ public class AnalyzeError extends RuntimeException {
 //			for(int i = 0; i < lexeme.lexeme.length(); i++) builder.append(" ");
 //			builder.append("^");
 //		}
+		for(String s : reduce)
+		builder.append("\nreduce : " + s + " ");
+		additional = builder.toString();
+	}
 
+	public AnalyzeError(Scanner scanner, Scanner.Lexeme lexeme, String first, String... lines) {
+		StringBuilder builder = new StringBuilder();
+		builder.append("парсер грамматики");
+		builder.append("(строка ");
+		builder.append(scanner.getNumberOfRow());
+		builder.append("): ");
+		int length = builder.length();
+
+		builder.append(first);
+		message = builder.toString();
+		builder = new StringBuilder();
+		builder.append("\n");
+
+		for(String s : lines) {
+			for(int i = 0; i < length; i++) builder.append(" ");
+			builder.append(s);
+			builder.append("\n");
+		}
+		builder.append("\n");
+
+//		if(lexeme.type != Types.TypeEnd) {
+//			builder.append(scanner.getCurrentIndexPosition());
+//			for(int i = 0; i < lexeme.lexeme.length(); i++) builder.append(" ");
+//			builder.append("^");
+//		}
+		builder.append("\n lexeme : " + lexeme.lexeme);
 		additional = builder.toString();
 	}
 	

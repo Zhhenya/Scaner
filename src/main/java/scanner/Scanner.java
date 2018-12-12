@@ -381,6 +381,13 @@ public class Scanner {
     }
 
 
+    public String getOneLexeme(){
+        int pos = currentIndexPosition;
+        scanner();
+        currentIndexPosition = pos;
+        return lexeme.lexeme.toString();
+    }
+
     public String reader(String filePath, BufferedReader reader){
             StringBuilder s = new StringBuilder();
             try {
