@@ -2,9 +2,10 @@ S -> public class N { $112 | public class N { }
 $112 -> C }
 C -> C A | C M | C S | A | M | S
 A -> T I ;
-I -> P1 , I | P1 | $89 , I | $89 | $89 = P1 , I | $89 = P1
+I -> P1 , I | P1 | $89 , I | $89 | $89 = P1 , I | $89 = P1 | $34 = $34 | $89 = $34 = $34
 P1 -> $89 = $34 | $89 = H
-T -> int | boolean
+T -> int | boolean | $7777
+$7777 -> a
 N -> a | Main1
 M -> T $76 ( $90
 $90 -> F ) $77
@@ -13,7 +14,8 @@ $92 -> O
 $76 -> N1
 N1 -> a | main
 F -> F , P | P
-P -> T N2
+P -> T $9999
+$9999 -> a
 $66 -> T
 O -> O1 O | S | RR
 $55 -> O1

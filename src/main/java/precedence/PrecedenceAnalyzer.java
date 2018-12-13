@@ -85,7 +85,7 @@ public class PrecedenceAnalyzer {
                                 cnt--;
                                 break;
                             case "(":
-                                if(stack.get(i - 1).equals("$76")){
+                                if (stack.get(i - 1).equals("$76")) {
                                     stack.push("$35");
                                     break cycle;
                                 }
@@ -125,12 +125,14 @@ public class PrecedenceAnalyzer {
 //                                stack.push("N1");
 //                                break cycle;
                             case "T":
-                                if (lexeme.lexeme.toString().equals("("))
+                                if (stack.get(i - 2).equals("$76"))
+                                    stack.push("$9999");
+                                else if (lexeme.lexeme.toString().equals("("))
                                     stack.push("$76");
                                 else if (i > 0 && stack.get(i - 1).equals("("))
                                     stack.push("N2");
                                 else if (i > 0 && stack.get(i - 1).equals(",") && stack.get(i - 2).equals("F"))
-                                    stack.push("N2");
+                                    stack.push("$9999");
                                 else
                                     stack.push("$89");
                                 break cycle;
@@ -147,11 +149,22 @@ public class PrecedenceAnalyzer {
                                 if (lexeme.lexeme.toString().equals("("))
                                     stack.push("N2");
                                 else
-                                    stack.push("$885");
+                                    //if()
+                                     stack.push("$885");
+                                   // stack.push("$7777");
                                 break cycle;
                             case ";":
+                                // if (stack.get(stack.size() - 2).equals("A"))
+                                //    stack.push("O");
                                 if (stack.get(stack.size() - 2).equals("A"))
-                                    stack.push("O");
+                                    stack.push("$7777");
+                                break cycle;
+//                            case "O1":
+//                              //  if (stack.get(stack.size() - 2).equals("A"))
+//                                    stack.push("$7777");
+//                                break cycle;
+                            case "{":
+                                stack.push("$7777");
                                 break cycle;
                         }
                     }
@@ -177,15 +190,15 @@ public class PrecedenceAnalyzer {
                 } else if (Grammar.isRulesEquals(reduce, "int")) {
                     stack.push("T");
 
-                }else if (Grammar.isRulesEquals(reduce, "$89", "=", "H")) {
-                    if(stack.peek().equals("T"))
+                } else if (Grammar.isRulesEquals(reduce, "$89", "=", "H")) {
+                    if (stack.peek().equals("T"))
                         stack.pop();
                     else
                         System.out.println("Ошибка T a = H");
                     stack.push("O1");
-                  //  stack.push(";");
+                    //  stack.push(";");
 
-               } else if (Grammar.isRulesEquals(reduce, "N2")) {
+                } else if (Grammar.isRulesEquals(reduce, "N2")) {
                     String s = stack.get(stack.size() - 1);
                     String s1 = stack.get(stack.size() - 2);
                     boolean f = false;
@@ -231,6 +244,8 @@ public class PrecedenceAnalyzer {
                     else if (stack.get(stack.size() - 1).equals("(") && stack.get(stack.size() - 2).equals("$888")
                             || stack.get(stack.size() - 1).equals(",") && stack.get(stack.size() - 2).equals("F1"))
                         stack.push("$35");
+                    else if (stack.get(stack.size() - 1).equals("=") && stack.get(stack.size() - 2).equals("$34"))
+                        stack.push("$34");
                 } else if (Grammar.isRulesEquals(reduce, "S")) {
                     String prev = stack.get(stack.size() - 2);
                     String prev2 = stack.get(stack.size() - 3);
@@ -319,9 +334,11 @@ public class PrecedenceAnalyzer {
             return '>';
         if ((a.equals("I") && b.equals("return")))
             return '>';
-            //return '>';
-       /* if(a.equals("N89") && b.equals("="))
-            return '>';*/
+        //return '>';
+        if (a.equals("$112") && b.equals("a"))
+            return '>';
+        if (a.equals("a") && b.equals("a"))
+            return '>';
         Table.Cell cell = data.getCell(data.getIndex(a), data.getIndex(b));
         if (cell.relations.size() != 1) {
             System.out.println(cell.relations.size());
