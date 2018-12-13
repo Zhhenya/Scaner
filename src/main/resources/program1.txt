@@ -15,7 +15,7 @@
              f.Func1( u, h);
              if(5 + myIdent.global > 0){
                  myIdent.dlobal = 5 + myIdent.global;
-                 }
+
                else{
                  if(!myIdent.back){
                      return 0
