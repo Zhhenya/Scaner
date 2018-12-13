@@ -125,7 +125,7 @@ public class LLkAnalyzer {
 
                 if (cell.isEmpty()) {
                     String line1 = "ошибочная комбинация " + scanner.getLexeme().type, line2 = "при анализе " + nonTerminal;
-                    if(scanner.getLexeme().lexeme.toString().equals(";"))
+                  //  if(scanner.getLexeme().lexeme.toString().equals(";"))
                     System.out.println(new AnalyzeError(
                             scanner, scanner.getLexeme(), line1, line2).getDisplayMessage());
 
