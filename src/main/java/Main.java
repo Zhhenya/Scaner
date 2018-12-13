@@ -42,7 +42,6 @@ public class Main {
         }*/
 
 
-
         Scanner scanner = new Scanner();
         String filePath = "src/main/resources/program1.txt";
         BufferedReader reader = null;
@@ -52,12 +51,14 @@ public class Main {
             scanner.setReader(reader);
             LLkAnalyzer lLkAnalyzer = new LLkAnalyzer(new File("table.llk"), scanner, new File("firstFollowTable.fft"));
             boolean t = lLkAnalyzer.program();
-            if(!t)
+            if (lLkAnalyzer.countOfCloseBrace != lLkAnalyzer.countOfOpenBrace) {
+                System.out.println("Не верное количество скобок");
+            } else if (!t || !scanner.getLexeme().lexeme.toString().equals("#"))
                 System.out.println("Конец программы не достигнут");
             else
                 System.out.println("Анализ завершен");
         } catch (FileNotFoundException e) {
-          //  e.printStackTrace();
+            //  e.printStackTrace();
         } /*catch (AnalyzeError e) {
             System.out.println(e.getDisplayMessage());
         }*/
