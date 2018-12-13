@@ -35,6 +35,8 @@ public class LLkAnalyzer {
     Types errorPrevType = null;
     private Set<Types> safeSymbols;
     Table.NonTerminal classes = new Table.NonTerminal("C", 0);
+    public int countOfOpenBrace = 0;
+    public int countOfCloseBrace = 0;
 
     public LLkAnalyzer(File table, Scanner source, File firstFollow) throws Exception {
         controlTable = SerializationUtils.deserialize(new FileInputStream(table));
@@ -52,7 +54,7 @@ public class LLkAnalyzer {
         currentLexeme = scanner.getLexeme();
         for (; ; ) {
             if (stack.isEmpty()) {
-                System.out.println("Конец файла не достигнут. Ваша ошибка была фатальной. Исправьте ее и попробуйте снова");
+                System.out.println("Конец файла не достигнут. Проверьте правильность расстановки скобок");
                 exit(-1);
             }
             Table.Element current = stack.pop();
@@ -109,6 +111,10 @@ public class LLkAnalyzer {
                   //  if(stackClasses.peek() == TypeClass)
                         stackClasses.push(scanner.getLexeme().type);
                     scanner.scanner();
+                    if(scanner.getLexeme().lexeme.toString().equals("{"))
+                        countOfOpenBrace++;
+                    if(scanner.getLexeme().lexeme.toString().equals("}"))
+                        countOfCloseBrace++;
                     currentLexeme = scanner.getLexeme();
                 }
                 if (scanner.getLexeme().type == Types.TypeEnd) break;
@@ -128,6 +134,10 @@ public class LLkAnalyzer {
                         Table.Element e = stack.pop();
                         stack.push(e);
                         Table.Terminal t = (Table.Terminal) e;
+                        if(scanner.getLexeme().lexeme.toString().equals("}"))
+                            countOfCloseBrace++;
+                        if(scanner.getLexeme().lexeme.toString().equals("{"))
+                            countOfOpenBrace++;
                         if (scanner.getLexeme().type.toString().compareTo(t.type.toString()) == 0)
                             continue;
                     }
@@ -277,6 +287,10 @@ public class LLkAnalyzer {
                         || scanner.getLexeme().lexeme.toString().compareTo(")") == 0)) {
 
 
+                    if(scanner.getLexeme().lexeme.toString().equals("}"))
+                        countOfCloseBrace++;
+                    if(scanner.getLexeme().lexeme.toString().equals("{"))
+                        countOfOpenBrace++;
                  /*   if(nonTerminal.getLast().contains(scanner.getLexeme().type)) {
                         scanner.scanner();
                         currentLexeme = scanner.getLexeme();
@@ -297,6 +311,10 @@ public class LLkAnalyzer {
                 }
                  if(scanner.getLexeme().lexeme.toString().compareTo("{") == 0
                  || scanner.getLexeme().lexeme.toString().compareTo("(") == 0) {
+                     if(scanner.getLexeme().lexeme.toString().equals("}"))
+                         countOfCloseBrace++;
+                     if(scanner.getLexeme().lexeme.toString().equals("{"))
+                         countOfOpenBrace++;
                      br = true;
                      break;
                  }
