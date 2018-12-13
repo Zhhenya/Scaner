@@ -125,10 +125,12 @@ public class LLkAnalyzer {
 
                 if (cell.isEmpty()) {
                     String line1 = "ошибочная комбинация " + scanner.getLexeme().type, line2 = "при анализе " + nonTerminal;
+                    if(scanner.getLexeme().lexeme.toString().equals(";"))
                     System.out.println(new AnalyzeError(
                             scanner, scanner.getLexeme(), line1, line2).getDisplayMessage());
 
-
+                  /*  if(stack.peek().value.compareTo(";") == 0 )
+                        stack.pop();*/
 
                     if(stack.peek() instanceof Table.Terminal) {
                         Table.Element e = stack.pop();
@@ -286,12 +288,11 @@ public class LLkAnalyzer {
                         || scanner.getLexeme().lexeme.toString().compareTo("}") == 0
                         || scanner.getLexeme().lexeme.toString().compareTo(")") == 0)) {
 
-
                     if(scanner.getLexeme().lexeme.toString().equals("}"))
                         countOfCloseBrace++;
                     if(scanner.getLexeme().lexeme.toString().equals("{"))
                         countOfOpenBrace++;
-                 /*   if(nonTerminal.getLast().contains(scanner.getLexeme().type)) {
+                  /*  if(nonTerminal.getLast().contains(scanner.getLexeme().type)) {
                         scanner.scanner();
                         currentLexeme = scanner.getLexeme();
                         if(stack.peek().value.compareTo(";") == 0 || stack.peek().value.compareTo("}") == 0
@@ -301,10 +302,10 @@ public class LLkAnalyzer {
                             stack.add(controlTable.getAxiom());
                         return nonTerminal.value;
                     }*/
-                    if (!controlTable.get(nonTerminal, scanner.getLexeme().type).isEmpty()) {
+                   /* if (!controlTable.get(nonTerminal, scanner.getLexeme().type).isEmpty()) {
                         stack.add(nonTerminal);
                         break;
-                    }
+                    }*/
 
                     br = true;
                     break;

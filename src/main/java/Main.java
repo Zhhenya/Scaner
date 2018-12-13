@@ -51,9 +51,9 @@ public class Main {
             scanner.setReader(reader);
             LLkAnalyzer lLkAnalyzer = new LLkAnalyzer(new File("table.llk"), scanner, new File("firstFollowTable.fft"));
             boolean t = lLkAnalyzer.program();
-            if (lLkAnalyzer.countOfCloseBrace != lLkAnalyzer.countOfOpenBrace) {
+           /* if (lLkAnalyzer.countOfCloseBrace != lLkAnalyzer.countOfOpenBrace) {
                 System.out.println("Не верное количество скобок");
-            } else if (!t || !scanner.getLexeme().lexeme.toString().equals("#"))
+            } else */if (!t || !scanner.getLexeme().lexeme.toString().equals("#"))
                 System.out.println("Конец программы не достигнут");
             else
                 System.out.println("Анализ завершен");
