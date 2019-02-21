@@ -33,7 +33,7 @@ public class Main {
                 return;
             }
 
-            if(types != Types.TypeError)
+          //  if(types != Types.TypeError)
                 System.out.println("Завершено без ошибок");
         } catch (FileNotFoundException | DiagramsException | SemanticsException e) {
             e.printStackTrace();

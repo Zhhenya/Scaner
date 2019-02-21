@@ -251,15 +251,15 @@ public class Tree {
         return vertex;
     }
 
-    public Tree getFunction(String lexeme, Tree from) throws SemanticsException {
-        Tree vertex = findRightLeft(from, lexeme);
-        if(vertex == null)
-            throw new SemanticsException("Отсутствует описание функции", lexeme);
-        if(vertex.node.type != DateType.TFunction)
-            throw new SemanticsException("Неверный вызов функции", lexeme);
-
-        return vertex;
-    }
+//    public Tree getFunction(String lexeme, Tree from) throws SemanticsException {
+//        Tree vertex = findRightLeft(from, lexeme);
+//        if(vertex == null)
+//            throw new SemanticsException("Отсутствует описание функции", lexeme);
+//        if(vertex.node.type != DateType.TFunction)
+//            throw new SemanticsException("Неверный вызов функции", lexeme);
+//
+//        return vertex;
+//    }
 
     public Tree getClass(String lexeme) throws SemanticsException {
         Tree vertex = findUp(current, lexeme);
