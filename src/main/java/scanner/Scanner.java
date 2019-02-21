@@ -16,33 +16,33 @@ public class Scanner {
     private Lexeme lexeme = new Lexeme();
 
 
-    public static class Lexeme{
+    public static class Lexeme {
         public StringBuilder lexeme = new StringBuilder();
         public Types type;
 
-        public Lexeme(StringBuilder lexeme, Types type){
+        public Lexeme(StringBuilder lexeme, Types type) {
 
             this.lexeme.append(lexeme);
             this.type = type;
         }
 
-        public void delete(){
+        public void delete() {
             this.lexeme.delete(0, lexeme.length());
         }
 
-        public void delete(int start, int end){
+        public void delete(int start, int end) {
             this.lexeme.delete(start, end);
         }
 
-        public void append(String symbol){
+        public void append(String symbol) {
             lexeme.append(symbol);
         }
 
-        public void append(Character symbol){
+        public void append(Character symbol) {
             lexeme.append(symbol);
         }
 
-        public int length(){
+        public int length() {
             return lexeme.length();
         }
 
@@ -50,34 +50,38 @@ public class Scanner {
             this.type = type;
         }
 
-        public Types setGetType(Types type){
+        public Types setGetType(Types type) {
             this.type = type;
             return type;
         }
 
-        public Lexeme(){}
+        public Lexeme() {
+        }
     }
 
-    public Types setGetType(Types type){
-       return lexeme.setGetType(type);
+    public Types setGetType(Types type) {
+        return lexeme.setGetType(type);
     }
 
-    public Lexeme getLexeme(){
+    public Lexeme getLexeme() {
         return lexeme;
     }
 
+    public void setLexeme(StringBuilder lexeme) {
+        this.lexeme.lexeme = lexeme;
+    }
 
-    public void setNumberOfRow(int numberOfRow){
+    public void setNumberOfRow(int numberOfRow) {
         this.numberOfRow = numberOfRow;
     }
-    public int getNumberOfRow(){
+
+    public int getNumberOfRow() {
         return numberOfRow;
     }
 
 
-
     public Types scanner() {
-      //  lexeme.lexeme.delete(0, lexeme.lexeme.length());
+        //  lexeme.lexeme.delete(0, lexeme.lexeme.length());
         lexeme.delete();
         while (true) {
             skipSymbols();
@@ -147,10 +151,10 @@ public class Scanner {
                 }
 
             for (int j = 0; j < KeyWords.keyWords.length; j++) {
-                if(lexeme.lexeme.toString().equals("Main"))
-                    return  setGetType(Types.TypeMain);
-                if(lexeme.lexeme.toString().equals("main"))
-                    return  setGetType(Types.Typemain);
+                if (lexeme.lexeme.toString().equals("Main"))
+                    return setGetType(Types.TypeMain);
+                if (lexeme.lexeme.toString().equals("main"))
+                    return setGetType(Types.Typemain);
                 if (KeyWords.keyWords[j].equalsIgnoreCase(lexeme.lexeme.toString()))
                     return setGetType(Types.valueOf("Type" + KeyWords.keyWords[j]));
             }
@@ -182,8 +186,8 @@ public class Scanner {
             return setGetType(getTypes(lexeme.lexeme, Types.TypeMinus));
         } else if (text.charAt(currentIndexPosition) == '/')
             return setGetType(getTypes(lexeme.lexeme, Types.TypeDivision));
-        else if(text.charAt(currentIndexPosition) == '.')
-                return setGetType(getTypes(lexeme.lexeme, Types.TypeDot));
+        else if (text.charAt(currentIndexPosition) == '.')
+            return setGetType(getTypes(lexeme.lexeme, Types.TypeDot));
         else if (text.charAt(currentIndexPosition) == '%')
             return setGetType(getTypes(lexeme.lexeme, Types.TypeMod));
         else if (text.charAt(currentIndexPosition) == '*')
@@ -236,7 +240,7 @@ public class Scanner {
     }
 
 
-    public boolean isEndWord(int pos, int length){
+    public boolean isEndWord(int pos, int length) {
         if (pos >= length - 1)
             return false;
         return true;
@@ -247,7 +251,7 @@ public class Scanner {
     public Types next(String grammarWord) {
         //  lexeme.lexeme.delete(0, lexeme.lexeme.length());
 
-    //    grammarWord += "\n";
+        //    grammarWord += "\n";
 
         Lexeme lexeme = new Lexeme();
         int currentIndexPosition = 0;
@@ -260,7 +264,7 @@ public class Scanner {
             return setGetType(Types.TypeEnd);
         }
 
-       // if(!isEndWord(currentIndexPosition, grammarWord.length());
+        // if(!isEndWord(currentIndexPosition, grammarWord.length());
 
 
         //константа
@@ -279,7 +283,6 @@ public class Scanner {
             lexeme.append(grammarWord.charAt(currentIndexPosition++));
 
 
-
             //идентификатор
             while (isEndWord(currentIndexPosition, grammarWord.length()) && (grammarWord.charAt(currentIndexPosition) >= '0' && grammarWord.charAt(currentIndexPosition) <= '9' ||
                     grammarWord.charAt(currentIndexPosition) >= 'a' && grammarWord.charAt(currentIndexPosition) <= 'z' ||
@@ -292,10 +295,10 @@ public class Scanner {
                 }
 
             for (int j = 0; j < KeyWords.keyWords.length; j++) {
-                if(grammarWord.equals("Main"))
-                    return  setGetType(Types.TypeMain);
-                if(grammarWord.equals("main"))
-                    return  setGetType(Types.Typemain);
+                if (grammarWord.equals("Main"))
+                    return setGetType(Types.TypeMain);
+                if (grammarWord.equals("main"))
+                    return setGetType(Types.Typemain);
                 if (KeyWords.keyWords[j].equalsIgnoreCase(grammarWord))
                     return setGetType(Types.valueOf("Type" + KeyWords.keyWords[j]));
             }
@@ -304,11 +307,11 @@ public class Scanner {
         } else if (grammarWord.charAt(currentIndexPosition) == ',')
             return setGetType(Types.TypeComma);
         else if (grammarWord.charAt(currentIndexPosition) == ';')
-            return setGetType( Types.TypeSemicolon);
+            return setGetType(Types.TypeSemicolon);
         else if (grammarWord.charAt(currentIndexPosition) == '(')
             return setGetType(Types.TypeOpenParenthesis);
         else if (grammarWord.charAt(currentIndexPosition) == ')')
-            return setGetType( Types.TypeCloseParenthesis);
+            return setGetType(Types.TypeCloseParenthesis);
         else if (grammarWord.charAt(currentIndexPosition) == '{')
             return setGetType(Types.TypeOpenBrace);
         else if (grammarWord.charAt(currentIndexPosition) == '}')
@@ -316,56 +319,56 @@ public class Scanner {
         else if (grammarWord.charAt(currentIndexPosition) == '+') {
             if (isEndWord(currentIndexPosition, grammarWord.length()) && grammarWord.charAt(currentIndexPosition + 1) == '+') {
                 lexeme.append(grammarWord.charAt(currentIndexPosition++));
-                return setGetType( Types.TypePlusPlus);
+                return setGetType(Types.TypePlusPlus);
             }
             return setGetType(Types.TypePlus);
         } else if (grammarWord.charAt(currentIndexPosition) == '-') {
             if (isEndWord(currentIndexPosition, grammarWord.length()) && grammarWord.charAt(currentIndexPosition + 1) == '-') {
                 lexeme.append(grammarWord.charAt(currentIndexPosition++));
-                return setGetType( Types.TypeMinusMinus);
+                return setGetType(Types.TypeMinusMinus);
             }
-            return setGetType( Types.TypeMinus);
+            return setGetType(Types.TypeMinus);
         } else if (grammarWord.charAt(currentIndexPosition) == '/')
-            return setGetType( Types.TypeDivision);
-        else if(grammarWord.charAt(currentIndexPosition) == '.')
-            return setGetType( Types.TypeDot);
+            return setGetType(Types.TypeDivision);
+        else if (grammarWord.charAt(currentIndexPosition) == '.')
+            return setGetType(Types.TypeDot);
         else if (grammarWord.charAt(currentIndexPosition) == '%')
-            return setGetType( Types.TypeMod);
+            return setGetType(Types.TypeMod);
         else if (grammarWord.charAt(currentIndexPosition) == '*')
-            return setGetType( Types.TypeMultiply);
+            return setGetType(Types.TypeMultiply);
         else if (grammarWord.charAt(currentIndexPosition) == '<') {
             if (isEndWord(currentIndexPosition, grammarWord.length()) && grammarWord.charAt(currentIndexPosition + 1) == '=') {
                 lexeme.append(grammarWord.charAt(currentIndexPosition++));
-                return setGetType( Types.TypeLe);
+                return setGetType(Types.TypeLe);
             }
-            return setGetType( Types.TypeLt);
+            return setGetType(Types.TypeLt);
         } else if (grammarWord.charAt(currentIndexPosition) == '>') {
             if (isEndWord(currentIndexPosition, grammarWord.length()) && grammarWord.charAt(currentIndexPosition + 1) == '=') {
                 lexeme.append(grammarWord.charAt(currentIndexPosition++));
-                return setGetType( Types.TypeGe);
+                return setGetType(Types.TypeGe);
             }
-            return setGetType( Types.TypeGt);
+            return setGetType(Types.TypeGt);
         } else if (grammarWord.charAt(currentIndexPosition) == '!') {
             if (isEndWord(currentIndexPosition, grammarWord.length()) && grammarWord.charAt(currentIndexPosition + 1) == '=') {
                 lexeme.append(grammarWord.charAt(currentIndexPosition++));
                 lexeme.append(grammarWord.charAt(currentIndexPosition++));
-                return setGetType( Types.TypeNegation);
+                return setGetType(Types.TypeNegation);
             }
             // return printError("Неверный входной символ", lexeme, new StringBuilder().append(grammarWord.charAt(currentIndexPosition)));
-            return setGetType( Types.TypeNegation);
+            return setGetType(Types.TypeNegation);
         }
         if (grammarWord.charAt(currentIndexPosition) == '=') {
             if (isEndWord(currentIndexPosition, grammarWord.length()) && grammarWord.charAt(currentIndexPosition + 1) == '=') {
                 lexeme.append(grammarWord.charAt(currentIndexPosition++));
                 lexeme.append(grammarWord.charAt(currentIndexPosition++));
-                return setGetType( Types.TypeComparison);
+                return setGetType(Types.TypeComparison);
             }
             return setGetType(Types.TypeAssign);
         } else if (grammarWord.charAt(currentIndexPosition) == '&') {
             if (isEndWord(currentIndexPosition, grammarWord.length()) && grammarWord.charAt(currentIndexPosition + 1) == '&') {
                 lexeme.append(grammarWord.charAt(currentIndexPosition++));
                 lexeme.append(grammarWord.charAt(currentIndexPosition++));
-                return setGetType( Types.TypeAnd);
+                return setGetType(Types.TypeAnd);
             } else
                 return printError("Неверный входной символ", lexeme.lexeme, new StringBuilder().append(grammarWord.charAt(currentIndexPosition)));
 
@@ -381,21 +384,22 @@ public class Scanner {
     }
 
 
-    public String reader(String filePath, BufferedReader reader){
-            StringBuilder s = new StringBuilder();
-            try {
-                String line = "";
-                while ((line = reader.readLine()) != null) {
-                    s.append(line + '\n'); }
-                if ((line = reader.readLine()) != null)
-                    s.append(line + '\n');
-
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
+    public String reader(String filePath, BufferedReader reader) {
+        StringBuilder s = new StringBuilder();
+        try {
+            String line = "";
+            while ((line = reader.readLine()) != null) {
+                s.append(line + '\n');
             }
-            return s.toString();
+            if ((line = reader.readLine()) != null)
+                s.append(line + '\n');
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return s.toString();
 
     }
 
@@ -404,12 +408,12 @@ public class Scanner {
         return setGetType(types);
     }
 
-    public StringBuilder getCurrentItem(){
-     return new StringBuilder().append(text.charAt(currentIndexPosition));
+    public StringBuilder getCurrentItem() {
+        return new StringBuilder().append(text.charAt(currentIndexPosition));
     }
 
     public Types printError(String error, StringBuilder lexeme, StringBuilder errorItem) {
-       // System.out.println("строка" + numberOfRow + ": " + error + ": " + " позиция " + currentIndexPosition + ": " + errorItem.toString() + "лексемма " + lexeme);
+        // System.out.println("строка" + numberOfRow + ": " + error + ": " + " позиция " + currentIndexPosition + ": " + errorItem.toString() + "лексемма " + lexeme);
         System.out.println(error + ": " + " позиция " + currentIndexPosition + ": " + errorItem.toString() + " лексемма " + lexeme);
         currentIndexPosition++;
         return setGetType(Types.TypeError);
@@ -446,25 +450,26 @@ public class Scanner {
         this.filePath = filePath;
     }
 
-    public void setReader(BufferedReader reader){
+    public void setReader(BufferedReader reader) {
         this.reader = reader;
     }
 
-    public void skipSymbols(){
+    public void skipSymbols() {
         //пропуск незначащих символов
-        while (text.charAt(currentIndexPosition) == ' ' || text.charAt(currentIndexPosition) == '\n' || text.charAt(currentIndexPosition) == '\t') {
-            if(!newLine())
+        while (text.charAt(currentIndexPosition) == ' ' || text.charAt(currentIndexPosition) == '\n'
+                || text.charAt(currentIndexPosition) == '\t') {
+            if (!newLine())
                 currentIndexPosition++;
         }
     }
 
-    private boolean newLine(){
+    private boolean newLine() {
         boolean change = false;
         while (text.charAt(currentIndexPosition) == '\n') {
             numberOfRow++;
             currentIndexPosition++;
             change = true;
-         //   System.out.println("строка " + numberOfRow);
+            //   System.out.println("строка " + numberOfRow);
         }
         return change;
     }
