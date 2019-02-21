@@ -12,7 +12,7 @@ import java.util.List;
 
 public class Diagrams {
     private Scanner scanner;
-    private Scanner.Lexeme lexeme;
+    private Scanner.Lexeme lexeme = new Scanner.Lexeme();
     private int position;
     private int row;
     private List<Boolean> brace = new ArrayList<Boolean>();

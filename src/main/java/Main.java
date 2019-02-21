@@ -10,7 +10,7 @@ import java.io.*;
 
 public class Main {
     public static void main(String[] argv) throws Exception {
-  /*      Scanner scanner = new Scanner();
+        Scanner scanner = new Scanner();
         String filePath = "src/main/resources/program1.txt";
         Types types;
         StringBuilder lexeme = new StringBuilder();
@@ -39,10 +39,10 @@ public class Main {
             e.printStackTrace();
         } catch (SemanticsException e) {
             e.printStackTrace();
-        }*/
+        }
 
 
-        Scanner scanner = new Scanner();
+     /*   Scanner scanner = new Scanner();
         String filePath = "src/main/resources/program1.txt";
         BufferedReader reader = null;
         try {
@@ -59,10 +59,10 @@ public class Main {
                 System.out.println("Анализ завершен");
         } catch (FileNotFoundException e) {
             //  e.printStackTrace();
-        } /*catch (AnalyzeError e) {
+        } *//*catch (AnalyzeError e) {
             System.out.println(e.getDisplayMessage());
-        }*/
-
+        }*//*
+*/
 
     }
 }
