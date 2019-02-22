@@ -1,5 +1,7 @@
 package diagrams;
 
+import org.apache.log4j.Logger;
+import org.apache.log4j.spi.LoggerFactory;
 import scanner.Scanner;
 import service.DateType;
 import service.DiagramsException;
@@ -11,6 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Diagrams {
+    private static Logger LOGGER = Logger.getLogger(Diagrams.class);
     private Scanner scanner;
     private Scanner.Lexeme lexeme = new Scanner.Lexeme();
     private int position;
@@ -308,6 +311,8 @@ public class Diagrams {
             if (((((t = scanner.scanner())) == Types.TypeIdent || t == Types.TypeBoolean || t == Types.TypeInt)) &&
                     (t = scanner.scanner()) != Types.TypeDot && t != Types.TypeOpenParenthesis) {
                 setPositionAndLine(position, row);
+                LOGGER.info("Operators: " + t);
+                LOGGER.info(scanner.getCurrentItem());
                 VariableDescription();
                 continue;
             }

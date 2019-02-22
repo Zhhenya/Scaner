@@ -1,4 +1,4 @@
-/**********/public class Main(){
+/**********/public class Main1(){
   //fghjk
     public void main(){
         int temp = 0, a = 0;
@@ -29,7 +29,7 @@
 }#
 
 
-public class Main{
+public class Main1{
 
     int a, b = 0;
 

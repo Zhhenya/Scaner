@@ -1,4 +1,5 @@
 import diagrams.Diagrams;
+import org.apache.log4j.BasicConfigurator;
 import scanner.Scanner;
 import service.DiagramsException;
 import service.SemanticsException;
@@ -11,6 +12,7 @@ import java.io.InputStreamReader;
 
 public class Main {
     public static void main(String[] argv) throws Exception {
+        BasicConfigurator.configure();
         Scanner scanner = new Scanner();
         String filePath = "src/main/resources/program1.java";
         Types types;

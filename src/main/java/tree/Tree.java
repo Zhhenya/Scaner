@@ -1,11 +1,13 @@
 package tree;
 
+import org.apache.log4j.Logger;
 import service.DateType;
 import service.SemanticsException;
 
 import java.util.Collections;
 
 public class Tree {
+    protected Logger LOGGER = Logger.getLogger(Tree.class);
     public Node node;
     public Tree parent, left, right;
     public static Tree current;
@@ -212,6 +214,8 @@ public class Tree {
 
 
     public DateType getType(String lexeme) throws SemanticsException {
+        LOGGER.info("Метод getType()");
+        LOGGER.info(lexeme);
         switch(lexeme.toString()){
             case "int" : return DateType.TInt;
             case "boolean": return DateType.TBoolean;
@@ -263,6 +267,9 @@ public class Tree {
 
     public Tree getClass(String lexeme) throws SemanticsException {
         Tree vertex = findUp(current, lexeme);
+        LOGGER.info("Метод getClass()");
+        LOGGER.info(vertex);
+        LOGGER.info(lexeme);
         if(vertex == null)
             throw new SemanticsException("Отсутствует описание класса", lexeme);
         if(vertex.node.type != DateType.TClass)
