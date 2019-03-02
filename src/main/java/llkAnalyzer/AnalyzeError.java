@@ -1,6 +1,7 @@
 package llkAnalyzer;
 
 
+import scanner.Lexeme;
 import scanner.Scanner;
 import service.Types;
 
@@ -11,7 +12,7 @@ public class AnalyzeError extends RuntimeException{
 	private final String message;
 	private final String additional;
 	
-	public AnalyzeError(Scanner scanner, Scanner.Lexeme lexeme, Types... expected) {
+	public AnalyzeError(Scanner scanner, Lexeme lexeme, Types... expected) {
 		this(scanner, lexeme, ((Supplier<String>)(() -> {
 			StringBuilder builder = new StringBuilder();
 			builder.append("Найдено ");
@@ -27,11 +28,11 @@ public class AnalyzeError extends RuntimeException{
 		})).get(), "ожидался " + asList(expected));
 	}
 	
-	public AnalyzeError(Scanner scanner, Scanner.Lexeme lexeme, String first, String... lines) {
+	public AnalyzeError(Scanner scanner, Lexeme lexeme, String first, String... lines) {
 		StringBuilder builder = new StringBuilder();
 		builder.append("парсер грамматики");
 		builder.append("(строка ");
-		builder.append(scanner.getNumberOfRow());
+		builder.append(scanner.getCurrentLine());
 		builder.append("): ");
 		int length = builder.length();
 		
@@ -48,7 +49,7 @@ public class AnalyzeError extends RuntimeException{
 		builder.append("\n");
 		
 //		if(lexeme.type != Types.TypeEnd) {
-//			builder.append(scanner.getCurrentIndexPosition());
+//			builder.append(scanner.getPtr());
 //			for(int i = 0; i < lexeme.lexeme.length(); i++) builder.append(" ");
 //			builder.append("^");
 //		}

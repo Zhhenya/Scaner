@@ -1,3 +1,4 @@
+/*
 package precedence;
 
 
@@ -177,3 +178,4 @@ public class Generator {
 	}
 	
 }
+*/

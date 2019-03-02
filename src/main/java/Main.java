@@ -12,7 +12,7 @@ import java.io.InputStreamReader;
 
 public class Main {
     public static void main(String[] argv) throws Exception {
-        BasicConfigurator.configure();
+       /* BasicConfigurator.configure();
         Scanner scanner = new Scanner();
         String filePath = "src/main/resources/program1.java";
         Types types;
@@ -22,12 +22,12 @@ public class Main {
         Diagrams diagrams;
         try {
             reader = new BufferedReader(new InputStreamReader(new FileInputStream(filePath)));
-            scanner.setText(scanner.reader(filePath, reader));
+            scanner.setLine(scanner.reader(filePath, reader));
             scanner.setReader(reader);
-            diagrams = new Diagrams(scanner, lexeme);
+         //   diagrams = new Diagrams(scanner, lexeme);
             scanner.setLexeme(lexeme);
           //  System.out.println("строка 1:" );
-            diagrams.setRoot();
+         //   diagrams.setRoot();
             types = diagrams.S();
 
             if(types != Types.TypeEnd) {
@@ -40,14 +40,14 @@ public class Main {
         } catch (FileNotFoundException | DiagramsException | SemanticsException e) {
             e.printStackTrace();
         }
-
+*/
 
       /*  Scanner scanner = new Scanner();
         String filePath = "src/main/resources/program1.java";
         BufferedReader reader = null;
         try {
             reader = new BufferedReader(new InputStreamReader(new FileInputStream(filePath)));
-            scanner.setText(scanner.reader(filePath, reader));
+            scanner.setLine(scanner.reader(filePath, reader));
             scanner.setReader(reader);
             LLkAnalyzer lLkAnalyzer = new LLkAnalyzer(new File("table.llk"), scanner, new File("firstFollowTable.fft"));
             boolean t = lLkAnalyzer.program();

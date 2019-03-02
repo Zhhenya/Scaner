@@ -1,6 +1,6 @@
 package service;
 
-public enum DateType {
+public enum DataType {
     TInt,
     TBoolean,
     TBooleanSign,

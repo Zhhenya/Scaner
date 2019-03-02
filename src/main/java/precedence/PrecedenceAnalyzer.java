@@ -1,13 +1,13 @@
+/*
 package precedence;
 
 import llkAnalyzer.AnalyzeError;
 import llkAnalyzer.Grammar;
 import llkAnalyzer.Grammar.*;
 import org.apache.commons.lang3.SerializationUtils;
+import scanner.Lexeme;
 import scanner.Scanner;
-import scanner.Scanner.*;
 import service.Types;
-
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -54,7 +54,7 @@ public class PrecedenceAnalyzer {
                     reduce.push(stack.pop());
                 Collections.reverse(reduce);
 
-           //     if (DEBUG) System.out.println((scanner.getNumberOfRow() + 1) + " " + stack + " " + reduce);
+           //     if (DEBUG) System.out.println((scanner.getCurrentLine() + 1) + " " + stack + " " + reduce);
 
                 if (stack.size() == 1 && reduce.size() == 1 && reduce.get(0).equals("S")) {
                     break; // finish
@@ -83,7 +83,8 @@ public class PrecedenceAnalyzer {
                                 break cycle;
                         }
                     }
-                } /*else if (Grammar.isRulesEquals(reduce, "A5")) {
+                } */
+/*else if (Grammar.isRulesEquals(reduce, "A5")) {
                     String prev1 = stack.get(stack.size() - 1);
                     String prev2 = stack.get(stack.size() - 2);
 
@@ -93,7 +94,8 @@ public class PrecedenceAnalyzer {
                         stack.push("A4");
                     else
                         stack.push("$21");
-                }*/ else if (Grammar.isRulesEquals(reduce, "O")) {
+                }*//*
+ else if (Grammar.isRulesEquals(reduce, "O")) {
                     if (stack.get(stack.size() - 1).equals("do"))
                         stack.push("$0");
                     else
@@ -142,7 +144,7 @@ public class PrecedenceAnalyzer {
         }
     }
 
-    private char getRelation(Scanner.Lexeme lexeme, String a, String b) {
+    private char getRelation(Lexeme lexeme, String a, String b) {
         if (a.equals("#")) return '<';
         if (b.equals("#")) return '>';
         Table.Cell cell = data.getCell(data.getIndex(a), data.getIndex(b));
@@ -151,3 +153,4 @@ public class PrecedenceAnalyzer {
         return cell.relations.iterator().next();
     }
 }
+*/

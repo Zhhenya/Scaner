@@ -1,3 +1,4 @@
+/*
 package llkAnalyzer;
 
 
@@ -196,3 +197,4 @@ isRulesEquals(r, rule)) return e.getKey();
 	}
 	
 }
+*/

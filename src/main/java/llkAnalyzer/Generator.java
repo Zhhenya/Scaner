@@ -1,3 +1,4 @@
+/*
 package llkAnalyzer;
 
 import llkAnalyzer.Grammar.Rule;
@@ -169,3 +170,4 @@ public class Generator {
 	}
 	
 }
+*/

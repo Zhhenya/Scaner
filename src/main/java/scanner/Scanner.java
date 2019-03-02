@@ -3,57 +3,28 @@ package scanner;
 import service.Types;
 
 import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Scanner {
     private final int MAX_LENGTH_LEXEMES = 100;
-    private final int MAX_NUMBER_KEYWORDS = 11;
-    private String text;
-    private int currentIndexPosition = 0;
-    private int numberOfRow = 1;//номер строки
-    private String filePath;
-    private BufferedReader reader;
+    private int ptr = 0, startPtr = 0;
+    private int currentLine = 1;//номер строки
+    private List<char[]> lines = new ArrayList<>();
+    private char[] line;
 
     private Lexeme lexeme = new Lexeme();
 
 
-    public static class Lexeme {
-        public StringBuilder lexeme = new StringBuilder();
-        public Types type;
+    public void createLines(String filePath) throws IOException {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(filePath)));
 
-        public Lexeme(StringBuilder lexeme, Types type) {
-
-            this.lexeme.append(lexeme); this.type = type;
+        String readed;
+        while ((readed = reader.readLine()) != null) {
+            lines.add((readed + "\n").toCharArray());
         }
-
-        public void delete() {
-            this.lexeme.delete(0, lexeme.length());
-        }
-
-        public void delete(int start, int end) {
-            this.lexeme.delete(start, end);
-        }
-
-        public void append(String symbol) {
-            lexeme.append(symbol);
-        }
-
-        public void append(Character symbol) {
-            lexeme.append(symbol);
-        }
-
-        public int length() {
-            return lexeme.length();
-        }
-
-        public void setType(Types type) {
-            this.type = type;
-        }
-
-        public Types setGetType(Types type) {
-            this.type = type; return type;
-        }
-
-        public Lexeme() {
+        if (lines.size() != 0) {
+            line = lines.get(0);
         }
     }
 
@@ -69,181 +40,286 @@ public class Scanner {
         this.lexeme.lexeme = lexeme;
     }
 
-    public void setNumberOfRow(int numberOfRow) {
-        this.numberOfRow = numberOfRow;
+    public void setCurrentLine(int currentLine) {
+        this.currentLine = currentLine;
     }
 
-    public int getNumberOfRow() {
-        return numberOfRow;
+    public int getCurrentLine() {
+        return currentLine;
     }
 
+    public void restoreState(State s) {
+        ptr = s.line; ptr = s.pointer;
+        line = lines.get(ptr);
+    }
 
-    public Types scanner() {
-        //  lexeme.lexeme.delete(0, lexeme.lexeme.length());
-        lexeme.delete(); while (true) {
+    public State getState() {
+        return new State(currentLine, ptr);
+    }
+
+    private void fillLexeme(Types types) {
+        lexeme.type = types;
+        lexeme.line = currentLine;
+        lexeme.ptr = startPtr;
+    }
+
+    public Lexeme scanner() {
+        lexeme.delete();
+        startPtr = ptr;
+        while (true) {
             skipSymbols();
 
             //пропуск комментариев
-            if (text.charAt(currentIndexPosition) == '/') {
+            if (line[ptr] == '/') {
                 //однострочный
-                if (text.charAt(currentIndexPosition + 1) == '/') {
-                    currentIndexPosition += 2; while (text.charAt(currentIndexPosition) != '\n') {
-                        currentIndexPosition++;
-                    } newLine();
+                if (line[ptr + 1] == '/') {
+                    ptr += 2;
+                    while (line[ptr] != '\n') {
+                        ptr++;
+                    }
+                    newLine();
                 } else
                     //многострочный
-                    if (text.charAt(currentIndexPosition + 1) == 42) {
-                        currentIndexPosition += 2; while (true) {
-                            if (text.charAt(currentIndexPosition) == 42 && text.charAt(currentIndexPosition + 1) == 47) {
-                                currentIndexPosition += 2; break;
-                            } newLine(); if (text.charAt(currentIndexPosition) == '#') return setGetType(Types.TypeEnd);
-                            else currentIndexPosition++;
+                    if (line[ptr + 1] == 42) {
+                        ptr += 2;
+                        while (true) {
+                            if (line[ptr] == 42 && line[ptr + 1] == 47) {
+                                ptr += 2;
+                                break;
+                            }
+                            newLine();
+                            if (line[ptr] == '#') {
+                                lexeme.lexeme.append(line[ptr]);
+                                fillLexeme(Types.TypeEnd);
+                                return lexeme;
+                            } else {
+                                ptr++;
+                            }
                         }
-                    } else break;
+                    } else {
+                        break;
+                    }
 
-            } else break;
+            } else {
+                break;
+            }
 
         }
 
         //если встретился символ конца
-        if (text.charAt(currentIndexPosition) == '\0' || text.charAt(currentIndexPosition) == '#') {
-            lexeme.append("#"); return setGetType(Types.TypeEnd);
+        if (line[ptr] == '\0' || line[ptr] == '#') {
+            lexeme.lexeme.append(line[ptr]);
+            fillLexeme(Types.TypeEnd);
+            return lexeme;
         }
 
 
         //константа
-        if (text.charAt(currentIndexPosition) >= '0' && text.charAt(currentIndexPosition) <= '9') {
-            lexeme.append(text.charAt(currentIndexPosition)); currentIndexPosition++;
-            while (text.charAt(currentIndexPosition) >= '0' && text.charAt(currentIndexPosition) <= '9') {
-                if (lexeme.length() < MAX_LENGTH_LEXEMES - 1) lexeme.append(text.charAt(currentIndexPosition++));
-                else currentIndexPosition++;
-            } return setGetType(Types.TypeConstInt);
-        } else if (text.charAt(currentIndexPosition) >= 'a' && text.charAt(currentIndexPosition) <= 'z' || text.charAt(currentIndexPosition) >= 'A' && text.charAt(currentIndexPosition) <= 'Z') {
-            lexeme.append(text.charAt(currentIndexPosition++));
+        if (line[ptr] >= '0' && line[ptr] <= '9') {
+            lexeme.append(line[ptr]); ptr++;
+            while (line[ptr] >= '0' && line[ptr] <= '9') {
+                if (lexeme.length() < MAX_LENGTH_LEXEMES - 1) {
+                    lexeme.append(line[ptr++]);
+                } else {
+                    ptr++;
+                }
+                fillLexeme(Types.TypeConstInt);
+            } return lexeme;
+        } else if (line[ptr] >= 'a' && line[ptr] <= 'z' || line[ptr] >= 'A' && line[ptr] <= 'Z') {
+            lexeme.append(line[ptr++]);
 
             //идентификатор
-            while (text.charAt(currentIndexPosition) >= '0' && text.charAt(currentIndexPosition) <= '9' || text.charAt(currentIndexPosition) >= 'a' && text.charAt(currentIndexPosition) <= 'z' || text.charAt(currentIndexPosition) >= 'A' && text.charAt(currentIndexPosition) <= 'Z') {
-                if (lexeme.length() < MAX_LENGTH_LEXEMES - 1) lexeme.append(text.charAt(currentIndexPosition++));
-                else {
-                    currentIndexPosition++;
+            while (line[ptr] >= '0' && line[ptr] <= '9' || line[ptr] >= 'a' && line[ptr] <= 'z' || line[ptr] >=
+                    'A' && line[ptr] <= 'Z') {
+                if (lexeme.length() < MAX_LENGTH_LEXEMES - 1) {
+                    lexeme.append(line[ptr++]);
+                } else {
+                    ptr++;
                     return printError("Слишком длинный идентификатор", lexeme.lexeme, new StringBuilder());
                 }
             }
 
             for (int j = 0; j < KeyWords.keyWords.length; j++) {
-                if (lexeme.lexeme.toString().equals("Main")) return setGetType(Types.TypeMain);
-                if (lexeme.lexeme.toString().equals("main")) return setGetType(Types.Typemain);
-                if (KeyWords.keyWords[j].equalsIgnoreCase(lexeme.lexeme.toString()))
-                    return setGetType(Types.valueOf("Type" + KeyWords.keyWords[j]));
+                if (lexeme.lexeme.toString().equals("Main")) {
+                    fillLexeme(Types.TypeMain);
+                    return lexeme;
+                }
+                if (lexeme.lexeme.toString().equals("main")) {
+                    fillLexeme(Types.Typemain);
+                    return lexeme;
+                }
+                if (KeyWords.keyWords[j].equalsIgnoreCase(lexeme.lexeme.toString())) {
+                    fillLexeme(Types.valueOf("Type" + KeyWords.keyWords[j]));
+                    return lexeme;
+                }
+            }
+            fillLexeme(Types.TypeIdent);
+            return lexeme;
+        } else if (line[ptr] == ',') {
+            lexeme.append(line[ptr++]);
+            fillLexeme(Types.TypeComma);
+            return lexeme;
+        } else if (line[ptr] == ';') {
+            lexeme.append(line[ptr++]);
+            fillLexeme(Types.TypeSemicolon);
+            return lexeme;
+        } else if (line[ptr] == '(') {
+            lexeme.append(line[ptr++]);
+            fillLexeme(Types.TypeOpenParenthesis);
+            return lexeme;
+        } else if (line[ptr] == ')') {
+            lexeme.append(line[ptr++]);
+            fillLexeme(Types.TypeCloseParenthesis);
+            return lexeme;
+        } else if (line[ptr] == '{') {
+            lexeme.append(line[ptr++]);
+            fillLexeme(Types.TypeOpenBrace);
+            return lexeme;
+        } else if (line[ptr] == '}') {
+            lexeme.append(line[ptr++]);
+            fillLexeme(Types.TypeCloseBrace);
+            return lexeme;
+        } else if (line[ptr] == '+') {
+            lexeme.append(line[ptr++]);
+            if (line[ptr + 1] == '+') {
+                lexeme.append(line[ptr++]);
+                fillLexeme(Types.TypePlusPlus);
+                return lexeme;
+            }
+            fillLexeme(Types.TypePlus);
+            return lexeme;
+        } else if (line[ptr] == '-') {
+            lexeme.append(line[ptr++]);
+            if (line[ptr + 1] == '-') {
+                lexeme.append(line[ptr++]);
+                fillLexeme(Types.TypeMinusMinus);
+                return lexeme;
+            }
+            fillLexeme(Types.TypeMinus);
+            return lexeme;
+        } else if (line[ptr] == '/') {
+            lexeme.append(line[ptr++]);
+            fillLexeme(Types.TypeDivision);
+            return lexeme;
+        } else if (line[ptr] == '.') {
+            lexeme.append(line[ptr++]);
+            fillLexeme(Types.TypeDot);
+            return lexeme;
+        } else if (line[ptr] == '%') {
+            lexeme.append(line[ptr++]);
+            fillLexeme(Types.TypeMod);
+            return lexeme;
+        } else if (line[ptr] == '*') {
+            lexeme.append(line[ptr++]);
+            fillLexeme(Types.TypeMultiply);
+            return lexeme;
+        } else if (line[ptr] == '<') {
+            if (line[ptr + 1] == '=') {
+                lexeme.append(line[ptr++]);
+                fillLexeme(Types.TypeLe);
+                return lexeme;
+            }
+            fillLexeme(Types.TypeLt);
+            return lexeme;
+        } else if (line[ptr] == '>') {
+            if (line[ptr + 1] == '=') {
+                lexeme.append(line[ptr++]);
+                fillLexeme(Types.TypeGe);
+                return lexeme;
+            }
+            fillLexeme(Types.TypeGt);
+            return lexeme;
+        } else if (line[ptr] == '!') {
+            lexeme.append(line[ptr++]);
+            if (line[ptr + 1] == '=') {
+                lexeme.append(line[ptr++]);
+                fillLexeme(Types.TypeNegation);
+                return lexeme;
+            }
+            fillLexeme(Types.TypeNegation);
+            return lexeme;
+        } if (line[ptr] == '=') {
+            lexeme.append(line[ptr++]);
+            if (line[ptr + 1] == '=') {
+                lexeme.append(line[ptr++]);
+                fillLexeme(Types.TypeComparison);
+                return lexeme;
+            }
+            fillLexeme(Types.TypeAssign);
+            return lexeme;
+        } else if (line[ptr] == '&') {
+            if (line[ptr + 1] == '&') {
+                lexeme.append(line[ptr++]);
+                lexeme.append(line[ptr++]);
+                fillLexeme(Types.TypeAnd);
+                return lexeme;
+            } else {
+                return printError("Неверный входной символ", lexeme.lexeme,
+                        new StringBuilder().append(line[ptr]));
             }
 
-            return setGetType(Types.TypeIdent);
-        } else if (text.charAt(currentIndexPosition) == ',')
-            return setGetType(getTypes(lexeme.lexeme, Types.TypeComma));
-        else if (text.charAt(currentIndexPosition) == ';')
-            return setGetType(getTypes(lexeme.lexeme, Types.TypeSemicolon));
-        else if (text.charAt(currentIndexPosition) == '(')
-            return setGetType(getTypes(lexeme.lexeme, Types.TypeOpenParenthesis));
-        else if (text.charAt(currentIndexPosition) == ')')
-            return setGetType(getTypes(lexeme.lexeme, Types.TypeCloseParenthesis));
-        else if (text.charAt(currentIndexPosition) == '{')
-            return setGetType(getTypes(lexeme.lexeme, Types.TypeOpenBrace));
-        else if (text.charAt(currentIndexPosition) == '}')
-            return setGetType(getTypes(lexeme.lexeme, Types.TypeCloseBrace));
-        else if (text.charAt(currentIndexPosition) == '+') {
-            if (text.charAt(currentIndexPosition + 1) == '+') {
-                lexeme.append(text.charAt(currentIndexPosition++));
-                return setGetType(getTypes(lexeme.lexeme, Types.TypePlusPlus));
-            } return setGetType(getTypes(lexeme.lexeme, Types.TypePlus));
-        } else if (text.charAt(currentIndexPosition) == '-') {
-            if (text.charAt(currentIndexPosition + 1) == '-') {
-                lexeme.append(text.charAt(currentIndexPosition++));
-                return setGetType(getTypes(lexeme.lexeme, Types.TypeMinusMinus));
-            } return setGetType(getTypes(lexeme.lexeme, Types.TypeMinus));
-        } else if (text.charAt(currentIndexPosition) == '/')
-            return setGetType(getTypes(lexeme.lexeme, Types.TypeDivision));
-        else if (text.charAt(currentIndexPosition) == '.') return setGetType(getTypes(lexeme.lexeme, Types.TypeDot));
-        else if (text.charAt(currentIndexPosition) == '%') return setGetType(getTypes(lexeme.lexeme, Types.TypeMod));
-        else if (text.charAt(currentIndexPosition) == '*')
-            return setGetType(getTypes(lexeme.lexeme, Types.TypeMultiply));
-        else if (text.charAt(currentIndexPosition) == '<') {
-            if (text.charAt(currentIndexPosition + 1) == '=') {
-                lexeme.append(text.charAt(currentIndexPosition++));
-                return setGetType(getTypes(lexeme.lexeme, Types.TypeLe));
-            } return setGetType(getTypes(lexeme.lexeme, Types.TypeLt));
-        } else if (text.charAt(currentIndexPosition) == '>') {
-            if (text.charAt(currentIndexPosition + 1) == '=') {
-                lexeme.append(text.charAt(currentIndexPosition++));
-                return setGetType(getTypes(lexeme.lexeme, Types.TypeGe));
-            } return setGetType(getTypes(lexeme.lexeme, Types.TypeGt));
-        } else if (text.charAt(currentIndexPosition) == '!') {
-            if (text.charAt(currentIndexPosition + 1) == '=') {
-                lexeme.append(text.charAt(currentIndexPosition++)); lexeme.append(text.charAt(currentIndexPosition++));
-                return setGetType(getTypes(lexeme.lexeme, Types.TypeNegation));
+        } else if (line[ptr] == '|') {
+            if (line[ptr] == '|') {
+                lexeme.append(line[ptr++]);
+                lexeme.append(line[ptr++]);
+                fillLexeme(Types.TypeOr);
+                return lexeme;
             }
-            // return printError("Неверный входной символ", lexeme, new StringBuilder().append(text.charAt(currentIndexPosition)));
-            return setGetType(getTypes(lexeme.lexeme, Types.TypeNegation));
-        } if (text.charAt(currentIndexPosition) == '=') {
-            if (text.charAt(currentIndexPosition + 1) == '=') {
-                lexeme.append(text.charAt(currentIndexPosition++)); lexeme.append(text.charAt(currentIndexPosition++));
-                return setGetType(getTypes(lexeme.lexeme, Types.TypeComparison));
-            } return setGetType(getTypes(lexeme.lexeme, Types.TypeAssign));
-        } else if (text.charAt(currentIndexPosition) == '&') {
-            if (text.charAt(currentIndexPosition + 1) == '&') {
-                lexeme.append(text.charAt(currentIndexPosition++)); lexeme.append(text.charAt(currentIndexPosition++));
-                return setGetType(getTypes(lexeme.lexeme, Types.TypeAnd));
-            } else
-                return printError("Неверный входной символ", lexeme.lexeme, new StringBuilder().append(text.charAt(currentIndexPosition)));
-
-        } else if (text.charAt(currentIndexPosition) == '|') {
-            if (text.charAt(currentIndexPosition) == '|') {
-                lexeme.append(text.charAt(currentIndexPosition++)); lexeme.append(text.charAt(currentIndexPosition++));
-                return setGetType(getTypes(lexeme.lexeme, Types.TypeOr));
-            }
-            return printError("Неверный входной символ", lexeme.lexeme, new StringBuilder().append(text.charAt(currentIndexPosition)));
-        } else
-            return printError("Неверный входной символ", lexeme.lexeme, new StringBuilder().append(text.charAt(currentIndexPosition)));
+            return printError("Неверный входной символ", lexeme.lexeme,
+                    new StringBuilder().append(line[ptr]));
+        } else {
+            return printError("Неверный входной символ", lexeme.lexeme,
+                    new StringBuilder().append(line[ptr]));
+        }
     }
 
 
     public boolean isEndWord(int pos, int length) {
-        if (pos >= length - 1) return false; return true;
+        if (pos >= length - 1) {
+            return false;
+        }
+        return true;
 
     }
 
 
-    public Types next(String grammarWord) {
+  /*  public Types next(String grammarWord) {
         //  lexeme.lexeme.delete(0, lexeme.lexeme.length());
 
         //    grammarWord += "\n";
 
-        Lexeme lexeme = new Lexeme(); int currentIndexPosition = 0; lexeme.delete();
+        Lexeme lexeme = new Lexeme(); int ptr = 0; lexeme.delete();
 
 
         //если встретился символ конца
-        if (grammarWord.charAt(currentIndexPosition) == '\0' || grammarWord.charAt(currentIndexPosition) == '#') {
+        if (grammarWord[ptr) == '\0' || grammarWord[ptr) == '#') {
             lexeme.append("#"); return setGetType(Types.TypeEnd);
         }
 
-        // if(!isEndWord(currentIndexPosition, grammarWord.length());
+        // if(!isEndWord(ptr, grammarWord.length());
 
 
         //константа
-        if (grammarWord.charAt(currentIndexPosition) >= '0' && grammarWord.charAt(currentIndexPosition) <= '9') {
-            lexeme.append(grammarWord.charAt(currentIndexPosition)); currentIndexPosition++;
-            while (isEndWord(currentIndexPosition, grammarWord.length()) && grammarWord.charAt(currentIndexPosition) >= '0' && grammarWord.charAt(currentIndexPosition) <= '9') {
-                if (lexeme.length() < MAX_LENGTH_LEXEMES - 1) lexeme.append(grammarWord.charAt(currentIndexPosition++));
-                else currentIndexPosition++;
+        if (grammarWord[ptr) >= '0' && grammarWord[ptr) <= '9') {
+            lexeme.append(grammarWord[ptr)); ptr++;
+            while (isEndWord(ptr, grammarWord.length()) && grammarWord[ptr)
+            >= '0' && grammarWord[ptr) <= '9') {
+                if (lexeme.length() < MAX_LENGTH_LEXEMES - 1) lexeme.append(grammarWord[ptr++));
+                else ptr++;
             } return Types.TypeConstInt;
-        } else if (grammarWord.charAt(currentIndexPosition) >= 'a' && grammarWord.charAt(currentIndexPosition) <= 'z' || grammarWord.charAt(currentIndexPosition) >= 'A' && grammarWord.charAt(currentIndexPosition) <= 'Z') {
-            lexeme.append(grammarWord.charAt(currentIndexPosition++));
+        } else if (grammarWord[ptr) >= 'a' && grammarWord[ptr) <= 'z'
+         || grammarWord[ptr) >= 'A' && grammarWord[ptr) <= 'Z') {
+            lexeme.append(grammarWord[ptr++));
 
 
             //идентификатор
-            while (isEndWord(currentIndexPosition, grammarWord.length()) && (grammarWord.charAt(currentIndexPosition) >= '0' && grammarWord.charAt(currentIndexPosition) <= '9' || grammarWord.charAt(currentIndexPosition) >= 'a' && grammarWord.charAt(currentIndexPosition) <= 'z' || grammarWord.charAt(currentIndexPosition) >= 'A' && grammarWord.charAt(currentIndexPosition) <= 'Z')) {
-                if (lexeme.length() < MAX_LENGTH_LEXEMES - 1) lexeme.append(grammarWord.charAt(currentIndexPosition++));
+            while (isEndWord(ptr, grammarWord.length()) && (grammarWord[ptr)
+             >= '0' && grammarWord[ptr) <= '9' || grammarWord[ptr) >=
+              'a' && grammarWord[ptr) <= 'z' || grammarWord[ptr) >=
+              'A' && grammarWord[ptr) <= 'Z')) {
+                if (lexeme.length() < MAX_LENGTH_LEXEMES - 1) lexeme.append(grammarWord[ptr++));
                 else {
-                    currentIndexPosition++;
+                    ptr++;
                     return printError("Слишком длинный идентификатор", lexeme.lexeme, new StringBuilder());
                 }
             }
@@ -256,67 +332,82 @@ public class Scanner {
             }
 
             return Types.TypeIdent;
-        } else if (grammarWord.charAt(currentIndexPosition) == ',') return setGetType(Types.TypeComma);
-        else if (grammarWord.charAt(currentIndexPosition) == ';') return setGetType(Types.TypeSemicolon);
-        else if (grammarWord.charAt(currentIndexPosition) == '(') return setGetType(Types.TypeOpenParenthesis);
-        else if (grammarWord.charAt(currentIndexPosition) == ')') return setGetType(Types.TypeCloseParenthesis);
-        else if (grammarWord.charAt(currentIndexPosition) == '{') return setGetType(Types.TypeOpenBrace);
-        else if (grammarWord.charAt(currentIndexPosition) == '}') return setGetType(Types.TypeCloseBrace);
-        else if (grammarWord.charAt(currentIndexPosition) == '+') {
-            if (isEndWord(currentIndexPosition, grammarWord.length()) && grammarWord.charAt(currentIndexPosition + 1) == '+') {
-                lexeme.append(grammarWord.charAt(currentIndexPosition++)); return setGetType(Types.TypePlusPlus);
+        } else if (grammarWord[ptr) == ',') return setGetType(Types.TypeComma);
+        else if (grammarWord[ptr) == ';') return setGetType(Types.TypeSemicolon);
+        else if (grammarWord[ptr) == '(') return setGetType(Types.TypeOpenParenthesis);
+        else if (grammarWord[ptr) == ')') return setGetType(Types.TypeCloseParenthesis);
+        else if (grammarWord[ptr) == '{') return setGetType(Types.TypeOpenBrace);
+        else if (grammarWord[ptr) == '}') return setGetType(Types.TypeCloseBrace);
+        else if (grammarWord[ptr) == '+') {
+            if (isEndWord(ptr, grammarWord.length()) && grammarWord[ptr + 1)
+             == '+') {
+                lexeme.append(grammarWord[ptr++)); return setGetType(Types.TypePlusPlus);
             } return setGetType(Types.TypePlus);
-        } else if (grammarWord.charAt(currentIndexPosition) == '-') {
-            if (isEndWord(currentIndexPosition, grammarWord.length()) && grammarWord.charAt(currentIndexPosition + 1) == '-') {
-                lexeme.append(grammarWord.charAt(currentIndexPosition++)); return setGetType(Types.TypeMinusMinus);
+        } else if (grammarWord[ptr) == '-') {
+            if (isEndWord(ptr, grammarWord.length()) && grammarWord[ptr + 1)
+             == '-') {
+                lexeme.append(grammarWord[ptr++)); return setGetType(Types.TypeMinusMinus);
             } return setGetType(Types.TypeMinus);
-        } else if (grammarWord.charAt(currentIndexPosition) == '/') return setGetType(Types.TypeDivision);
-        else if (grammarWord.charAt(currentIndexPosition) == '.') return setGetType(Types.TypeDot);
-        else if (grammarWord.charAt(currentIndexPosition) == '%') return setGetType(Types.TypeMod);
-        else if (grammarWord.charAt(currentIndexPosition) == '*') return setGetType(Types.TypeMultiply);
-        else if (grammarWord.charAt(currentIndexPosition) == '<') {
-            if (isEndWord(currentIndexPosition, grammarWord.length()) && grammarWord.charAt(currentIndexPosition + 1) == '=') {
-                lexeme.append(grammarWord.charAt(currentIndexPosition++)); return setGetType(Types.TypeLe);
+        } else if (grammarWord[ptr) == '/') return setGetType(Types.TypeDivision);
+        else if (grammarWord[ptr) == '.') return setGetType(Types.TypeDot);
+        else if (grammarWord[ptr) == '%') return setGetType(Types.TypeMod);
+        else if (grammarWord[ptr) == '*') return setGetType(Types.TypeMultiply);
+        else if (grammarWord[ptr) == '<') {
+            if (isEndWord(ptr, grammarWord.length()) && grammarWord[ptr + 1)
+             == '=') {
+                lexeme.append(grammarWord[ptr++)); return setGetType(Types.TypeLe);
             } return setGetType(Types.TypeLt);
-        } else if (grammarWord.charAt(currentIndexPosition) == '>') {
-            if (isEndWord(currentIndexPosition, grammarWord.length()) && grammarWord.charAt(currentIndexPosition + 1) == '=') {
-                lexeme.append(grammarWord.charAt(currentIndexPosition++)); return setGetType(Types.TypeGe);
+        } else if (grammarWord[ptr) == '>') {
+            if (isEndWord(ptr, grammarWord.length()) && grammarWord[ptr + 1)
+             == '=') {
+                lexeme.append(grammarWord[ptr++)); return setGetType(Types.TypeGe);
             } return setGetType(Types.TypeGt);
-        } else if (grammarWord.charAt(currentIndexPosition) == '!') {
-            if (isEndWord(currentIndexPosition, grammarWord.length()) && grammarWord.charAt(currentIndexPosition + 1) == '=') {
-                lexeme.append(grammarWord.charAt(currentIndexPosition++));
-                lexeme.append(grammarWord.charAt(currentIndexPosition++)); return setGetType(Types.TypeNegation);
+        } else if (grammarWord[ptr) == '!') {
+            if (isEndWord(ptr, grammarWord.length()) && grammarWord[ptr + 1)
+             == '=') {
+                lexeme.append(grammarWord[ptr++));
+                lexeme.append(grammarWord[ptr++)); return setGetType(Types.TypeNegation);
             }
-            // return printError("Неверный входной символ", lexeme, new StringBuilder().append(grammarWord.charAt(currentIndexPosition)));
+            // return printError("Неверный входной символ", lexeme, new StringBuilder().append(grammarWord.charAt
+            (ptr)));
             return setGetType(Types.TypeNegation);
-        } if (grammarWord.charAt(currentIndexPosition) == '=') {
-            if (isEndWord(currentIndexPosition, grammarWord.length()) && grammarWord.charAt(currentIndexPosition + 1) == '=') {
-                lexeme.append(grammarWord.charAt(currentIndexPosition++));
-                lexeme.append(grammarWord.charAt(currentIndexPosition++)); return setGetType(Types.TypeComparison);
+        } if (grammarWord[ptr) == '=') {
+            if (isEndWord(ptr, grammarWord.length()) && grammarWord[ptr + 1)
+             == '=') {
+                lexeme.append(grammarWord[ptr++));
+                lexeme.append(grammarWord[ptr++)); return setGetType(Types.TypeComparison);
             } return setGetType(Types.TypeAssign);
-        } else if (grammarWord.charAt(currentIndexPosition) == '&') {
-            if (isEndWord(currentIndexPosition, grammarWord.length()) && grammarWord.charAt(currentIndexPosition + 1) == '&') {
-                lexeme.append(grammarWord.charAt(currentIndexPosition++));
-                lexeme.append(grammarWord.charAt(currentIndexPosition++)); return setGetType(Types.TypeAnd);
+        } else if (grammarWord[ptr) == '&') {
+            if (isEndWord(ptr, grammarWord.length()) && grammarWord[ptr + 1)
+             == '&') {
+                lexeme.append(grammarWord[ptr++));
+                lexeme.append(grammarWord[ptr++)); return setGetType(Types.TypeAnd);
             } else
-                return printError("Неверный входной символ", lexeme.lexeme, new StringBuilder().append(grammarWord.charAt(currentIndexPosition)));
+                return printError("Неверный входной символ", lexeme.lexeme, new StringBuilder().append(grammarWord
+                [ptr)));
 
-        } else if (grammarWord.charAt(currentIndexPosition) == '|') {
-            if (isEndWord(currentIndexPosition, grammarWord.length()) && grammarWord.charAt(currentIndexPosition) == '|') {
-                lexeme.append(grammarWord.charAt(currentIndexPosition++));
-                lexeme.append(grammarWord.charAt(currentIndexPosition++)); return setGetType(Types.TypeOr);
+        } else if (grammarWord[ptr) == '|') {
+            if (isEndWord(ptr, grammarWord.length()) && grammarWord[ptr) ==
+            '|') {
+                lexeme.append(grammarWord[ptr++));
+                lexeme.append(grammarWord[ptr++)); return setGetType(Types.TypeOr);
             }
-            return printError("Неверный входной символ", lexeme.lexeme, new StringBuilder().append(grammarWord.charAt(currentIndexPosition)));
+            return printError("Неверный входной символ", lexeme.lexeme, new StringBuilder().append(grammarWord.charAt
+            (ptr)));
         } else
-            return printError("Неверный входной символ", lexeme.lexeme, new StringBuilder().append(grammarWord.charAt(currentIndexPosition)));
-    }
+            return printError("Неверный входной символ", lexeme.lexeme, new StringBuilder().append(grammarWord.charAt
+            (ptr)));
+    }*/
 
 
     public String reader(String filePath, BufferedReader reader) {
         StringBuilder s = new StringBuilder(); try {
             String line = ""; while ((line = reader.readLine()) != null) {
                 s.append(line + '\n');
-            } if ((line = reader.readLine()) != null) s.append(line + '\n');
+            }
+            if ((line = reader.readLine()) != null) {
+                s.append(line + '\n');
+            }
 
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -327,24 +418,29 @@ public class Scanner {
     }
 
     private Types getTypes(StringBuilder lexeme, Types types) {
-        lexeme.append(text.charAt(currentIndexPosition++)); return setGetType(types);
+        lexeme.append(line[ptr++]);
+        return setGetType(types);
     }
 
     public StringBuilder getCurrentItem() {
-        return new StringBuilder().append(text.charAt(currentIndexPosition));
+        return new StringBuilder().append(line[ptr]);
     }
 
-    public Types printError(String error, StringBuilder lexeme, StringBuilder errorItem) {
-        // System.out.println("строка" + numberOfRow + ": " + error + ": " + " позиция " + currentIndexPosition + ": " + errorItem.toString() + "лексемма " + lexeme);
-        System.out.println(error + ": " + " позиция " + currentIndexPosition + ": " + errorItem.toString() + " лексемма " + lexeme);
-        currentIndexPosition++; return setGetType(Types.TypeError);
+    public Lexeme printError(String error, StringBuilder lexeme, StringBuilder errorItem) {
+        // System.out.println("строка" + currentLine + ": " + error + ": " + " позиция " + ptr + ":
+        // " + errorItem.toString() + "лексемма " + lexeme);
+        System.out.println(error + ": " + " позиция " + ptr + ": " + errorItem.toString() + " " +
+                "лексемма " + lexeme);
+        ptr++;
+        fillLexeme(Types.TypeError);
+        return this.lexeme;
     }
 
   /*  public void readNextLine(BufferedReader reader){
-        setText(reader(filePath, reader));
-        setNumberOfRow(getNumberOfRow() + 1);
-        currentIndexPosition = 0;
-        System.out.println("строка " + getNumberOfRow());
+        setLine(reader(filePath, reader));
+        setCurrentLine(getCurrentLine() + 1);
+        ptr = 0;
+        System.out.println("строка " + getCurrentLine());
     }
 
     private boolean checkIdentName(char item){
@@ -355,37 +451,39 @@ public class Scanner {
 */
 
 
-    public void setCurrentIndexPosition(int currentIndexPosition) {
-        this.currentIndexPosition = currentIndexPosition;
+    public void setPtr(int ptr) {
+        this.ptr = ptr;
     }
 
-    public int getCurrentIndexPosition() {
-        return currentIndexPosition;
+    public int getPtr() {
+        return ptr;
     }
 
-    public void setText(String text) {
-        this.text = text;
-    }
-
-    public void setFilePath(String filePath) {
-        this.filePath = filePath;
-    }
-
-    public void setReader(BufferedReader reader) {
-        this.reader = reader;
+    public void setLine(int lineIndex) {
+        this.line = lines.get(lineIndex);
     }
 
     public void skipSymbols() {
         //пропуск незначащих символов
-        while (text.charAt(currentIndexPosition) == ' ' || text.charAt(currentIndexPosition) == '\n' || text.charAt(currentIndexPosition) == '\t') {
-            if (!newLine()) currentIndexPosition++;
+        if (line == null) {
+            return;
+        }
+
+        for (; ; ) {
+            if (ptr >= line.length || line[ptr] == '\n') {
+                newLine();
+            } else if (line[ptr] == ' ' || line[ptr] == '\t') {
+                ptr++;
+            } else {
+                break;
+            }
+
         }
     }
 
-    private boolean newLine() {
-        boolean change = false; while (text.charAt(currentIndexPosition) == '\n') {
-            numberOfRow++; currentIndexPosition++; change = true;
-            //   System.out.println("строка " + numberOfRow);
-        } return change;
+    private void newLine() {
+        currentLine++;
+        ptr = 0;
+        line = (currentLine != lines.size()) ? lines.get(currentLine) : null;
     }
 }

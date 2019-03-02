@@ -2,6 +2,7 @@ package llkAnalyzer;
 
 
 import org.apache.commons.lang3.SerializationUtils;
+import scanner.Lexeme;
 import scanner.Scanner;
 import service.Types;
 import service.Types.*;
@@ -28,8 +29,8 @@ public class LLkAnalyzer {
     private final Table controlTable;
     private final FirstFollowTable firstFollowTable;
     private final Scanner scanner;
-    private Scanner.Lexeme prevLexeme = new Scanner.Lexeme();
-    Scanner.Lexeme currentLexeme = new Scanner.Lexeme();
+    private Lexeme prevLexeme = new Lexeme();
+    Lexeme currentLexeme = new Lexeme();
     Stack<Table.Element> stack = new Stack<>();
     Stack<Types> stackClasses = new Stack<>();
     Types errorPrevType = null;
