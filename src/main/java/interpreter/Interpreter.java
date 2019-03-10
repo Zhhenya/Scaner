@@ -1,6 +1,7 @@
 package interpreter;
 
 import diagrams.Diagrams;
+import org.apache.log4j.BasicConfigurator;
 import scanner.Lexeme;
 import scanner.Scanner;
 import service.DataType;
@@ -35,6 +36,7 @@ public class Interpreter {
     }
 
     private void start(){
+        BasicConfigurator.configure();
         program();
         findAndRunMainClass();
 

@@ -42,7 +42,7 @@ public class Tree {
     public Tree findUp(Tree from, String lexemeID) {
         Tree vertex = from;
         while ((vertex != null) /*&& (vertex.parent != null)*/ && (vertex != vertex.parent)
-                && lexemeID.compareTo(vertex.node.lexemeName.toString()) != 0) {
+                && !lexemeID.equals(vertex.node.lexemeName)) {
             vertex = vertex.parent;
         }
         if (vertex == vertex.parent) {
@@ -181,7 +181,7 @@ public class Tree {
         duplicateControl(current, lexeme);
         Tree vertex = new Tree();
         Node newNode = new Node();
-        newNode.lexemeName = lexeme.toString();
+        newNode.lexemeName = lexeme;
         newNode.type = lexemeType;
         /*и еще ссылка на значение*/
         current.setLeft(newNode);
@@ -252,7 +252,17 @@ public class Tree {
                 return DataType.TBoolean;
             case "void":
                 return DataType.TVoid;
+            case "TypeInt":
+                return DataType.TInt;
+            case "TypeBoolean":
+                return DataType.TBoolean;
+            case "TypeConstInt":
+                return DataType.TInt;
             default:
+                Tree vertex = findUp(current, lexeme);
+                if (vertex != null) {
+                    return vertex.node.type;
+                }
                 getClass(lexeme); return DataType.TClass;
         }
     }

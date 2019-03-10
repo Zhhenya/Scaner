@@ -1,12 +1,15 @@
 package scanner;
 
+import org.apache.log4j.Logger;
 import service.Types;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class Scanner {
+    private static Logger LOGGER = Logger.getLogger(Scanner.class);
     private final int MAX_LENGTH_LEXEMES = 100;
     private int ptr = 0, startPtr = 0;
     private int currentLine = 1;//номер строки
@@ -42,6 +45,7 @@ public class Scanner {
 
     public void setCurrentLine(int currentLine) {
         this.currentLine = currentLine;
+        line = lines.get(currentLine);
     }
 
     public int getCurrentLine() {
@@ -124,7 +128,9 @@ public class Scanner {
                     ptr++;
                 }
                 fillLexeme(Types.TypeConstInt);
-            } return lexeme;
+            }
+            fillLexeme(Types.TypeConstInt);
+            return lexeme;
         } else if (line[ptr] >= 'a' && line[ptr] <= 'z' || line[ptr] >= 'A' && line[ptr] <= 'Z') {
             lexeme.append(line[ptr++]);
 
@@ -219,6 +225,7 @@ public class Scanner {
                 fillLexeme(Types.TypeLe);
                 return lexeme;
             }
+            lexeme.append(line[ptr++]);
             fillLexeme(Types.TypeLt);
             return lexeme;
         } else if (line[ptr] == '>') {
@@ -227,6 +234,7 @@ public class Scanner {
                 fillLexeme(Types.TypeGe);
                 return lexeme;
             }
+            lexeme.append(line[ptr++]);
             fillLexeme(Types.TypeGt);
             return lexeme;
         } else if (line[ptr] == '!') {
@@ -468,7 +476,9 @@ public class Scanner {
         if (line == null) {
             return;
         }
-
+        LOGGER.info("skipSymbols");
+        LOGGER.info(Arrays.toString(line));
+        LOGGER.info(currentLine);
         for (; ; ) {
             if (ptr >= line.length || line[ptr] == '\n') {
                 newLine();

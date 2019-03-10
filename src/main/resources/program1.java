@@ -9,11 +9,8 @@ public class TestClass{
 
                 public class f{}
                 int s = 0;
-                s++;
-                s--;
-                !s;
-                --s;
-                ++s;
+                s = s + 34;
+                s = s - 45;
                 return 8;
             }
         }
