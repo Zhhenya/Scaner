@@ -41,15 +41,47 @@ public class Tree {
 
     public Tree findUp(Tree from, String lexemeID) {
         Tree vertex = from;
-        while ((vertex != null) /*&& (vertex.parent != null)*/ && (vertex != vertex.parent)
-                && !lexemeID.equals(vertex.node.lexemeName)) {
+        Tree vertex1 = null;
+        while ((vertex != null) && (vertex != vertex.parent) && !lexemeID.equals(vertex.node.lexemeName)) {
             vertex = vertex.parent;
+            vertex1 = findByName(vertex, lexemeID);
+            if(vertex1 != null)
+                return vertex1;
         }
         if (vertex == vertex.parent) {
             return null;
         }
 
         return vertex;
+    }
+    public Tree findByNameLeft(Tree vertex, String lexeme){
+
+        if(vertex == null || vertex == vertex.parent)
+            return null;
+        if(vertex.node.lexemeName.equals(lexeme))
+            return vertex;
+        if(vertex.left != null)
+            return findByNameLeft(vertex.left, lexeme);
+        else
+            return findByNameLeft(vertex.right, lexeme);
+    }
+    public Tree findByNameRight(Tree vertex, String lexeme){
+
+        if(vertex == null || vertex == vertex.parent)
+            return null;
+        if(vertex.node.lexemeName.equals(lexeme))
+            return vertex;
+        if(vertex.right != null)
+            return findByNameRight(vertex.right, lexeme);
+        else
+            return findByNameRight(vertex.left, lexeme);
+    }
+
+    public Tree findByName(Tree vertex, String lexeme){
+        Tree foundedVertex = findByNameLeft(vertex, lexeme);
+        if(foundedVertex == null)
+            foundedVertex = findByNameRight(vertex, lexeme);
+        return foundedVertex;
     }
 
     public Tree findUp() {
@@ -77,10 +109,10 @@ public class Tree {
 
     public Tree findUpName(String className) {
         Tree vertex = current;
-        while (vertex != null && (vertex != vertex.parent) &&
-                ((vertex.node.type == DataType.TClass || vertex.node.type == DataType.TFunction) && vertex.node.lexemeName.compareTo(className) != 0) ||
-                (vertex.node.type != DataType.TClass && vertex.node.type != DataType.TFunction) && vertex.node.lexemeName.compareTo(className) != 0) {
-            vertex = vertex.parent;
+        while(vertex != null && (vertex != vertex.parent) &&
+                ((vertex.node.type == DataType.TClass || vertex.node.type == DataType.TFunction)   && !vertex.node.lexemeName.equals(className)) ||
+                (vertex.node.type != DataType.TClass && vertex.node.type != DataType.TFunction)   && !vertex.node.lexemeName.equals(className)) {
+                vertex = vertex.parent;
         }
         if (vertex == vertex.parent) {
             return null;
@@ -94,7 +126,7 @@ public class Tree {
 
     public Tree findRightLeft(Tree from, String lexemeID) {
         Tree vertex = from.right;
-        while ((vertex != null) && lexemeID.compareTo(vertex.node.lexemeName) != 0) {
+        while ((vertex != null) && !lexemeID.equals(vertex.node.lexemeName)) {
             vertex = vertex.left;
         }
         return vertex;
@@ -128,6 +160,26 @@ public class Tree {
         System.out.println("Вершина: " + node.lexemeName);
         if (left != null) {
             System.out.println("     слева: " + left.node.lexemeName);
+        }
+        if (right != null) {
+            System.out.println("     справа: " + right.node.lexemeName);
+        }
+        System.out.println();
+        if (left != null) {
+            left.printTree();
+        }
+        if (right != null) {
+            right.printTree();
+        }
+    }
+
+    public void printValueTree() {
+        System.out.println("Вершина: " + node.lexemeName);
+        if (left != null) {
+            if(left.node.type == DataType.TInt)
+            System.out.println("     слева: " + left.node.lexemeName + " = " + left.node.dataValue.value.valueInt);
+            else
+                System.out.println("     слева: " + left.node.lexemeName);
         }
         if (right != null) {
             System.out.println("     справа: " + right.node.lexemeName);
@@ -181,6 +233,7 @@ public class Tree {
         duplicateControl(current, lexeme);
         Tree vertex = new Tree();
         Node newNode = new Node();
+        node.dataValue = new DataValue();
         newNode.lexemeName = lexeme;
         newNode.type = lexemeType;
         /*и еще ссылка на значение*/
@@ -207,6 +260,7 @@ public class Tree {
         duplicateControl(current, lexeme);
         Tree vertex = new Tree();
         Node newNode = new Node();
+        newNode.dataValue = new DataValue();
         newNode.lexemeName = lexeme.toString();
         newNode.type = lexemeType;
         newNode.returnType = returnType;

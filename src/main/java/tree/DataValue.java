@@ -3,6 +3,6 @@ package tree;
 import service.DataType;
 
 public class DataValue {
-    public DataType type;
-    public Value value;
+    public DataType type = DataType.Empty;
+    public Value value = new Value();
 }

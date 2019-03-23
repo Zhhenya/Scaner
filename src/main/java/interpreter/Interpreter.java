@@ -22,8 +22,8 @@ public class Interpreter {
         (new Interpreter()).start();
     }
 
-    private Interpreter(){
-        String filePath = "src/main/resources/program1.java";
+    private Interpreter() {
+        String filePath = "src/main/resources/program2.java";
         scanner = new Scanner();
         Lexeme lexeme = new Lexeme();
         try {
@@ -35,10 +35,19 @@ public class Interpreter {
         }
     }
 
-    private void start(){
+    private void start() {
         BasicConfigurator.configure();
         program();
         findAndRunMainClass();
+
+        interpreting = true;
+        analyzing = false;
+        scanner.setCurrentLine(0);
+        scanner.setPtr(0);
+        diagrams.clear();
+        program();
+
+        printGlobalVariables();
 
     }
 
@@ -51,40 +60,53 @@ public class Interpreter {
         }
     }
 
-    private void findAndRunMainClass(){
+    private void findAndRunMainClass() {
 
         /*
-        * Реализовать поиск класса по имени (
-        * Main  не обязательно корневой)
-        * */
+         * Реализовать поиск класса по имени (
+         * Main  не обязательно корневой)
+         * */
 
-        Node node = diagrams.getRoot().findUpName("Main").getNode();
-        if(node.type != DataType.TClass)
+        Node node = null;
+        try {
+            node = diagrams.getRoot().getClass("TestClass").getNode();
+        } catch (SemanticsException e) {
+            e.printStackTrace();
+        }
+        if (node.type != DataType.TClass) {
             throw new DiagramsException("Тип не является классом");
-        if(node.lexemeName.equals("Main"))
-            throw new DiagramsException("Класс Main не найден");
-        findAndRunMainMethod(node);
+        }
+        if (!node.lexemeName.equals("TestClass")) {
+            throw new DiagramsException("Класс TestClass не найден");
+        }
+     //   findAndRunMainMethod();
     }
 
-    private void findAndRunMainMethod(Node node){
+    private void findAndRunMainMethod() {
         /*
          * Реализовать оиск класса по имени (
          * Main  не обязательно корневой)
          * */
-        if(!node.lexemeName.equals("min"))
+        Node mainNode = null;
+        Tree from = diagrams.getRoot().left;
+        mainNode = diagrams.getRoot().findRightLeft(from, "main").getNode();
+        if (!mainNode.lexemeName.equals("main")) {
             throw new DiagramsException("Метод main н найден");
+        }
     }
 
     private void printGlobalVariables() {
         System.out.println("Global variables values:");
         Tree tree = diagrams.getRoot();
-        while(tree != null) {
-            if(tree.node != null && tree.right == null) {
+        while (tree != null) {
+            if (tree.node != null && tree.right == null) {
                 System.out.print("* " + tree.node.lexemeName + " = ");
-                if(tree.node.dataValue.value == null)
+                if (tree.node.dataValue.value == null) {
                     System.out.println("null");
-                else
-                    System.out.println(tree.node.dataValue + " (" + tree.node.dataValue.getClass().getSimpleName() + ")");
+                } else {
+                    System.out.println(tree.node.dataValue + " (" + tree.node.dataValue.getClass().getSimpleName() +
+                            ")");
+                }
             }
             tree = tree.left;
         }

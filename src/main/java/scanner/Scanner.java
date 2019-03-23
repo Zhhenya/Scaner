@@ -12,7 +12,7 @@ public class Scanner {
     private static Logger LOGGER = Logger.getLogger(Scanner.class);
     private final int MAX_LENGTH_LEXEMES = 100;
     private int ptr = 0, startPtr = 0;
-    private int currentLine = 1;//номер строки
+    private int currentLine = 0;//номер строки
     private List<char[]> lines = new ArrayList<>();
     private char[] line;
 
@@ -68,7 +68,8 @@ public class Scanner {
     }
 
     public Lexeme scanner() {
-        lexeme.delete();
+        lexeme = new Lexeme();
+       // lexeme.delete();
         startPtr = ptr;
         while (true) {
             skipSymbols();
@@ -239,7 +240,7 @@ public class Scanner {
             return lexeme;
         } else if (line[ptr] == '!') {
             lexeme.append(line[ptr++]);
-            if (line[ptr + 1] == '=') {
+            if (line[ptr] == '=') {
                 lexeme.append(line[ptr++]);
                 fillLexeme(Types.TypeNegation);
                 return lexeme;
@@ -248,7 +249,7 @@ public class Scanner {
             return lexeme;
         } if (line[ptr] == '=') {
             lexeme.append(line[ptr++]);
-            if (line[ptr + 1] == '=') {
+            if (line[ptr] == '=') {
                 lexeme.append(line[ptr++]);
                 fillLexeme(Types.TypeComparison);
                 return lexeme;

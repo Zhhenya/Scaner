@@ -10,5 +10,4 @@ public class Value {
         valueInt = null;
         clazz = null;
     }
-
 }
