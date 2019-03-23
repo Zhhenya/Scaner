@@ -18,6 +18,10 @@ public class Scanner {
 
     private Lexeme lexeme = new Lexeme();
 
+    public void initLine(int index){
+        line = lines.get(index);
+    }
+
 
     public void createLines(String filePath) throws IOException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(filePath)));

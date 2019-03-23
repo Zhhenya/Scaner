@@ -45,8 +45,9 @@ public class Tree {
         while ((vertex != null) && (vertex != vertex.parent) && !lexemeID.equals(vertex.node.lexemeName)) {
             vertex = vertex.parent;
             vertex1 = findByName(vertex, lexemeID);
-            if(vertex1 != null)
+            if (vertex1 != null) {
                 return vertex1;
+            }
         }
         if (vertex == vertex.parent) {
             return null;
@@ -54,33 +55,42 @@ public class Tree {
 
         return vertex;
     }
-    public Tree findByNameLeft(Tree vertex, String lexeme){
 
-        if(vertex == null || vertex == vertex.parent)
+    public Tree findByNameLeft(Tree vertex, String lexeme) {
+
+        if (vertex == null || vertex == vertex.parent) {
             return null;
-        if(vertex.node.lexemeName.equals(lexeme))
+        }
+        if (vertex.node.lexemeName.equals(lexeme)) {
             return vertex;
-        if(vertex.left != null)
+        }
+        if (vertex.left != null) {
             return findByNameLeft(vertex.left, lexeme);
-        else
+        } else {
             return findByNameLeft(vertex.right, lexeme);
+        }
     }
-    public Tree findByNameRight(Tree vertex, String lexeme){
 
-        if(vertex == null || vertex == vertex.parent)
+    public Tree findByNameRight(Tree vertex, String lexeme) {
+
+        if (vertex == null || vertex == vertex.parent) {
             return null;
-        if(vertex.node.lexemeName.equals(lexeme))
+        }
+        if (vertex.node.lexemeName.equals(lexeme)) {
             return vertex;
-        if(vertex.right != null)
+        }
+        if (vertex.right != null) {
             return findByNameRight(vertex.right, lexeme);
-        else
+        } else {
             return findByNameRight(vertex.left, lexeme);
+        }
     }
 
-    public Tree findByName(Tree vertex, String lexeme){
+    public Tree findByName(Tree vertex, String lexeme) {
         Tree foundedVertex = findByNameLeft(vertex, lexeme);
-        if(foundedVertex == null)
+        if (foundedVertex == null) {
             foundedVertex = findByNameRight(vertex, lexeme);
+        }
         return foundedVertex;
     }
 
@@ -106,13 +116,22 @@ public class Tree {
         return vertex;
     }
 
+    public Tree retrieveClassLick() {
+        Tree vertex = current;
+        if (current.node.classLink != null) {
+            return current.node.classLink;
+        } else {
+            return findUpFunction();
+        }
+    }
+
 
     public Tree findUpName(String className) {
         Tree vertex = current;
-        while(vertex != null && (vertex != vertex.parent) &&
-                ((vertex.node.type == DataType.TClass || vertex.node.type == DataType.TFunction)   && !vertex.node.lexemeName.equals(className)) ||
-                (vertex.node.type != DataType.TClass && vertex.node.type != DataType.TFunction)   && !vertex.node.lexemeName.equals(className)) {
-                vertex = vertex.parent;
+        while (vertex != null && (vertex != vertex.parent) &&
+                ((vertex.node.type == DataType.TClass || vertex.node.type == DataType.TFunction) && !vertex.node.lexemeName.equals(className)) ||
+                (vertex.node.type != DataType.TClass && vertex.node.type != DataType.TFunction) && !vertex.node.lexemeName.equals(className)) {
+            vertex = vertex.parent;
         }
         if (vertex == vertex.parent) {
             return null;
@@ -145,11 +164,11 @@ public class Tree {
             if (vertex.node.classLink != null) {
                 if (vertex.node.classLink.node.lexemeName != typeOfParameter) {
                     throw new SemanticsException("Тип формальной и фактической переменной не совпадают: ",
-                            vertex.node.classLink.node.lexemeName + " " + typeOfParameter);
+                                                 vertex.node.classLink.node.lexemeName + " " + typeOfParameter);
                 }
             } else {
                 throw new SemanticsException("Тип формальной и фактической переменной не совпадают: ",
-                        vertex.node.type.toString() + " " + typeOfParameter);
+                                             vertex.node.type.toString() + " " + typeOfParameter);
             }
         }
 
@@ -176,10 +195,11 @@ public class Tree {
     public void printValueTree() {
         System.out.println("Вершина: " + node.lexemeName);
         if (left != null) {
-            if(left.node.type == DataType.TInt)
-            System.out.println("     слева: " + left.node.lexemeName + " = " + left.node.dataValue.value.valueInt);
-            else
+            if (left.node.type == DataType.TInt) {
+                System.out.println("     слева: " + left.node.lexemeName + " = " + left.node.dataValue.value.valueInt);
+            } else {
                 System.out.println("     слева: " + left.node.lexemeName);
+            }
         }
         if (right != null) {
             System.out.println("     справа: " + right.node.lexemeName);

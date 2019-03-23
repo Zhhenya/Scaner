@@ -44,6 +44,7 @@ public class Interpreter {
         analyzing = false;
         scanner.setCurrentLine(0);
         scanner.setPtr(0);
+        scanner.initLine(0);
         diagrams.clear();
         program();
 
