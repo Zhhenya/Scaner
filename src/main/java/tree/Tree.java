@@ -1,6 +1,7 @@
 package tree;
 
 import org.apache.log4j.Logger;
+import scanner.Lexeme;
 import service.DataType;
 import service.SemanticsException;
 
@@ -192,6 +193,36 @@ public class Tree {
         }
     }
 
+    private void print(Node node) {
+        switch (node.type) {
+            case TBoolean:
+                System.out.println(node.dataValue.value.constant);
+            case TInt:
+                System.out.println(node.dataValue.value.valueInt);
+            case TUserType:
+                System.out.println(node.dataValue.value.clazz.node.lexemeName);
+        }
+    }
+
+    public void printVariables() {
+        System.out.println("Вершина: " + node.lexemeName);
+        if (left != null) {
+            System.out.println("     слева: " + left.node.lexemeName);
+            print(left.node);
+        }
+        if (right != null) {
+            System.out.println("     справа: " + right.node.lexemeName);
+            //  print(right.node);
+        }
+        System.out.println();
+        if (left != null) {
+            left.printVariables();
+        }
+        if (right != null) {
+            right.printVariables();
+        }
+    }
+
     public void printValueTree() {
         System.out.println("Вершина: " + node.lexemeName);
         if (left != null) {
@@ -249,12 +280,14 @@ public class Tree {
         return current;
     }
 
-    public Tree include(String lexeme, DataType lexemeType, String className) throws SemanticsException {
-        duplicateControl(current, lexeme);
+    public Tree include(Lexeme lexeme, DataType lexemeType, String className) throws SemanticsException {
+        duplicateControl(current, lexeme.lexeme.toString());
         Tree vertex = new Tree();
         Node newNode = new Node();
         node.dataValue = new DataValue();
-        newNode.lexemeName = lexeme;
+        newNode.lexemeName = lexeme.lexeme.toString();
+        newNode.ptr = lexeme.ptr;
+        newNode.line = lexeme.line;
         newNode.type = lexemeType;
         /*и еще ссылка на значение*/
         current.setLeft(newNode);
@@ -276,12 +309,15 @@ public class Tree {
     }
 
 
-    public Tree include(String lexeme, DataType lexemeType, DataType returnType, String className) throws SemanticsException {
-        duplicateControl(current, lexeme);
-        Tree vertex = new Tree();
+    public Tree include(Lexeme lexeme, DataType lexemeType, DataType returnType, String className) throws
+            SemanticsException {
+        duplicateControl(current, lexeme.lexeme.toString());
+        Tree vertex;
         Node newNode = new Node();
         newNode.dataValue = new DataValue();
-        newNode.lexemeName = lexeme.toString();
+        newNode.lexemeName = lexeme.lexeme.toString();
+        newNode.ptr = lexeme.ptr;
+        newNode.line = lexeme.line;
         newNode.type = lexemeType;
         newNode.returnType = returnType;
         if (className != null) {
@@ -463,5 +499,32 @@ public class Tree {
 
     public Tree getRight() {
         return right;
+    }
+
+    public Tree clone(Tree vertex) {
+        Tree tree = new Tree();
+        tree.node = vertex.node.clone();
+        tree.right = new Tree();
+        tree.right.node = vertex.right.node.clone();
+        tree.right.parent = tree;
+        tree.right.left = vertex.cloneLeft(vertex.right.left);
+        tree.right.left.parent = tree.right;
+        return tree;
+    }
+
+    public Tree cloneLeft(Tree vertex) {
+        Tree tree = new Tree();
+        tree.node = vertex.node.clone();
+        if (vertex.left != null) {
+            tree.left = vertex.cloneLeft(vertex.left);
+            tree.left.parent = tree;
+        }
+        if (vertex.right != null) {
+            tree.right = vertex.cloneLeft(vertex.right);
+            tree.right.parent = tree;
+        }
+        if(vertex.right == null && vertex.left == null)
+            return tree;
+        return tree;
     }
 }

@@ -11,6 +11,8 @@ import tree.Tree;
 import java.util.ArrayList;
 import java.util.List;
 
+import static service.InterpreterEnum.CALL_VAR_POINT_ADDR;
+
 public class Diagrams {
     private static Logger LOGGER = Logger.getLogger(Diagrams.class);
     private Scanner scanner;
@@ -39,7 +41,7 @@ public class Diagrams {
         int row;
         List<Boolean> brace = new ArrayList<Boolean>();
         List<Boolean> func = new ArrayList<Boolean>();
-     //   Tree root = new Tree();
+        //   Tree root = new Tree();
         Tree reset;
         DataType currentType = null;
         Lexeme currentLexeme = new Lexeme();
@@ -97,9 +99,10 @@ public class Diagrams {
 
         Tree vertex;
         if (interpreter.isAnalyzing()) {
-            vertex = root.include(scanner.getLexeme().lexeme.toString(), DataType.TClass, null);
+            vertex = root.include(scanner.getLexeme(), DataType.TClass, null);
         } else {
-            vertex = root.findByNameLeft(root, scanner.getLexeme().lexeme.toString());
+            vertex = root.findByName(root.left, scanner.getLexeme().lexeme.toString());
+            root.setCurrent(vertex);
         }
 
         if (scanner.scanner().type != Types.TypeOpenBrace) {
@@ -138,6 +141,7 @@ public class Diagrams {
                 if ((t = scanner.scanner().type) == Types.TypeIdent || t == Types.Typemain) {
                     if ((t = scanner.scanner().type) == Types.TypeOpenParenthesis) {
                         setPositionAndLine(position, row);
+
                         Method();
                         continue;
 
@@ -208,30 +212,41 @@ public class Diagrams {
         }
     }
 
-    public void Method() throws DiagramsException, SemanticsException {
+    public DataValue Method() throws DiagramsException, SemanticsException {
         Types t;
+        DataValue dataValue = null;
 
-        ReturnType();
+        if (interpreter.isAnalyzing()) {
+            ReturnType();
+            currentType = root.getType(scanner.getLexeme().lexeme.toString());
+            if ((t = scanner.scanner().type) != Types.TypeIdent && t != Types.Typemain) {
+                throw new DiagramsException("Ожидалось идентификатор или main", scanner);
+            }
+        }
 
         /*
          * Определить тип лексеммы
          * */
-        currentType = root.getType(scanner.getLexeme().lexeme.toString());
-
-
-        if ((t = scanner.scanner().type) != Types.TypeIdent && t != Types.Typemain) {
-            throw new DiagramsException("Ожидалось идентификатор или main", scanner);
+        if (interpreter.isInterpreting() && interpreter.isCallFunction()) {
+            currentType = interpreter.peek().node.returnType;
         }
 
 
         /*
          * занести  в дерево идентификатор с типом
          * */
-        Tree vertex;
+        Tree vertex = null;
         if (interpreter.isAnalyzing()) {
-            vertex = root.include(scanner.getLexeme().lexeme.toString(), DataType.TFunction, currentType, null);
-        } else {
-            vertex = root.findByNameLeft(root, scanner.getLexeme().lexeme.toString());
+            vertex = root.include(scanner.getLexeme(), DataType.TFunction, currentType, null);
+        } else if (interpreter.isInterpreting()) {
+            scanner.scanner();
+            if (interpreter.isCallFunction()) {
+                vertex = interpreter.peek();
+            } else {
+                scanner.scanner();
+                vertex = root.findByName(root.left, scanner.getLexeme().lexeme.toString());
+            }
+            root.setCurrent(vertex.right);
         }
 
         if (scanner.scanner().type != Types.TypeOpenParenthesis) {
@@ -251,6 +266,7 @@ public class Diagrams {
          * восстановить значение указателя
          * */
         root.setCurrent(vertex);
+        return  dataValue;
     }
 
     public void ReturnType() throws DiagramsException {
@@ -309,11 +325,12 @@ public class Diagrams {
          * определить ссылку на класс
          * */
         if (interpreter.isAnalyzing()) {
-            currentVertex = root.include(scanner.getLexeme().lexeme.toString(), currentType,
+            currentVertex = root.include(scanner.getLexeme(), currentType,
                                          currentType == DataType.TUserType ?
                                                  currentVertex.node.lexemeName : null);
         } else {
-            currentVertex = root.findByNameLeft(root, scanner.getLexeme().lexeme.toString());
+            currentVertex = root.findByName(root.left, scanner.getLexeme().lexeme.toString());
+            root.setCurrent(currentVertex);
         }
 
         /*
@@ -343,20 +360,15 @@ public class Diagrams {
 
         while (true) {
             getPositionAndLine();
+            remember(CALL_VAR_POINT_ADDR);
             t = scanner.scanner().type;
-            if (interpreter.isInterpreting()) {
-                pos.variable = scanner.getLexeme();
-            }
+
             if (t == Types.TypeIdent && ((t = scanner.scanner().type) == Types.TypePlusPlus || t == Types.TypeMinusMinus)) {
                 setPositionAndLine(position, row);
                 typeOfV.clear();
                 dataOfV.clear();
 
-                DataValue dataValue = V();
-                if (interpreter.isInterpreting()) {
-                    Tree tree = root.findRightLeft(pos.variable.lexeme.toString());
-                    tree.node.dataValue = dataValue;
-                }
+                setVarValue(V());
 
                 continue;
             }
@@ -365,7 +377,8 @@ public class Diagrams {
                 setPositionAndLine(position, row);
                 typeOfV.clear();
                 dataOfV.clear();
-                V();
+                setVarValue(V());
+
                 continue;
             }
             setPositionAndLine(position, row);
@@ -374,7 +387,7 @@ public class Diagrams {
                 setPositionAndLine(position, row);
                 typeOfV.clear();
                 dataOfV.clear();
-                V();
+                setVarValue(V());
                 continue;
             }
 
@@ -434,7 +447,7 @@ public class Diagrams {
                         && (scanner.scanner().type) == Types.TypeSemicolon) {
 
                     Tree vertex = root.getFunction();
-               //     Tree vertex = root.retrieveClassLick();
+                    //     Tree vertex = root.retrieveClassLick();
 
 
                     if (t == Types.TypeConstInt || t == Types.TypeInt) {
@@ -560,14 +573,12 @@ public class Diagrams {
              * заносим идентификатор с типом currentType в дерево
              * */
             if (interpreter.isAnalyzing()) {
-                vertex = root.include(scanner.getLexeme().lexeme.toString(), currentType,
+                vertex = root.include(scanner.getLexeme(), currentType,
                                       currentType == DataType.TUserType ?
                                               currentVertex.node.lexemeName : null);
             } else {
-                vertex = root.findByNameLeft(root.left, scanner.getLexeme().lexeme.toString());
-                if (vertex == null) {
-                    vertex = root.findByNameRight(root.left, scanner.getLexeme().lexeme.toString());
-                }
+                vertex = root.findByName(root.left, scanner.getLexeme().lexeme.toString());
+                root.setCurrent(vertex);
             }
 
             typeIdent = currentType.toString();
@@ -576,13 +587,21 @@ public class Diagrams {
             if ((t = scanner.scanner().type) == Types.TypeAssign) {
                 typeOfV.clear();
                 dataOfV.clear();
-                DataValue dataValue = V();
 
-                if (interpreter.isInterpreting() && vertex != null) {
-                    vertex.node.dataValue = dataValue;
+                int tmpPos = scanner.getPtr();
+                int tmpLine = scanner.getCurrentLine();
+                if(scanner.scanner().type == Types.TypeIdent && scanner.scanner().type == Types.TypeOpenParenthesis){
+                    setVarValue(FunctionCall(), vertex);
+                } else {
+                    setPositionAndLine(tmpPos, tmpLine);
+                    setVarValue(V(), vertex);
                 }
 
-                //   vertex.node.dataValue.value. =
+
+                //вызов функции
+
+
+
                 /*
                  * в V() вычисляется новый currentType (тип выражения),
                  * затем сравнивается с типом объявленной переменной(идентификатора)
@@ -804,7 +823,7 @@ public class Diagrams {
         }
 
         if (functionCall) {
-            returnType = FunctionCall();
+            returnType = FunctionCall().type;
             typeOfV.clear();
             dataOfV.clear();
             functionCall = true;
@@ -821,35 +840,42 @@ public class Diagrams {
         return null;
     }
 
-    public DataType FunctionCall() throws DiagramsException, SemanticsException {
+    public DataValue FunctionCall() throws DiagramsException, SemanticsException {
         Types t;
-        DataType returnType;
+        DataValue dataValue = new DataValue();
+
         if ((t = scanner.scanner().type) != Types.TypeIdent) {
             throw new DiagramsException("Ожидался идентификатор", scanner);
         }
 
+        if (interpreter.isInterpreting()) {
+            pos.callMethodPointAddr = scanner.getLexeme();
+        }
+
         nameCurrentFunction.delete(0, nameCurrentFunction.length());
         nameCurrentFunction.append(scanner.getLexeme().lexeme);
-        /*
-         * получить адрес функции
-         * */
-//        if (!functionCall) {
-//            currentVertex = root.getFunction(scanner.getLexeme().lexeme.toString());
-//        } else {
-//            functionCall = false;
-//        }
+
+        //получить адрес функции
         if (functionCall) {
             functionCall = false;
         }
 
         currentVertex = root.getFunction(scanner.getLexeme().lexeme.toString());
 
-        returnType = currentVertex.node.returnType;
+        //получили координаты начала описания функции
+        if (interpreter.isInterpreting()) {
+            pos.setDescriptionMethodAddr(currentVertex.node.ptr, currentVertex.node.line);
+        }
+
+        dataValue.type = currentVertex.node.returnType;
 
         if ((t = scanner.scanner().type) != Types.TypeOpenParenthesis) {
             throw new DiagramsException("Ожидалось '('", scanner);
         }
 
+        if (interpreter.isInterpreting()) {
+            interpreter.put(currentVertex.clone(currentVertex));
+        }
 
         ActualParameterList();
 
@@ -861,23 +887,46 @@ public class Diagrams {
             throw new DiagramsException("Ожидалось ';'", scanner);
         }
 
-        return returnType;
+        /*
+         * Переходим на описание функции
+         * */
+        if (interpreter.isInterpreting()) {
+            setPositionAndLine(pos.descriptionMethodAddr.ptr, pos.descriptionMethodAddr.line);
+            interpreter.setCallFunction(true);
+            dataValue = Method();
+        }
+
+
+        return dataValue;
     }
 
     public void ActualParameterList() throws DiagramsException, SemanticsException {
         Types t;
+        Tree parameters = null;
+        if (interpreter.isCallFunction() && interpreter.isInterpreting()) {
+            parameters = interpreter.peek().right;
+        }
         int numberOfActualParameter = 0, numberOfParameter = currentVertex.node.numberOfParameters;
-        String functionName = currentVertex.node.lexemeName;
         Tree functionVertex = currentVertex;
         do {
             typeOfV.clear();
             dataOfV.clear();
-            V();
+
+            DataValue dataValue = V();
+
             numberOfActualParameter++;
             if (currentType != DataType.TUserType) {
                 functionVertex = root.findParameter(functionVertex, currentType.toString());
             } else {
                 functionVertex = root.findParameter(functionVertex, typeName);
+            }
+
+            if (interpreter.isInterpreting()) {
+                functionVertex.node.dataValue = dataValue;
+                if (interpreter.isCallFunction()) {
+                    parameters.left.node.dataValue = dataValue;
+                    parameters = parameters.left;
+                }
             }
 
             /*
@@ -1376,6 +1425,36 @@ public class Diagrams {
                 return value1 < value2;
             default:
                 return null;
+        }
+    }
+
+    private void remember(InterpreterEnum interpreterEnum) {
+        if (interpreter.isInterpreting()) {
+            switch (interpreterEnum) {
+                case CALL_VAR_POINT_ADDR:
+                    pos.callVarPointAddr = scanner.getLexeme(); break;
+                case CALL_METHOD_POINT_ADDR:
+                    pos.callMethodPointAddr = scanner.getLexeme(); break;
+                case CALL_CLASS_POINT_ADDR:
+                    pos.callClassPointAddr = scanner.getLexeme(); break;
+                case DESCRIPTION_CLASS_ADDR:
+                    pos.descriptionMethodAddr = scanner.getLexeme(); break;
+                case DESCRIPTION_METHOD_ADDR:
+                    pos.descriptionClassAddr = scanner.getLexeme(); break;
+            }
+        }
+    }
+
+    private void setVarValue(DataValue dataValue){
+        if (interpreter.isInterpreting()) {
+            Tree tree = root.findRightLeft(pos.callVarPointAddr.lexeme.toString());
+            tree.node.dataValue = dataValue;
+        }
+    }
+
+    private void setVarValue(DataValue dataValue, Tree tree){
+        if (interpreter.isInterpreting() && tree != null) {
+            tree.node.dataValue = dataValue;
         }
     }
 

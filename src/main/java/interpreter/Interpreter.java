@@ -7,16 +7,23 @@ import scanner.Scanner;
 import service.DataType;
 import service.DiagramsException;
 import service.SemanticsException;
+import tree.DataValue;
 import tree.Node;
 import tree.Tree;
 
 import java.io.IOException;
+import java.util.Stack;
 
 public class Interpreter {
-    private boolean interpreting = false, analyzing = true;
+    private boolean interpreting = false, analyzing = true, callFunction = false;
     private Diagrams diagrams;
     private Scanner scanner;
+    private Stack<DataValue> middleValues = new Stack<>();
+    private Stack<Tree> functionCallInterpreter = new Stack<>();
 
+    public void setFunctionCallInterpreterClear(){
+        functionCallInterpreter = new Stack<>();
+    }
 
     public static void main(String[] args) {
         (new Interpreter()).start();
@@ -48,14 +55,14 @@ public class Interpreter {
         diagrams.clear();
         program();
 
-        printGlobalVariables();
+   //     printGlobalVariables();
 
     }
 
     private void program() {
         try {
             diagrams.S();
-            diagrams.printTree();
+            diagrams.getRoot().printValueTree();
         } catch (SemanticsException e) {
             e.printStackTrace();
         }
@@ -96,17 +103,25 @@ public class Interpreter {
         }
     }
 
+
+
     private void printGlobalVariables() {
         System.out.println("Global variables values:");
         Tree tree = diagrams.getRoot();
         while (tree != null) {
             if (tree.node != null && tree.right == null) {
-                System.out.print("* " + tree.node.lexemeName + " = ");
+                System.out.print(tree.node.lexemeName + " = ");
                 if (tree.node.dataValue.value == null) {
                     System.out.println("null");
                 } else {
-                    System.out.println(tree.node.dataValue + " (" + tree.node.dataValue.getClass().getSimpleName() +
-                            ")");
+                    switch(tree.node.type){
+                        case TBoolean:
+                            System.out.println(tree.node.dataValue.value.constant);
+                        case TInt:
+                            System.out.println(tree.node.dataValue.value.valueInt);
+                        case TUserType:
+                            System.out.println(tree.node.dataValue.value.clazz.node.lexemeName);
+                    }
                 }
             }
             tree = tree.left;
@@ -127,5 +142,27 @@ public class Interpreter {
 
     public void setAnalyzing(boolean analyzing) {
         this.analyzing = analyzing;
+    }
+
+    public boolean isCallFunction() {
+        return callFunction;
+    }
+
+    public void setCallFunction(boolean callFunction) {
+        this.callFunction = callFunction;
+    }
+
+    public Stack<Tree> getFunctionCallInterpreter() {
+        return functionCallInterpreter;
+    }
+
+    public void setFunctionCallInterpreter(Stack<Tree> functionCallInterpreter) {
+        this.functionCallInterpreter = functionCallInterpreter;
+    }
+    public Tree peek(){
+        return functionCallInterpreter.peek();
+    }
+    public void put(Tree tree){
+        functionCallInterpreter.push(tree);
     }
 }

@@ -1,5 +1,5 @@
 public class TestClass {
-    int result;
+    int result = 0;
 
     int fact(int n) {
         if (n == 1) {

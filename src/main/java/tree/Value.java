@@ -10,4 +10,14 @@ public class Value {
         valueInt = null;
         clazz = null;
     }
+
+    public Value clone(){
+        Value clone = null;
+        try {
+            clone = (Value)super.clone();
+        } catch (CloneNotSupportedException e) {
+            e.printStackTrace();
+        }
+        return clone;
+    }
 }
