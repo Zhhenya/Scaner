@@ -16,6 +16,7 @@ import java.util.Stack;
 
 public class Interpreter {
     private boolean interpreting = false, analyzing = true, callFunction = false;
+    private boolean interpretingIf = false, execute = false;
     private Diagrams diagrams;
     private Scanner scanner;
     private Stack<DataValue> middleValues = new Stack<>();
@@ -45,15 +46,13 @@ public class Interpreter {
     private void start() {
         BasicConfigurator.configure();
         program();
-        findAndRunMainClass();
-
         interpreting = true;
         analyzing = false;
         scanner.setCurrentLine(0);
         scanner.setPtr(0);
         scanner.initLine(0);
         diagrams.clear();
-        program();
+        findAndRunMainClass();
 
    //     printGlobalVariables();
 
@@ -87,7 +86,7 @@ public class Interpreter {
         if (!node.lexemeName.equals("TestClass")) {
             throw new DiagramsException("Класс TestClass не найден");
         }
-     //   findAndRunMainMethod();
+        findAndRunMainMethod();
     }
 
     private void findAndRunMainMethod() {
@@ -95,11 +94,21 @@ public class Interpreter {
          * Реализовать оиск класса по имени (
          * Main  не обязательно корневой)
          * */
-        Node mainNode = null;
         Tree from = diagrams.getRoot().left;
-        mainNode = diagrams.getRoot().findRightLeft(from, "main").getNode();
-        if (!mainNode.lexemeName.equals("main")) {
-            throw new DiagramsException("Метод main н найден");
+        Tree main = diagrams.getRoot().findByName(from, "main");
+        if (main == null) {
+            throw new DiagramsException("Метод main не найден");
+        }
+
+        scanner.setCurrentLine(main.node.line);
+        scanner.setPtr(main.node.ptr);
+        try {
+            callFunction = true;
+            functionCallInterpreter.push(main.clone(main));
+            functionCallInterpreter.peek().node.dataValue.value.valueInt = 0;
+            diagrams.Method();
+        } catch (SemanticsException e) {
+            e.printStackTrace();
         }
     }
 
@@ -164,5 +173,21 @@ public class Interpreter {
     }
     public void put(Tree tree){
         functionCallInterpreter.push(tree);
+    }
+
+    public boolean isInterpretingIf() {
+        return interpretingIf;
+    }
+
+    public void setInterpretingIf(boolean interpretingIf) {
+        this.interpretingIf = interpretingIf;
+    }
+
+    public boolean isExecute() {
+        return execute;
+    }
+
+    public void setExecute(boolean execute) {
+        this.execute = execute;
     }
 }
