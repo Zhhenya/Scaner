@@ -10,6 +10,6 @@ public class TestClass {
     }
 
     void main(int u) {
-        fact(5);
+        int y = fact(5);
     }
 }#

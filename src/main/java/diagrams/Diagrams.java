@@ -432,7 +432,9 @@ public class Diagrams {
                 continue;
             } else if (t == Types.TypeReturn) {
                 getPositionAndLine();
-                if ((t = scanner.scanner().type) == Types.TypeSemicolon) {
+                Lexeme returnLexeme = scanner.scanner();
+                DataValue returnValue = new DataValue();
+                if (returnLexeme.type == Types.TypeSemicolon) {
 
                     Tree vertex = root.getFunction();
                     if (vertex.node.returnType != DataType.TVoid) {
@@ -443,34 +445,72 @@ public class Diagrams {
                 }
 
                 setPositionAndLine(position, row);
-                if (((t = scanner.scanner().type) == Types.TypeIdent || t == Types.TypeConstInt || t == Types.TypeFalse || t == Types.TypeTrue)
+                returnLexeme = scanner.scanner();
+                if ((returnLexeme.type == Types.TypeIdent || returnLexeme.type == Types.TypeConstInt || returnLexeme.type == Types.TypeFalse || returnLexeme.type == Types.TypeTrue)
                         && (scanner.scanner().type) == Types.TypeSemicolon) {
 
                     Tree vertex = root.getFunction();
-                    //     Tree vertex = root.retrieveClassLick();
 
+                    Tree returnTree = null;
+                    if (returnLexeme.type == Types.TypeIdent) {
 
-                    if (t == Types.TypeConstInt || t == Types.TypeInt) {
+                        if (interpreter.isAnalyzing()) {
+                            setPositionAndLine(position, row);
+                            scanner.scanner();
+                            Tree returnValueTree = root.getTypeOfLexeme(scanner.getLexeme().lexeme.toString());
+                            scanner.scanner();
+                            if (returnValueTree.node.type != vertex.node.returnType) {
+                                throw new SemanticsException("Тип возвращаемого значения не совпадает: функция " + vertex.node.lexemeName);
+                            }
+                            continue;
+                        }
+
+                        if (interpreter.isInterpreting()) {
+                            returnTree = root.findByName(interpreter.getFunctionCallInterpreter().peek().right,
+                                                         scanner.getLexeme().lexeme.toString());
+                        }
+                        if (returnValue == null) {
+                            returnTree = root.findByName(root.left, scanner.getLexeme().lexeme.toString());
+                        }
+                        if (returnTree.node.type == DataType.TInt) {
+                            returnValue.value.valueInt = returnTree.node.dataValue.value.valueInt;
+                        }
+                        if (returnTree.node.type == DataType.TBoolean) {
+                            returnValue.value.constant = returnTree.node.dataValue.value.constant;
+                        }
+                    }
+
+                    if (returnLexeme.type == Types.TypeConstInt || returnLexeme.type == Types.TypeInt) {
+                        if (interpreter.isInterpreting()) {
+                            returnValue.value.valueInt = Integer.parseInt(scanner.getLexeme().lexeme.toString());
+                        }
                         if (vertex.node.returnType != DataType.TConstant && vertex.node.returnType != DataType.TInt) {
                             throw new SemanticsException("Тип возвращаемого значения не совпадает: функция " + vertex.node.lexemeName);
                         }
                     }
 
-                    if (t == Types.TypeFalse || t == Types.TypeTrue) {
+                    if (returnLexeme.type == Types.TypeFalse || returnLexeme.type == Types.TypeTrue) {
+                        if (interpreter.isInterpreting()) {
+                            returnValue.value.constant = returnLexeme.type != Types.TypeFalse;
+                        }
                         if (vertex.node.returnType != DataType.TBoolean) {
                             throw new SemanticsException("Тип возвращаемого значения не совпадает: функция " + vertex.node.lexemeName);
                         }
                     }
-
-                    if (t == Types.TypeIdent) {
-                        setPositionAndLine(position, row);
-                        scanner.scanner();
-                        Tree returnValue = root.getTypeOfLexeme(scanner.getLexeme().lexeme.toString());
-                        scanner.scanner();
-                        if (returnValue.node.type != vertex.node.returnType) {
-                            throw new SemanticsException("Тип возвращаемого значения не совпадает: функция " + vertex.node.lexemeName);
-                        }
+                    if (interpreter.isInterpreting()) {
+                        setPositionAndLine(pos.callMethodPointAddr.ptr, pos.callMethodPointAddr.line);
                     }
+
+//                    if (t == Types.TypeIdent) {
+//                        setPositionAndLine(position, row);
+//                        scanner.scanner();
+//                        Tree returnValueTree = root.getTypeOfLexeme(scanner.getLexeme().lexeme.toString());
+//                        scanner.scanner();
+//                        if (returnValueTree.node.type != vertex.node.returnType) {
+//                            throw new SemanticsException("Тип возвращаемого значения не совпадает: функция " +
+//                            vertex.node.lexemeName);
+//                        }
+                    //                   }
                     continue;
                 }
 
@@ -590,7 +630,10 @@ public class Diagrams {
 
                 int tmpPos = scanner.getPtr();
                 int tmpLine = scanner.getCurrentLine();
-                if (scanner.scanner().type == Types.TypeIdent && scanner.scanner().type == Types.TypeOpenParenthesis) {
+                Lexeme functionName = scanner.scanner();
+                if (functionName.type == Types.TypeIdent && scanner.scanner().type == Types.TypeOpenParenthesis) {
+                    setPositionAndLine(tmpPos, tmpLine);
+                    interpreter.pushFunctionCallPos(functionName);
                     setVarValue(FunctionCall(), vertex);
                 } else {
                     setPositionAndLine(tmpPos, tmpLine);
@@ -692,7 +735,9 @@ public class Diagrams {
 
         if (t == Types.TypeReturn) {
             getPositionAndLine();
-            if ((t = scanner.scanner().type) == Types.TypeSemicolon) {
+            DataValue returnValue = new DataValue();
+            Lexeme returnLexeme = scanner.scanner();
+            if (returnLexeme.type == Types.TypeSemicolon) {
                 Tree vertex = root.getFunction();
                 if (vertex.node.returnType != DataType.TVoid) {
                     throw new SemanticsException("Тип возвращаемого значения не совпадает: функция " + vertex.node.lexemeName);
@@ -701,23 +746,53 @@ public class Diagrams {
             }
 
             setPositionAndLine(position, row);
-            if (((t = scanner.scanner().type) == Types.TypeIdent || t == Types.TypeConstInt || t == Types.TypeFalse || t == Types.TypeTrue)
+            returnLexeme = scanner.scanner();
+            if ((returnLexeme.type == Types.TypeIdent || returnLexeme.type == Types.TypeConstInt
+                    || returnLexeme.type == Types.TypeFalse || returnLexeme.type == Types.TypeTrue)
                     && (nextT = scanner.scanner().type) == Types.TypeSemicolon) {
 
                 Tree vertex = root.getFunction();
 
-                if (t == Types.TypeConstInt || t == Types.TypeInt) {
+                Tree returnTree = null;
+                if (returnLexeme.type == Types.TypeIdent) {
+                    if (interpreter.isInterpreting()) {
+                        returnTree = root.findByName(interpreter.getFunctionCallInterpreter().peek().right,
+                                                     scanner.getLexeme().lexeme.toString());
+                    }
+                    if (interpreter.isAnalyzing() || returnValue == null) {
+                        returnTree = root.findByName(root.left, scanner.getLexeme().lexeme.toString());
+                    }
+
+                    if (interpreter.isInterpreting() && returnTree.node.type == DataType.TInt) {
+                        returnValue.value.valueInt = returnTree.node.dataValue.value.valueInt;
+                    }
+                    if (interpreter.isInterpreting() && returnTree.node.type == DataType.TBoolean) {
+                        returnValue.value.constant = returnTree.node.dataValue.value.constant;
+                    }
+                }
+
+
+                if (returnLexeme.type == Types.TypeConstInt || returnLexeme.type == Types.TypeInt) {
+                    if (interpreter.isInterpreting()) {
+                        returnValue.value.valueInt = Integer.parseInt(scanner.getLexeme().lexeme.toString());
+                    }
                     if (vertex.node.returnType != DataType.TConstant && vertex.node.returnType != DataType.TInt) {
                         throw new SemanticsException("Тип возвращаемого значения не совпадает: функция " + vertex.node.lexemeName);
                     }
                 }
 
-                if (t == Types.TypeFalse || t == Types.TypeTrue) {
+                if (returnLexeme.type == Types.TypeFalse || returnLexeme.type == Types.TypeTrue) {
+                    if (interpreter.isInterpreting()) {
+                        returnValue.value.constant = returnLexeme.type != Types.TypeFalse;
+                    }
                     if (vertex.node.returnType != DataType.TBoolean) {
                         throw new SemanticsException("Тип возвращаемого значения не совпадает: функция " + vertex.node.lexemeName);
                     }
                 }
 
+                if (interpreter.isInterpreting()) {
+                    setPositionAndLine(pos.callMethodPointAddr.ptr, pos.callMethodPointAddr.line);
+                }
 
                 return;
             }
@@ -782,10 +857,11 @@ public class Diagrams {
         currentVertex = root.getObjectName(scanner.getLexeme().lexeme.toString(), root.getCurrent());
 
         getPositionAndLine();
+        Lexeme checkLexeme = null;
         while ((t = scanner.scanner().type) == Types.TypeDot) {
             getPositionAndLine();
-            t = scanner.scanner().type;
-            if (t != Types.TypeIdent) {
+            checkLexeme = scanner.scanner();
+            if (checkLexeme.type != Types.TypeIdent) {
                 throw new DiagramsException("Ожидался идентификатор", scanner);
             }
 
@@ -823,6 +899,9 @@ public class Diagrams {
         }
 
         if (functionCall) {
+            if (interpreter.isInterpreting()) {
+                interpreter.pushFunctionCallPos(checkLexeme);
+            }
             returnType = FunctionCall().type;
             typeOfV.clear();
             dataOfV.clear();
@@ -1086,9 +1165,11 @@ public class Diagrams {
         if ((t != Types.TypeSemicolon) && t != Types.TypeCloseParenthesis && t != Types.TypeComma) {
             throw new DiagramsException("Ожидалось ';' или ')' или ','", scanner);
         }
+
         if (t == Types.TypeCloseParenthesis || t == Types.TypeComma) {
             setPositionAndLine(position, row);
         }
+
 
         if (typeOfV.stream().anyMatch(i -> i == DataType.TFunction)) {
             for (int i = 0; i < typeOfV.size(); ) {
@@ -1229,7 +1310,9 @@ public class Diagrams {
         DataType returnType;
         getPositionAndLine();
 
-        if ((t = scanner.scanner().type) == Types.TypeIdent) {
+        Lexeme checkLexeme = scanner.scanner();
+        t = checkLexeme.type;
+        if (t == Types.TypeIdent) {
             setPositionAndLine(position, row);
             dataOfV.add(scanner.getLexeme());
 
@@ -1237,6 +1320,9 @@ public class Diagrams {
             int tmpLine = scanner.getCurrentLine();
             if (scanner.scanner().type == Types.TypeOpenParenthesis) {
                 setPositionAndLine(tmpPos, tmpLine);
+                if (interpreter.isInterpreting()) {
+                    interpreter.pushFunctionCallPos(checkLexeme);
+                }
                 functionCall = false;
                 FunctionCall();
             } else {

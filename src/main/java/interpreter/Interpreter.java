@@ -6,6 +6,7 @@ import scanner.Lexeme;
 import scanner.Scanner;
 import service.DataType;
 import service.DiagramsException;
+import service.Pos;
 import service.SemanticsException;
 import tree.DataValue;
 import tree.Node;
@@ -21,6 +22,7 @@ public class Interpreter {
     private Scanner scanner;
     private Stack<DataValue> middleValues = new Stack<>();
     private Stack<Tree> functionCallInterpreter = new Stack<>();
+    private Stack<Pos> functionCallPos = new Stack<>();
 
     public void setFunctionCallInterpreterClear(){
         functionCallInterpreter = new Stack<>();
@@ -91,7 +93,7 @@ public class Interpreter {
 
     private void findAndRunMainMethod() {
         /*
-         * Реализовать оиск класса по имени (
+         * Реализовать поиск класса по имени (
          * Main  не обязательно корневой)
          * */
         Tree from = diagrams.getRoot().left;
@@ -189,5 +191,21 @@ public class Interpreter {
 
     public void setExecute(boolean execute) {
         this.execute = execute;
+    }
+
+    public Stack<Pos> getFunctionCallPos() {
+        return functionCallPos;
+    }
+
+    public void setFunctionCallPos(Stack<Pos> functionCallPos) {
+        this.functionCallPos = functionCallPos;
+    }
+    public void pushFunctionCallPos(Lexeme lexeme){
+        Pos pos = new Pos();
+        pos.callMethodPointAddr.type = lexeme.type;
+        pos.callMethodPointAddr.lexeme.append(lexeme.lexeme);
+        pos.callMethodPointAddr.ptr = lexeme.ptr;
+        pos.callMethodPointAddr.line = lexeme.line;
+        functionCallPos.push(pos);
     }
 }
