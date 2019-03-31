@@ -482,7 +482,8 @@ public class Diagrams {
 
                     if (returnLexeme.type == Types.TypeConstInt || returnLexeme.type == Types.TypeInt) {
                         if (interpreter.isInterpreting()) {
-                            returnValue.value.valueInt = Integer.parseInt(scanner.getLexeme().lexeme.toString());
+                            returnValue.type = DataType.TInt;
+                            returnValue.value.valueInt = Integer.parseInt(returnLexeme.lexeme.toString());
                         }
                         if (vertex.node.returnType != DataType.TConstant && vertex.node.returnType != DataType.TInt) {
                             throw new SemanticsException("Тип возвращаемого значения не совпадает: функция " + vertex.node.lexemeName);
@@ -491,6 +492,7 @@ public class Diagrams {
 
                     if (returnLexeme.type == Types.TypeFalse || returnLexeme.type == Types.TypeTrue) {
                         if (interpreter.isInterpreting()) {
+                            returnValue.type = DataType.TBoolean;
                             returnValue.value.constant = returnLexeme.type != Types.TypeFalse;
                         }
                         if (vertex.node.returnType != DataType.TBoolean) {
@@ -774,7 +776,7 @@ public class Diagrams {
 
                 if (returnLexeme.type == Types.TypeConstInt || returnLexeme.type == Types.TypeInt) {
                     if (interpreter.isInterpreting()) {
-                        returnValue.value.valueInt = Integer.parseInt(scanner.getLexeme().lexeme.toString());
+                        returnValue.value.valueInt = Integer.parseInt(returnLexeme.lexeme.toString());
                     }
                     if (vertex.node.returnType != DataType.TConstant && vertex.node.returnType != DataType.TInt) {
                         throw new SemanticsException("Тип возвращаемого значения не совпадает: функция " + vertex.node.lexemeName);

@@ -202,10 +202,7 @@ public class Interpreter {
     }
     public void pushFunctionCallPos(Lexeme lexeme){
         Pos pos = new Pos();
-        pos.callMethodPointAddr.type = lexeme.type;
-        pos.callMethodPointAddr.lexeme.append(lexeme.lexeme);
-        pos.callMethodPointAddr.ptr = lexeme.ptr;
-        pos.callMethodPointAddr.line = lexeme.line;
+        pos.callMethodPointAddr = lexeme;
         functionCallPos.push(pos);
     }
 }
