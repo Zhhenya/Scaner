@@ -20,13 +20,9 @@ public class Interpreter {
     private boolean interpretingIf = false, execute = false;
     private Diagrams diagrams;
     private Scanner scanner;
-    private Stack<DataValue> middleValues = new Stack<>();
+    private Stack<DataValue> returnValues = new Stack<>();
     private Stack<Tree> functionCallInterpreter = new Stack<>();
     private Stack<Pos> functionCallPos = new Stack<>();
-
-    public void setFunctionCallInterpreterClear(){
-        functionCallInterpreter = new Stack<>();
-    }
 
     public static void main(String[] args) {
         (new Interpreter()).start();
@@ -55,27 +51,21 @@ public class Interpreter {
         scanner.initLine(0);
         diagrams.clear();
         findAndRunMainClass();
-
-   //     printGlobalVariables();
-
     }
 
     private void program() {
         try {
             diagrams.S();
-            diagrams.getRoot().printValueTree();
+            diagrams.printTree();
         } catch (SemanticsException e) {
             e.printStackTrace();
         }
     }
 
+    /**
+     * Найти класс TestClass
+     */
     private void findAndRunMainClass() {
-
-        /*
-         * Реализовать поиск класса по имени (
-         * Main  не обязательно корневой)
-         * */
-
         Node node = null;
         try {
             node = diagrams.getRoot().getClass("TestClass").getNode();
@@ -91,17 +81,15 @@ public class Interpreter {
         findAndRunMainMethod();
     }
 
+    /**
+     * Найти метод main в корневом классе
+     */
     private void findAndRunMainMethod() {
-        /*
-         * Реализовать поиск класса по имени (
-         * Main  не обязательно корневой)
-         * */
         Tree from = diagrams.getRoot().left;
-        Tree main = diagrams.getRoot().findByName(from, "main");
+        Tree main = diagrams.getRoot().findByNameLeft(from, "main");
         if (main == null) {
             throw new DiagramsException("Метод main не найден");
         }
-
         scanner.setCurrentLine(main.node.line);
         scanner.setPtr(main.node.ptr);
         try {
@@ -111,31 +99,6 @@ public class Interpreter {
             diagrams.Method();
         } catch (SemanticsException e) {
             e.printStackTrace();
-        }
-    }
-
-
-
-    private void printGlobalVariables() {
-        System.out.println("Global variables values:");
-        Tree tree = diagrams.getRoot();
-        while (tree != null) {
-            if (tree.node != null && tree.right == null) {
-                System.out.print(tree.node.lexemeName + " = ");
-                if (tree.node.dataValue.value == null) {
-                    System.out.println("null");
-                } else {
-                    switch(tree.node.type){
-                        case TBoolean:
-                            System.out.println(tree.node.dataValue.value.constant);
-                        case TInt:
-                            System.out.println(tree.node.dataValue.value.valueInt);
-                        case TUserType:
-                            System.out.println(tree.node.dataValue.value.clazz.node.lexemeName);
-                    }
-                }
-            }
-            tree = tree.left;
         }
     }
 
@@ -167,13 +130,11 @@ public class Interpreter {
         return functionCallInterpreter;
     }
 
-    public void setFunctionCallInterpreter(Stack<Tree> functionCallInterpreter) {
-        this.functionCallInterpreter = functionCallInterpreter;
-    }
-    public Tree peek(){
+    public Tree peek() {
         return functionCallInterpreter.peek();
     }
-    public void put(Tree tree){
+
+    public void put(Tree tree) {
         functionCallInterpreter.push(tree);
     }
 
@@ -197,12 +158,29 @@ public class Interpreter {
         return functionCallPos;
     }
 
-    public void setFunctionCallPos(Stack<Pos> functionCallPos) {
-        this.functionCallPos = functionCallPos;
-    }
-    public void pushFunctionCallPos(Lexeme lexeme){
+    public void pushFunctionCallPos(Lexeme lexeme) {
         Pos pos = new Pos();
-        pos.callMethodPointAddr = lexeme;
+        pos.callMethodPointAddr.type = lexeme.type;
+        pos.callMethodPointAddr.lexeme.append(lexeme.lexeme);
+        pos.callMethodPointAddr.line = lexeme.line;
+        pos.callMethodPointAddr.ptr = lexeme.ptr;
         functionCallPos.push(pos);
     }
+
+    public Stack<DataValue> getReturnValues() {
+        return returnValues;
+    }
+
+    public void pushReturnValue(DataValue dataValue) {
+        returnValues.push(dataValue);
+    }
+
+    public DataValue peekReturnValue() {
+        return returnValues.peek();
+    }
+
+    public DataValue popReturnValue() {
+        return returnValues.pop();
+    }
+
 }
