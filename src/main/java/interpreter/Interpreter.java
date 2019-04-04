@@ -22,7 +22,12 @@ public class Interpreter {
     private Scanner scanner;
     private Stack<DataValue> returnValues = new Stack<>();
     private Stack<Tree> functionCallInterpreter = new Stack<>();
+    private Stack<Tree> classCallInterpreter = new Stack<>();
     private Stack<Pos> functionCallPos = new Stack<>();
+    private Stack<Pos> varCallPos = new Stack<>();
+    private Stack<Tree> varCallInterpreter = new Stack<>();
+    private Stack<Boolean> nesting = new Stack<>();
+    private int countOfReturn = 0;
 
     public static void main(String[] args) {
         (new Interpreter()).start();
@@ -91,12 +96,13 @@ public class Interpreter {
             throw new DiagramsException("Метод main не найден");
         }
         scanner.setCurrentLine(main.node.line);
-        scanner.setPtr(main.node.ptr);
+        scanner.setPtr(main.node.ptrStart);
         try {
             callFunction = true;
             functionCallInterpreter.push(main.clone(main));
             functionCallInterpreter.peek().node.dataValue.value.valueInt = 0;
             diagrams.Method();
+            diagrams.getRoot().printValueTree();
         } catch (SemanticsException e) {
             e.printStackTrace();
         }
@@ -130,7 +136,7 @@ public class Interpreter {
         return functionCallInterpreter;
     }
 
-    public Tree peek() {
+    public Tree peekFunctionCall() {
         return functionCallInterpreter.peek();
     }
 
@@ -159,12 +165,20 @@ public class Interpreter {
     }
 
     public void pushFunctionCallPos(Lexeme lexeme) {
-        Pos pos = new Pos();
-        pos.callMethodPointAddr.type = lexeme.type;
-        pos.callMethodPointAddr.lexeme.append(lexeme.lexeme);
-        pos.callMethodPointAddr.line = lexeme.line;
-        pos.callMethodPointAddr.ptr = lexeme.ptr;
-        functionCallPos.push(pos);
+        if (isInterpreting()) {
+            Pos pos = new Pos();
+            pos.callMethodPointAddr.type = lexeme.type;
+            pos.callMethodPointAddr.lexeme.append(lexeme.lexeme);
+            pos.callMethodPointAddr.line = lexeme.line;
+            pos.callMethodPointAddr.ptr = lexeme.ptr;
+            functionCallPos.push(pos);
+        }
+    }
+
+    public void pushFunctionCallPos(Pos pos) {
+        if (isInterpreting()) {
+            functionCallPos.push(pos);
+        }
     }
 
     public Stack<DataValue> getReturnValues() {
@@ -179,8 +193,95 @@ public class Interpreter {
         return returnValues.peek();
     }
 
+    public Boolean isEmptyReturnValue() {
+        return returnValues.isEmpty();
+    }
+
     public DataValue popReturnValue() {
         return returnValues.pop();
     }
+
+    public int getCountOfReturn() {
+        return countOfReturn;
+    }
+
+    public void setCountOfReturn(int countOfReturn) {
+        this.countOfReturn = countOfReturn;
+    }
+
+    public void incCountOfReturn() {
+        countOfReturn++;
+    }
+
+    public void decCountOfReturn() {
+        countOfReturn--;
+    }
+
+    public void checkReturn() {
+        if (isInterpreting() && countOfReturn != 0) {
+            decCountOfReturn();
+        }
+    }
+
+    public void addNesting(Boolean isNesting) {
+        if (isNesting) {
+            nesting.push(isNesting);
+        }
+    }
+
+    public void changeNesting(Boolean isNesting) {
+        if (isNesting) {
+            nesting.pop();
+            nesting.push(isNesting);
+        }
+    }
+
+    public Boolean popNesting() {
+        if (isInterpreting()) {
+            return nesting.pop();
+        }
+        return null;
+    }
+
+    public Tree popFunctionCall(){
+        return functionCallInterpreter.pop();
+    }
+
+    public Pos popVarCall() {
+        return varCallPos.pop();
+    }
+
+    public void pushVarCall(Pos pos) {
+        varCallPos.push(pos);
+    }
+
+    public Pos peekVarCall() {
+        return varCallPos.peek();
+    }
+
+    public Boolean peekNesting() {
+        if (isInterpreting()) {
+            return nesting.peek();
+        }
+        return null;
+    }
+
+    public void changeFunctionCallInterpreter(DataValue dataValue) {
+        Tree tree = functionCallInterpreter.pop();
+        tree.node.dataValue = dataValue;
+        functionCallInterpreter.push(tree);
+    }
+
+    public boolean isClassCallInterpreterEmpty() {
+        return classCallInterpreter.isEmpty();
+    }
+
+    public Tree penultimateFunctionCall() {
+        if (functionCallInterpreter.size() > 1) {
+            return functionCallInterpreter.get(functionCallInterpreter.size() - 2);
+        }
+        return null;
+    }
+
 
 }

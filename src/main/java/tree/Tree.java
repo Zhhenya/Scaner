@@ -237,10 +237,10 @@ public class Tree {
         }
         System.out.println();
         if (left != null) {
-            left.printTree();
+            left.printValueTree();
         }
         if (right != null) {
-            right.printTree();
+            right.printValueTree();
         }
     }
 
@@ -286,7 +286,7 @@ public class Tree {
         Node newNode = new Node();
         node.dataValue = new DataValue();
         newNode.lexemeName = lexeme.lexeme.toString();
-        newNode.ptr = lexeme.ptr;
+        newNode.ptrStart = lexeme.ptr;
         newNode.line = lexeme.line;
         newNode.type = lexemeType;
         /*и еще ссылка на значение*/
@@ -316,10 +316,10 @@ public class Tree {
         Node newNode = new Node();
         newNode.dataValue = new DataValue();
         newNode.lexemeName = lexeme.lexeme.toString();
-        newNode.ptr = lexeme.ptr;
+        newNode.ptrStart = lexeme.ptr;
         newNode.line = lexeme.line;
         newNode.type = lexemeType;
-        newNode.returnType = returnType;
+        newNode.dataValue.type = returnType;
         if (className != null) {
             newNode.classLink = findUpName(className);
         } else {
@@ -523,8 +523,9 @@ public class Tree {
             tree.right = vertex.cloneLeft(vertex.right);
             tree.right.parent = tree;
         }
-        if(vertex.right == null && vertex.left == null)
+        if (vertex.right == null && vertex.left == null) {
             return tree;
+        }
         return tree;
     }
 }

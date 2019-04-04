@@ -501,4 +501,12 @@ public class Scanner {
         ptr = 0;
         line = (currentLine != lines.size()) ? lines.get(currentLine) : null;
     }
+
+    public void readForEndFunctionCall(){
+        Lexeme tmp = new Lexeme();
+        while(scanner().type !=  Types.TypeCloseParenthesis)
+            ;
+//        ptr = tmp.ptr;
+//        currentLine = tmp.line;
+    }
 }
