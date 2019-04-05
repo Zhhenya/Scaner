@@ -34,7 +34,7 @@ public class Interpreter {
     }
 
     private Interpreter() {
-        String filePath = "src/main/resources/program2.java";
+        String filePath = "src/main/resources/program3.java";
         scanner = new Scanner();
         Lexeme lexeme = new Lexeme();
         try {

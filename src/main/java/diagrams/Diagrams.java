@@ -523,7 +523,7 @@ public class Diagrams {
                         /*
                          * проверить тип возвращаемого значения (выражения)
                          * */
-                        if (currentType != currentVertex.node.dataValue.type) {
+                        if (!currentType.equals(currentVertex.node.type)) {
                             throw new SemanticsException("Тип возвращаемого значения не совпадает: функция " + currentVertex.node.lexemeName);
                         }
                         return;
@@ -938,9 +938,6 @@ public class Diagrams {
             pos.callMethodPointAddr = scanner.getLexeme();
             interpreter.setExecute(true);
         }
-
-//        nameCurrentFunction.delete(0, nameCurrentFunction.length());
-//        nameCurrentFunction.append(scanner.getLexeme().lexeme);
 
         //получить адрес функции
         if (functionCall) {
@@ -1363,7 +1360,7 @@ public class Diagrams {
              * добавим его в список типов для выражения
              * */
 
-            if (returnValue.type != DataType.Empty) {
+            if (returnValue != null && returnValue.type != DataType.Empty) {
                 typeOfV.add(returnValue.type);
                 typeOfV.add(DataType.TFunction);
                 /*

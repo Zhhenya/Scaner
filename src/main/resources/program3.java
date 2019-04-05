@@ -1,5 +1,7 @@
 public class TestClass {
     int result = 0;
+    int rez = 0;
+    int y = 0;
 
     int fibonacchi(int n) {
         if (n == 0) {
@@ -8,10 +10,11 @@ public class TestClass {
         if (n == 1) {
             return 1;
         }
-        return fibonacchi(n - 2) + fibonacchi(n - 1);
+        result = fibonacchi(n - 1);
+        return result + fibonacchi(n - 2);
     }
 
     void main(int u) {
-        fibonacchi(5);
+        y = fibonacchi(5);
     }
 }#
