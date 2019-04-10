@@ -1,5 +1,7 @@
 package translator;
 
+import tree.Tree;
+
 public abstract class Storage {
 
     public static final String[] REGISTERS = new String[]{"eax", "ebx", "ecx", "edx", "esi", "edi"};
@@ -40,8 +42,8 @@ public abstract class Storage {
             }
         }
 
-        public Memory(SemanticAnalyzer.Node n) {
-            this(n.global, n.lexeme.value, n.address);
+        public Memory(Tree n) {
+            this(n.global, n.value, n.address);
         }
 
         public Memory(int address, int index) {

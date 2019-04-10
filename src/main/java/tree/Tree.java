@@ -8,8 +8,11 @@ import service.SemanticsException;
 public class Tree {
     protected Logger LOGGER = Logger.getLogger(Tree.class);
     public Node node;
+    public String value;
     public Tree parent, left, right;
     public static Tree current;
+    public boolean global = false;
+    public int address;
 
     public Tree(Tree parent, Tree left, Tree right, Node node) {
         this.node = node;
@@ -293,11 +296,16 @@ public class Tree {
         current.setLeft(newNode);
         current = current.left;
         if (lexemeType != DataType.TFunction && lexemeType != DataType.TClass) {
+            Tree link;
             if (className != null) {
-                newNode.classLink = findUpName(className);
+                link = findUpName(className);
+                newNode.classLink = link;
             } else {
-                newNode.classLink = findUp();
+                link = findUp();
+                newNode.classLink = link;
             }
+            if(link.node.type == DataType.TClass || link.node.type == DataType.TUserType)
+                global = true;
             return current;
         } else {
             vertex = current;
@@ -320,12 +328,17 @@ public class Tree {
         newNode.line = lexeme.line;
         newNode.type = lexemeType;
         newNode.dataValue.type = returnType;
+        Tree link;
         if (className != null) {
-            newNode.classLink = findUpName(className);
+            link = findUpName(className);
+            newNode.classLink = link;
         } else {
-            newNode.classLink = findUp();
+            link = findUp();
+            newNode.classLink = link;
         }
 
+        if(link.node.type == DataType.TClass || link.node.type == DataType.TUserType)
+            global = true;
 
         /*и еще ссылка на значение*/
         current.setLeft(newNode);
@@ -346,7 +359,7 @@ public class Tree {
     }
 
     public void controlNumberOfParameters(Tree vertex, Integer numberOfParameters) throws SemanticsException {
-        if (numberOfParameters != vertex.node.numberOfParameters) {
+        if (!numberOfParameters.equals(vertex.node.numberOfParameters)) {
             throw new SemanticsException("Число параметров не совпадает");
         }
     }
@@ -354,7 +367,7 @@ public class Tree {
 
     public DataType getType(String lexeme) throws SemanticsException {
 //        LOGGER.info("Метод getType()");
-      //  LOGGER.info(lexeme);
+        //  LOGGER.info(lexeme);
         switch (lexeme) {
             case "int":
                 return DataType.TInt;
