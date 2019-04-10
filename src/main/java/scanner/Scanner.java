@@ -481,9 +481,9 @@ public class Scanner {
         if (line == null) {
             return;
         }
-//        LOGGER.info("skipSymbols");
-//        LOGGER.info(Arrays.toString(line));
-//        LOGGER.info(currentLine);
+        LOGGER.info("skipSymbols");
+        LOGGER.info(Arrays.toString(line));
+        LOGGER.info(currentLine);
         for (; ; ) {
             if (ptr >= line.length || line[ptr] == '\n') {
                 newLine();
