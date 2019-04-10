@@ -3,10 +3,14 @@ package service;
 import scanner.Scanner;
 
 public class DiagramsException extends RuntimeException {
-    public DiagramsException(String message, StringBuilder lexeme, Scanner scanner){
-        scanner.printError(message, lexeme, scanner.getCurrentItem());
+    private String MESSAGE = "строка %s:";
+
+    public DiagramsException(String message, Scanner scanner) {
+        scanner.printError(String.format(MESSAGE, scanner.getCurrentLine()) + message, scanner.getLexeme().lexeme,
+                scanner.getCurrentItem());
     }
-    public DiagramsException(String message){
-       System.out.println(message);
+
+    public DiagramsException(String message) {
+        System.out.println(message);
     }
 }
