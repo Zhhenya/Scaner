@@ -1,8 +1,5 @@
-  public class {
+  public class Main{
       int a, b = back = false;
-
-
-
      boolean h ;
      int h, k j l = 0;
       int int int 2;

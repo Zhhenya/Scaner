@@ -10,8 +10,8 @@ import java.io.*;
 
 public class Main {
     public static void main(String[] argv) throws Exception {
-        Scanner scanner = new Scanner();
-        String filePath = "src/main/resources/program1.txt";
+   /*     Scanner scanner = new Scanner();
+        String filePath = "src/main/resources/program3.java";
         Types types;
         StringBuilder lexeme = new StringBuilder();
         BufferedReader reader;
@@ -40,10 +40,10 @@ public class Main {
         } catch (SemanticsException e) {
             e.printStackTrace();
         }
+*/
 
-
-     /*   Scanner scanner = new Scanner();
-        String filePath = "src/main/resources/program1.txt";
+        Scanner scanner = new Scanner();
+        String filePath = "src/main/resources/program4.java";
         BufferedReader reader = null;
         try {
             reader = new BufferedReader(new InputStreamReader(new FileInputStream(filePath)));
@@ -58,11 +58,10 @@ public class Main {
             else
                 System.out.println("Анализ завершен");
         } catch (FileNotFoundException e) {
-            //  e.printStackTrace();
-        } *//*catch (AnalyzeError e) {
+              e.printStackTrace();
+        } catch (AnalyzeError e) {
             System.out.println(e.getDisplayMessage());
-        }*//*
-*/
+        }
 
     }
 }
