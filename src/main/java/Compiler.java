@@ -1,8 +1,12 @@
+import diagrams.Diagrams;
+import llkAnalyzer.AnalyzeError;
+import llkAnalyzer.Generator;
+import llkAnalyzer.Table;
 import org.apache.commons.lang3.SerializationUtils;
 import scanner.Lexeme;
 import scanner.Scanner;
 import service.DataType;
-import sun.nio.cs.Surrogate;
+import service.Types;
 import translator.Translator;
 import tree.Tree;
 import triad.Reference;
@@ -24,7 +28,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Stack;
 
-@SuppressWarnings("unused")
 public class Compiler {
 
     private static final boolean DEBUG = false;
@@ -63,7 +66,7 @@ public class Compiler {
         controlTable = SerializationUtils.deserialize(new FileInputStream(table));
         scanner = source;
 
-        semantic = new SemanticAnalyzer(scanner);
+        semantic = new Diagrams(scanner);
     }
 
     public boolean compile(boolean silent) throws Exception {
@@ -101,7 +104,7 @@ public class Compiler {
         stack.add(controlTable.getEndTerminal());
         stack.add(controlTable.getAxiom());
 
-        Lexeme lexeme = scanner.next();
+        Lexeme lexeme = scanner.scanner();
         for (; ; ) {
             if (DEBUG) {
                 System.out.format("%-17s %-2d %s\n", lexeme.type.name(), lexeme.line + 1, stack);
@@ -117,18 +120,18 @@ public class Compiler {
                     String line1 = "expected " + terminal.type, line2 = "but found " + lexeme.type;
                     throw new AnalyzeError(scanner, lexeme, line1, line2);
                 }
-                if (lexeme.type == Type.End) {
+                if (lexeme.type == Types.TypeEnd) {
                     break;
                 }
 
-                if (lexeme.type == Type.Identifier || lexeme.type == Type.KeyMain) {
+                if (lexeme.type == Types.TypeIdent || lexeme.lexeme.toString().equals("main")) {
                     identifiers.push(lexeme);
 
                     if (DEBUG) {
                         System.out.println(">>> PUSH IDENTIFIER " + lexeme.value + " <<<");
                         System.out.println(identifiers + " " + dataTypes + " " + references);
                     }
-                } else if (lexeme.type == Type.ConstInt10 || lexeme.type == Type.ConstInt16) {
+                } else if (lexeme.type == Types.TypeInt || lexeme.type == Types.TypeConstInt) {
                     SemanticAnalyzer.Value value = semantic.getConstValue(lexeme);
 
                     references.push(new ConstantReference(value.value));
@@ -143,7 +146,7 @@ public class Compiler {
                 }
 
                 prevLexeme = lexeme;
-                lexeme = scanner.next();
+                lexeme = scanner.scanner();
             } else {
                 Table.NonTerminal nonTerminal = (Table.NonTerminal) current;
 
