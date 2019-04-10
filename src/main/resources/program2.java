@@ -11,6 +11,6 @@ public class TestClass {
     }
 
     void main(int u) {
-        y = fact(4);
+        y = fact(5);
     }
 }#

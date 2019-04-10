@@ -8,9 +8,7 @@ import service.*;
 import tree.DataValue;
 import tree.Tree;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Stack;
+import java.util.*;
 
 import static service.InterpreterEnum.CALL_METHOD_POINT_ADDR;
 import static service.InterpreterEnum.CALL_VAR_POINT_ADDR;
@@ -204,7 +202,7 @@ public class Diagrams {
 
     public DataValue Method() throws DiagramsException, SemanticsException {
         Types t;
-        DataValue dataValue = null;
+        DataValue dataValue = new DataValue();
 
         if (interpreter.isAnalyzing()) {
             ReturnType();
@@ -491,12 +489,12 @@ public class Diagrams {
                         }
                     }
                     if (interpreter.isInterpreting()) {
-//                        if (interpreter.getFunctionCallInterpreter().size() > 1 && interpreter.peekFunctionCall()
-//                        .node.lexemeName.equals(interpreter.penultimateFunctionCall().node.lexemeName)) {
-//                            interpreter.popFunctionCall();
-//                        }
                         interpreter.changeFunctionCallInterpreter(returnValue);
                         interpreter.pushReturnValue(returnValue);
+                        interpreter.popPrevFunctionCall();
+                        if (!interpreter.getPrevFunctionCallInterpreter().isEmpty()) {
+                            interpreter.changePrevFunctionCallInterpreter(returnValue);
+                        }
                         return;
                     }
 
@@ -633,13 +631,22 @@ public class Diagrams {
                     setPositionAndLine(tmpPos, tmpLine);
                     remember(CALL_METHOD_POINT_ADDR, functionName);
                     initIdentValue = setFunctionValue(FunctionCall());
+
+                    if (interpreter.isInterpreting()) {
+                        Pos tmp = interpreter.getFunctionCallPos().pop();
+                        setPositionAndLine(tmp.callMethodPointAddr.ptr, tmp.callMethodPointAddr.line);
+                        scanner.readForEndFunctionCall();
+                        position = scanner.getPtr();
+                        row = scanner.getCurrentLine();
+                    }
+
                 } else {
                     setPositionAndLine(tmpPos, tmpLine);
                     remember(CALL_VAR_POINT_ADDR, functionName);
                     initIdentValue = setVarValue(V());
                 }
 
-                if(interpreter.isInterpreting()){
+                if (interpreter.isInterpreting()) {
                     setVarValue(initIdentValue);
                 }
 
@@ -652,7 +659,7 @@ public class Diagrams {
                  * затем сравнивается с типом объявленной переменной(идентификатора)
                  * */
 
-                if (!typeIdent.equals(currentType.toString())) {
+                if (interpreter.isAnalyzing() && !typeIdent.equals(currentType.toString())) {
                     if (currentVertex.node != null && currentVertex.node.type == DataType.TFunction) {
                         if (!currentVertex.node.dataValue.type.toString().equals(typeIdent)) {
                             throw new SemanticsException("Тип формальной и фактической переменной не совпадают: ",
@@ -912,7 +919,7 @@ public class Diagrams {
                 row = scanner.getCurrentLine();
             }
             typeOfV.clear();
-            functionCall = true;
+            functionCall = false;
             return dataValue;
         }
 
@@ -960,6 +967,12 @@ public class Diagrams {
 
         if (interpreter.isInterpreting()) {
             interpreter.put(currentVertex.clone(currentVertex));
+            if (interpreter.getPrevFunctionCallInterpreter().isEmpty()) {
+                interpreter.pushPrevFuctionCall(currentVertex.clone(currentVertex));
+            } else {
+                interpreter.pushPrevFuctionCall(interpreter.peekPrevFunctionCall()
+                                                           .clone(interpreter.peekPrevFunctionCall()));
+            }
         }
 
         ActualParameterList();
@@ -993,8 +1006,11 @@ public class Diagrams {
 
     private void ActualParameterList() throws DiagramsException, SemanticsException {
         Tree parameters = null;
+        Tree prevParameters = null;
+
         if (interpreter.isCallFunction() && interpreter.isInterpreting()) {
             parameters = interpreter.peekFunctionCall().right;
+            prevParameters = interpreter.peekPrevFunctionCall().right;
         }
         int numberOfActualParameter = 0, numberOfParameter = currentVertex.node.numberOfParameters;
         Tree functionVertex = currentVertex;
@@ -1014,7 +1030,9 @@ public class Diagrams {
                 functionVertex.node.dataValue = dataValue;
                 if (interpreter.isCallFunction()) {
                     parameters.left.node.dataValue = dataValue;
+                    prevParameters.left.node.dataValue = dataValue;
                     parameters = parameters.left;
+                    prevParameters = prevParameters.left;
                 }
             }
 
@@ -1466,7 +1484,7 @@ public class Diagrams {
                         break;
                     case TypeIdent:
                         Tree vertex = null;
-                        if(data.get(i + 2).type == Types.TypeIdent) {
+                        if (data.get(i + 2).type == Types.TypeIdent) {
                             vertex = retrieveVariable(data.get(i).lexeme.toString(), 1);
                             Lexeme intLexeme = new Lexeme();
                             intLexeme.lexeme.append(vertex.node.dataValue.value.valueInt);
@@ -1479,7 +1497,7 @@ public class Diagrams {
                                                                    data.get(i + 1).type, 0);
                                 break;
                             }
-                        }else{
+                        } else {
                             vertex = retrieveVariable(data.get(i).lexeme.toString(), 0);
                             Lexeme intLexeme = new Lexeme();
                             intLexeme.lexeme.append(vertex.node.dataValue.value.valueInt);
@@ -1493,7 +1511,6 @@ public class Diagrams {
                                 break;
                             }
                         }
-
 
 
                         break;
@@ -1510,8 +1527,6 @@ public class Diagrams {
     }
 
 
-
-
     private Integer checkSecondVariableIdentAndExecute(Lexeme lexeme2, Lexeme lexeme1, Types operation, int mode) {
         Tree vertex = retrieveVariable(lexeme2.lexeme.toString(), mode);
         return retrieveExecutionWithIdent(vertex, lexeme1, lexeme2, operation);
@@ -1522,13 +1537,52 @@ public class Diagrams {
             Tree ident = null;
             switch (mode) {
                 case 0:
-                    ident = root.findByName(interpreter.peekFunctionCall().right, name);
+                    if (!interpreter.getPrevFunctionCallInterpreter().isEmpty() &&
+                            interpreter.getPrevFunctionCallInterpreter().size() > 1 &&
+                            interpreter.penultimatePrevFunctionCall().node.lexemeName.equals(
+                                    interpreter.peekPrevFunctionCall().node.lexemeName)) {
+                        ident = root.findByName(interpreter.peekPrevFunctionCall().right, name);
+                    }
                     if (ident == null) {
+                        ident = root.findByName(interpreter.peekFunctionCall().right, name);
+                    }
+
+                    if (ident == null) {
+                        ident = root.findByName(root.left, name);
+                    }
+
+
+                    if (ident == null || ident.node.type == DataType.TFunction) {
+                        if (!interpreter.getPrevFunctionCallInterpreter().isEmpty() && (interpreter.getPrevFunctionCallInterpreter().size() == 1 ||
+                                interpreter.penultimatePrevFunctionCall().node.lexemeName.equals(
+                                        interpreter.peekPrevFunctionCall().node.lexemeName))) {
+                            return interpreter.peekPrevFunctionCall();
+                        }
                         return interpreter.popFunctionCall();
-                    } break;
+                    }
+                    break;
                 case 1:
-                    ident = root.findByName(interpreter.penultimateFunctionCall().right, name);
+                    if (!interpreter.getPrevFunctionCallInterpreter().isEmpty() &&
+                            interpreter.getPrevFunctionCallInterpreter().size() > 1 &&
+                            interpreter.penultimatePrevFunctionCall().node.lexemeName.equals(
+                                    interpreter.peekPrevFunctionCall().node.lexemeName)) {
+                        ident = root.findByName(interpreter.peekPrevFunctionCall().right, name);
+                    }
                     if (ident == null) {
+                        ident = root.findByName(interpreter.peekPrevFunctionCall().right, name);
+                    }
+
+                    if (ident == null) {
+                        ident = root.findByName(root.left, name);
+                    }
+
+
+                    if (ident == null || ident.node.type == DataType.TFunction) {
+                        if (!interpreter.getPrevFunctionCallInterpreter().isEmpty() && (interpreter.getPrevFunctionCallInterpreter().size() == 1 ||
+                                interpreter.penultimatePrevFunctionCall().node.lexemeName.equals(
+                                        interpreter.peekPrevFunctionCall().node.lexemeName))) {
+                            return interpreter.peekPrevFunctionCall();
+                        }
                         return interpreter.popFunctionCall();
                     } break;
             }
@@ -1574,8 +1628,14 @@ public class Diagrams {
     private Integer retrieveExecutionWithIdent(Tree vertex, Lexeme lexeme1, Lexeme lexeme2, Types operation) {
         switch (vertex.node.type) {
             case TInt:
+                lexeme2.lexeme.delete(0, lexeme2.lexeme.length());
+                lexeme2.lexeme.append(vertex.node.dataValue.value.valueInt);
+                lexeme2.type = Types.TypeInt;
                 return executeOperationInt(lexeme1, lexeme2, operation);
             case TConstant:
+                lexeme2.lexeme.delete(0, lexeme2.lexeme.length());
+                lexeme2.lexeme.append(vertex.node.dataValue.value.valueInt);
+                lexeme2.type = Types.TypeConstInt;
                 return executeOperationInt(lexeme1, lexeme2, operation);
             case TFunction:
                 switch (vertex.node.dataValue.type) {
@@ -1759,14 +1819,31 @@ public class Diagrams {
     private DataValue setVarValue(DataValue dataValue) {
         if (interpreter.isInterpreting()) {
             Tree tree = null;
+            Tree prev = null;
             Pos pos = interpreter.popVarCall();
+            if (!pos.callVarPointAddr.lexeme.toString().equals("main")) {
+                if (pos.classLinkVar.node.type == DataType.TFunction) {
+                    Collections.reverse(interpreter.getPrevFunctionCallInterpreter());
+                    for (Tree item : interpreter.getPrevFunctionCallInterpreter()) {
+                        prev = item.findByName(item.right, pos.callVarPointAddr.lexeme.toString());
+                        if (prev != null) {
+                            prev.node.dataValue = dataValue;
+                            break;
+                        }
+                    }
+                    Collections.reverse(interpreter.getPrevFunctionCallInterpreter());
+                }
+            }
+
             if (pos.classLinkVar.node.type == DataType.TFunction) {
+                Collections.reverse(interpreter.getFunctionCallInterpreter());
                 for (Tree item : interpreter.getFunctionCallInterpreter()) {
                     tree = item.findByName(item.right, pos.callVarPointAddr.lexeme.toString());
                     if (tree != null) {
                         break;
                     }
                 }
+                Collections.reverse(interpreter.getFunctionCallInterpreter());
 
             } else {
                 tree = root.findByName(root.left, pos.callVarPointAddr.lexeme.toString());
@@ -1777,8 +1854,12 @@ public class Diagrams {
     }
 
     private DataValue setFunctionValue(DataValue dataValue) {
+        if(dataValue.type == DataType.Empty)
+            return dataValue;
         if (interpreter.isInterpreting()) {
             Tree tree = interpreter.getFunctionCallInterpreter().peek();
+            Tree prev = interpreter.peekPrevFunctionCall();
+            prev.node.dataValue = dataValue;
             tree.node.dataValue = dataValue;
         }
         return dataValue;

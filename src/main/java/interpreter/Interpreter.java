@@ -21,6 +21,7 @@ public class Interpreter {
     private Diagrams diagrams;
     private Scanner scanner;
     private Stack<DataValue> returnValues = new Stack<>();
+    private Stack<Tree> prevFunctionCallInterpreter = new Stack<>();
     private Stack<Tree> functionCallInterpreter = new Stack<>();
     private Stack<Tree> classCallInterpreter = new Stack<>();
     private Stack<Pos> functionCallPos = new Stack<>();
@@ -272,6 +273,12 @@ public class Interpreter {
         functionCallInterpreter.push(tree);
     }
 
+    public void changePrevFunctionCallInterpreter(DataValue dataValue) {
+        Tree tree = prevFunctionCallInterpreter.pop();
+        tree.node.dataValue = dataValue;
+        prevFunctionCallInterpreter.push(tree);
+    }
+
     public boolean isClassCallInterpreterEmpty() {
         return classCallInterpreter.isEmpty();
     }
@@ -283,5 +290,29 @@ public class Interpreter {
         return null;
     }
 
+    public Stack<Tree> getPrevFunctionCallInterpreter() {
+        return prevFunctionCallInterpreter;
+    }
 
+    public void setPrevFunctionCallInterpreter(Stack<Tree> prevFunctionCallInterpreter) {
+        this.prevFunctionCallInterpreter = prevFunctionCallInterpreter;
+    }
+
+    public Tree peekPrevFunctionCall(){
+        return prevFunctionCallInterpreter.peek();
+    }
+
+    public Tree popPrevFunctionCall(){
+        return prevFunctionCallInterpreter.pop();
+    }
+
+    public void pushPrevFuctionCall(Tree tree){
+        prevFunctionCallInterpreter.push(tree);
+    }
+    public Tree penultimatePrevFunctionCall(){
+        if (prevFunctionCallInterpreter.size() > 1) {
+            return prevFunctionCallInterpreter.get(prevFunctionCallInterpreter.size() - 2);
+        }
+        return null;
+    }
 }
