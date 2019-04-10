@@ -15,6 +15,6 @@ public class TestClass {
     }
 
     void main(int u) {
-        y = fibonacchi(6);
+        y = fibonacchi(8);
     }
 }#
