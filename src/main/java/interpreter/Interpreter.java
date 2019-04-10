@@ -1,13 +1,11 @@
 package interpreter;
 
+import com.sun.org.apache.xml.internal.serializer.ToUnknownStream;
 import diagrams.Diagrams;
 import org.apache.log4j.BasicConfigurator;
 import scanner.Lexeme;
 import scanner.Scanner;
-import service.DataType;
-import service.DiagramsException;
-import service.Pos;
-import service.SemanticsException;
+import service.*;
 import tree.DataValue;
 import tree.Node;
 import tree.Tree;
@@ -35,7 +33,7 @@ public class Interpreter {
     }
 
     private Interpreter() {
-        String filePath = "src/main/resources/program2.java";
+        String filePath = "src/main/resources/program3.java";
         scanner = new Scanner();
         Lexeme lexeme = new Lexeme();
         try {
@@ -49,12 +47,14 @@ public class Interpreter {
 
     private void start() {
         BasicConfigurator.configure();
+        System.out.println("Анализ");
         program();
         interpreting = true;
         analyzing = false;
         scanner.setCurrentLine(0);
         scanner.setPtr(0);
         scanner.initLine(0);
+        System.out.println("Интерпретатор");
         diagrams.clear();
         findAndRunMainClass();
     }
@@ -62,7 +62,7 @@ public class Interpreter {
     private void program() {
         try {
             diagrams.S();
-            diagrams.printTree();
+          //  diagrams.printTree();
         } catch (SemanticsException e) {
             e.printStackTrace();
         }
@@ -84,7 +84,77 @@ public class Interpreter {
         if (!node.lexemeName.equals("TestClass")) {
             throw new DiagramsException("Класс TestClass не найден");
         }
+        initVariables();
+        clear();
         findAndRunMainMethod();
+    }
+
+    private void clear() {
+        returnValues = new Stack<>();
+        prevFunctionCallInterpreter = new Stack<>();
+        functionCallInterpreter = new Stack<>();
+        classCallInterpreter = new Stack<>();
+        functionCallPos = new Stack<>();
+        varCallPos = new Stack<>();
+        varCallInterpreter = new Stack<>();
+        Stack<Boolean> nesting = new Stack<>();
+        countOfReturn = 0;
+        diagrams.clear();
+        scanner.setCurrentLine(0);
+        scanner.setPtr(0);
+        scanner.initLine(0);
+    }
+
+    private void initVariables() {
+        Tree variable = diagrams.getRoot().left.right;
+        while (true) {
+            if(variable.left == null)
+                break;
+            DataType dataType = variable.left.node.type;
+            if (dataType == DataType.TBoolean || dataType == DataType.TInt || dataType == DataType.TConstant) {
+                variable = variable.left;
+                Lexeme lexeme = new Lexeme();
+                lexeme.lexeme.append(variable.node.lexemeName);
+                lexeme.type = convertDataType(dataType);
+                lexeme.ptr = variable.node.ptrStart;
+                lexeme.line = variable.node.line;
+                Pos pos = new Pos();
+                pos.setCallVarPointAddr(lexeme, variable.node.classLink);
+                varCallPos.push(pos);
+                scanner.setPtr(lexeme.ptr);
+                scanner.setCurrentLine(lexeme.line);
+                diagrams.getRoot().setCurrent(variable);
+                try {
+                    diagrams.setVarValue(diagrams.V());
+                } catch (SemanticsException e) {
+                    e.printStackTrace();
+                }
+            } else {
+                variable = variable.left;
+                continue;
+            }
+
+
+            if (dataType == DataType.TUserType || variable.right != null) {
+                variable = variable.right;
+                continue;
+            }
+            if (variable.left == null && variable.right == null) {
+                break;
+            }
+        }
+
+    }
+
+    private Types convertDataType(DataType dataType) {
+        switch (dataType) {
+            case TInt:
+                return Types.TypeInt;
+            case TBoolean:
+                return Types.TypeBoolean;
+            default:
+                return null;
+        }
     }
 
     /**
@@ -244,7 +314,7 @@ public class Interpreter {
         return null;
     }
 
-    public Tree popFunctionCall(){
+    public Tree popFunctionCall() {
         return functionCallInterpreter.pop();
     }
 
@@ -290,6 +360,16 @@ public class Interpreter {
         return null;
     }
 
+    public Tree popPenFunctionCall() {
+        if (functionCallInterpreter.size() > 1) {
+            Tree last = functionCallInterpreter.pop();
+            Tree prev = functionCallInterpreter.pop();
+            functionCallInterpreter.push(last);
+            return prev;
+        }
+        return null;
+    }
+
     public Stack<Tree> getPrevFunctionCallInterpreter() {
         return prevFunctionCallInterpreter;
     }
@@ -298,18 +378,19 @@ public class Interpreter {
         this.prevFunctionCallInterpreter = prevFunctionCallInterpreter;
     }
 
-    public Tree peekPrevFunctionCall(){
+    public Tree peekPrevFunctionCall() {
         return prevFunctionCallInterpreter.peek();
     }
 
-    public Tree popPrevFunctionCall(){
+    public Tree popPrevFunctionCall() {
         return prevFunctionCallInterpreter.pop();
     }
 
-    public void pushPrevFuctionCall(Tree tree){
+    public void pushPrevFuctionCall(Tree tree) {
         prevFunctionCallInterpreter.push(tree);
     }
-    public Tree penultimatePrevFunctionCall(){
+
+    public Tree penultimatePrevFunctionCall() {
         if (prevFunctionCallInterpreter.size() > 1) {
             return prevFunctionCallInterpreter.get(prevFunctionCallInterpreter.size() - 2);
         }

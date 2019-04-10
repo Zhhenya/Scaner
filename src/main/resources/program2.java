@@ -1,6 +1,6 @@
 public class TestClass {
     int result = 0;
-    int y = 0;
+    int y = 5;
 
     int fact(int n) {
         if (n == 1) {
@@ -11,6 +11,6 @@ public class TestClass {
     }
 
     void main(int u) {
-        y = fact(6);
+        y = y + fact(6);
     }
 }#

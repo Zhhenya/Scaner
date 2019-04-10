@@ -1,5 +1,5 @@
 public class TestClass {
-    int y = 0;
+    int y = 9;
 
     int fibonacchi(int n) {
         if (n == 0) {
@@ -15,6 +15,6 @@ public class TestClass {
     }
 
     void main(int u) {
-        y = fibonacchi(8);
+        y = y + fibonacchi(6);
     }
 }#

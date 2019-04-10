@@ -385,8 +385,8 @@ public class Diagrams {
             if ((ident.type == Types.TypeIdent || t == Types.TypeBoolean || t == Types.TypeInt) &&
                     (t = scanner.scanner().type) != Types.TypeDot && t != Types.TypeOpenParenthesis) {
                 setPositionAndLine(position, row);
-                LOGGER.info("Operators: " + t);
-                LOGGER.info(scanner.getCurrentItem());
+//                LOGGER.info("Operators: " + t);
+//                LOGGER.info(scanner.getCurrentItem());
                 VariableDescription();
                 continue;
             }
@@ -1149,7 +1149,7 @@ public class Diagrams {
         }
     }
 
-    private DataValue V() throws DiagramsException, SemanticsException {
+    public DataValue V() throws DiagramsException, SemanticsException {
         Types t;
         getPositionAndLine();
         dataOfV.push(new ArrayList<>());
@@ -1540,7 +1540,8 @@ public class Diagrams {
                     if (!interpreter.getPrevFunctionCallInterpreter().isEmpty() &&
                             interpreter.getPrevFunctionCallInterpreter().size() > 1 &&
                             interpreter.penultimatePrevFunctionCall().node.lexemeName.equals(
-                                    interpreter.peekPrevFunctionCall().node.lexemeName)) {
+                                    interpreter.peekPrevFunctionCall().node.lexemeName) ||
+                            interpreter.getPrevFunctionCallInterpreter().size() == 1) {
                         ident = root.findByName(interpreter.peekPrevFunctionCall().right, name);
                     }
                     if (ident == null) {
@@ -1565,11 +1566,12 @@ public class Diagrams {
                     if (!interpreter.getPrevFunctionCallInterpreter().isEmpty() &&
                             interpreter.getPrevFunctionCallInterpreter().size() > 1 &&
                             interpreter.penultimatePrevFunctionCall().node.lexemeName.equals(
-                                    interpreter.peekPrevFunctionCall().node.lexemeName)) {
+                                    interpreter.peekPrevFunctionCall().node.lexemeName) ||
+                    interpreter.getPrevFunctionCallInterpreter().size() == 1) {
                         ident = root.findByName(interpreter.peekPrevFunctionCall().right, name);
                     }
                     if (ident == null) {
-                        ident = root.findByName(interpreter.peekPrevFunctionCall().right, name);
+                        ident = root.findByName(interpreter.penultimateFunctionCall().right, name);
                     }
 
                     if (ident == null) {
@@ -1816,7 +1818,7 @@ public class Diagrams {
      *
      * @param dataValue значение
      */
-    private DataValue setVarValue(DataValue dataValue) {
+    public DataValue setVarValue(DataValue dataValue) {
         if (interpreter.isInterpreting()) {
             Tree tree = null;
             Tree prev = null;

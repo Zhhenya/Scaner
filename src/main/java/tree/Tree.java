@@ -353,8 +353,8 @@ public class Tree {
 
 
     public DataType getType(String lexeme) throws SemanticsException {
-        LOGGER.info("Метод getType()");
-        LOGGER.info(lexeme);
+//        LOGGER.info("Метод getType()");
+      //  LOGGER.info(lexeme);
         switch (lexeme) {
             case "int":
                 return DataType.TInt;
@@ -427,9 +427,9 @@ public class Tree {
 
     public Tree getClass(String lexeme) throws SemanticsException {
         Tree vertex = findUp(current, lexeme);
-        LOGGER.info("Метод getClass()");
-        LOGGER.info(vertex);
-        LOGGER.info(lexeme);
+//        LOGGER.info("Метод getClass()");
+//        LOGGER.info(vertex);
+//        LOGGER.info(lexeme);
         if (vertex == null) {
             throw new SemanticsException("Отсутствует описание класса", lexeme);
         }
