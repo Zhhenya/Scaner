@@ -1,5 +1,14 @@
 public class TestClass {
     int y = 9;
+    int o = 0;
+
+    int fact(int c) {
+        if (c == 1) {
+            return 1;
+        }
+        int r = c * fact(c - 1);
+        return r;
+    }
 
     int fibonacchi(int n) {
         if (n == 0) {
@@ -15,6 +24,7 @@ public class TestClass {
     }
 
     void main(int u) {
-        y = y + fibonacchi(8);
+        o = fact(2);
+        y = fibonacchi(o);
     }
 }#

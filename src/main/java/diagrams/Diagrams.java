@@ -863,7 +863,7 @@ public class Diagrams {
          * последний идентификатор проверяем как идентификатор (он только int или boolean)
          * */
 
-        currentVertex = root.getObjectName(scanner.getLexeme().lexeme.toString(), root.getCurrent());
+        currentVertex = root.getObjectName(scanner.getLexeme().lexeme.toString(), root.left);
 
         getPositionAndLine();
         while ((t = scanner.scanner().type) == Types.TypeDot) {

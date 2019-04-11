@@ -92,6 +92,9 @@ public class Tree {
         if (foundedVertex == null) {
             foundedVertex = findByNameRight(vertex, lexeme);
         }
+        if (foundedVertex == null) {
+            foundedVertex = findByNameRightLeft(vertex, lexeme);
+        }
         return foundedVertex;
     }
 
@@ -150,6 +153,24 @@ public class Tree {
             vertex = vertex.left;
         }
         return vertex;
+    }
+
+    public Tree findByNameRightLeft(Tree from, String name) {
+        Tree vertex = from;
+        Tree returnedVertex = null;
+        while (vertex != null) {
+            returnedVertex = findRightLeft(vertex, name);
+            if (returnedVertex != null) {
+                return returnedVertex;
+            } else {
+                if (vertex.left != null) {
+                    vertex = vertex.left;
+                } else {
+                    vertex = vertex.right;
+                }
+            }
+        }
+        return null;
     }
 
 
@@ -354,7 +375,7 @@ public class Tree {
 
     public DataType getType(String lexeme) throws SemanticsException {
 //        LOGGER.info("Метод getType()");
-      //  LOGGER.info(lexeme);
+        //  LOGGER.info(lexeme);
         switch (lexeme) {
             case "int":
                 return DataType.TInt;
@@ -392,7 +413,8 @@ public class Tree {
     }
 
     public Tree getFunction(String lexeme) throws SemanticsException {
-        Tree vertex = findUp(current, lexeme);
+        Tree vertex = findByName(this.left, lexeme);
+      //  Tree vertex = findUp(current, lexeme);
         if (vertex == null) {
             throw new SemanticsException("Отсутствует описание функции", lexeme);
         }
@@ -442,7 +464,10 @@ public class Tree {
 
 
     public Tree getObjectName(String lexeme, Tree from) throws SemanticsException {
-        Tree vertex = findUp(from, lexeme);
+        Tree vertex = findByName(from, lexeme);
+        if (vertex == null) {
+            vertex = findUp(from, lexeme);
+        }
         // Tree vertex = findRightLeft(from, lexeme);
 
         if (vertex == null) {
