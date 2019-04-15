@@ -43,7 +43,7 @@ public abstract class Storage {
         }
 
         public Memory(Tree n) {
-            this(n.global, n.value, n.address);
+            this(n.global, n.lexeme.getName(), n.address);
         }
 
         public Memory(int address, int index) {
@@ -60,15 +60,15 @@ public abstract class Storage {
 
     public static class Immediate extends Storage {
 
-        public final long value;
+        public final Comparable value;
 
-        public Immediate(long val) {
+        public Immediate(Comparable val) {
             value = val;
         }
 
         @Override
         public String toString() {
-            return Long.toString(value);
+            return value.toString();
         }
 
     }

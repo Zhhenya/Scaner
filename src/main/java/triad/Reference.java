@@ -15,7 +15,7 @@ public abstract class Reference {
         @Override
         public String toString() {
             //if(variable.global) return "{" + variable.lexeme.value + "}";
-            return variable.node.dataValue.value.valueInt.toString();
+            return variable.lexeme.getName();
         }
         
         @Override
@@ -32,9 +32,9 @@ public abstract class Reference {
     
     public static class ConstantReference extends Reference {
         
-        public final long value;
+        public final Comparable value;
         
-        public ConstantReference(long val) {
+        public ConstantReference(Comparable val) {
             value = val;
         }
         
@@ -83,6 +83,21 @@ public abstract class Reference {
             return name;
         }
         
+    }
+
+    public static class ClassReference extends Reference {
+
+        public final String name;
+
+        public ClassReference(String n) {
+            name = n;
+        }
+
+        @Override
+        public String toString() {
+            return name;
+        }
+
     }
     
 }

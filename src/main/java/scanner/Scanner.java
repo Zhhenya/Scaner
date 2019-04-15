@@ -30,6 +30,8 @@ public class Scanner {
         while ((readed = reader.readLine()) != null) {
             lines.add((readed + "\n").toCharArray());
         }
+//        char[] lastLine = lines.get(lines.size() - 1);
+//        lastLine
         if (lines.size() != 0) {
             line = lines.get(0);
         }

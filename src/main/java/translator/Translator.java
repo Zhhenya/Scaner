@@ -1,10 +1,13 @@
 package translator;
 
-import service.Types;
-import triad.Triad.Action;
-import translator.Storage.*;
-import translator.TranslatorAction.*;
-import diagrams.Diagrams;
+import translator.Storage.Immediate;
+import translator.Storage.Memory;
+import translator.Storage.Register;
+import translator.TranslatorAction.DecreaseOffset;
+import translator.TranslatorAction.EmptyLine;
+import translator.TranslatorAction.GenerateInstruction;
+import translator.TranslatorAction.IncreaseOffset;
+import tree.SemanticAnalyzer;
 import tree.Tree;
 import triad.Reference;
 import triad.Reference.ConstantReference;
@@ -12,6 +15,7 @@ import triad.Reference.FunctionReference;
 import triad.Reference.TriadReference;
 import triad.Reference.VariableReference;
 import triad.Triad;
+import triad.Triad.Action;
 
 import java.io.FileWriter;
 import java.io.PrintWriter;
@@ -21,7 +25,7 @@ import java.util.Arrays;
 public class Translator {
 
     private Triad[] triads;
-    private Diagrams semantic;
+    private SemanticAnalyzer semantic;
 
     private int[] usages;
 
@@ -33,7 +37,7 @@ public class Translator {
     private int localStorage, prologIndex;
     private int[] temporary;
 
-    public Translator(Triad[] t, Diagrams analyzer) {
+    public Translator(Triad[] t, SemanticAnalyzer analyzer) {
         triads = t;
         semantic = analyzer;
 
@@ -55,12 +59,12 @@ public class Translator {
         ArrayList<Tree> global = new ArrayList<>();
         Tree main = null;
 
-        Tree current = semantic.getRoot();
+        Tree current = semantic.getRoot().left.right;
         while (current != null) {
             if (current.global) {
                 global.add(current);
             }
-            if (current.node.lexemeName.equals("main")) {
+            if (current.lexeme.getName().equals("main")) {
                 main = current;
             }
 
@@ -75,11 +79,16 @@ public class Translator {
             addInstruction(".DATA");
             increaseOffset();
             for (Tree tree : global) {
-                addInstruction(String.format("%-12s", tree.node.dataValue.value), "DD");
+                addInstruction(String.format("%-12s", tree.lexeme.getName()), "DD");
             }
             decreaseOffset();
             emptyLine();
         }
+
+
+        addInstruction(String.format("%-12s", "_break"), "DD 13");
+        decreaseOffset();
+        emptyLine();
 
         addInstruction(".CODE");
         increaseOffset();

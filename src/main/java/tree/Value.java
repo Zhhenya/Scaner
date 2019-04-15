@@ -1,23 +1,33 @@
 package tree;
 
-public class Value {
-    public Boolean constant;
-    public Integer valueInt;
-    public Tree clazz;
+import service.DataType;
 
-    public Value() {
-        constant = null;
-        valueInt = null;
-        clazz = null;
+public class Value {
+
+    public DataType type;
+    public Comparable value;
+
+    public Value(DataType type, Comparable value) {
+        this.type = type;
+        this.value = value;
     }
 
-    public Value clone(){
-        Value clone = null;
-        try {
-            clone = (Value)super.clone();
-        } catch (CloneNotSupportedException e) {
-            e.printStackTrace();
-        }
-        return clone;
+    public Value() {
+    }
+
+    public DataType getType() {
+        return type;
+    }
+
+    public void setType(DataType type) {
+        this.type = type;
+    }
+
+    public String getValue() {
+        return value.toString();
+    }
+
+    public void setValue(Comparable value) {
+        this.value = value;
     }
 }

@@ -1,6 +1,4 @@
-import diagrams.Diagrams;
 import llkAnalyzer.AnalyzeError;
-import llkAnalyzer.Generator;
 import llkAnalyzer.Table;
 import org.apache.commons.lang3.SerializationUtils;
 import scanner.Lexeme;
@@ -8,9 +6,12 @@ import scanner.Scanner;
 import service.DataType;
 import service.Types;
 import translator.Translator;
+import tree.SemanticAnalyzer;
 import tree.Tree;
+import tree.Value;
 import triad.Reference;
 import triad.Reference.ConstantReference;
+import triad.Reference.ClassReference;
 import triad.Reference.FunctionReference;
 import triad.Reference.TriadReference;
 import triad.Reference.VariableReference;
@@ -26,6 +27,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Stack;
 
 public class Compiler {
@@ -37,7 +39,7 @@ public class Compiler {
     private final Scanner scanner;
     private Lexeme prevLexeme;
 
-    private final Tree semantic;
+    private final SemanticAnalyzer semantic;
 
     private final Stack<Lexeme> identifiers = new Stack<>();
     private final Stack<DataType> dataTypes = new Stack<>();
@@ -47,26 +49,27 @@ public class Compiler {
     private final Stack<Object> returns = new Stack<>();
     private final Stack<Triad> functionArguments = new Stack<>();
 
-    private final ArrayList<Triad> triads = new ArrayList<>();
+    private final List<Triad> triads = new ArrayList<>();
 
     public static void main(String[] args) throws Exception {
-        Generator.main(new String[]{"silent"});
+//        Generator.main(new String[]{"silent"});
 
-        Compiler compiler = new Compiler(new File("table.llk"), new Scanner(new File("input2.cpp")));
+        Scanner scanner = new Scanner();
+        scanner.createLines("src/main/resources/program5.java");
+
+        Compiler compiler = new Compiler(new File("table.llk"), scanner);
         if (!compiler.compile(false)) {
             return;
         }
-
-        Triad[] optimized = (new Optimizer(compiler.triads)).optimize(true);
-
-        (new Translator(optimized, compiler.semantic)).translate(true);
+        Triad[] triads = compiler.triads.toArray(new Triad[compiler.triads.size()]);
+        (new Translator(triads, compiler.semantic)).translate(true);
     }
 
     public Compiler(File table, Scanner source) throws Exception {
         controlTable = SerializationUtils.deserialize(new FileInputStream(table));
         scanner = source;
 
-        semantic = new Diagrams(scanner);
+        semantic = new SemanticAnalyzer(scanner);
     }
 
     public boolean compile(boolean silent) throws Exception {
@@ -128,11 +131,11 @@ public class Compiler {
                     identifiers.push(lexeme);
 
                     if (DEBUG) {
-                        System.out.println(">>> PUSH IDENTIFIER " + lexeme.value + " <<<");
+                        System.out.println(">>> PUSH IDENTIFIER " + lexeme.getName() + " <<<");
                         System.out.println(identifiers + " " + dataTypes + " " + references);
                     }
-                } else if (lexeme.type == Types.TypeInt || lexeme.type == Types.TypeConstInt) {
-                    SemanticAnalyzer.Value value = semantic.getConstValue(lexeme);
+                } else if (lexeme.type == Types.TypeConstInt || lexeme.type == Types.TypeBoolean) {
+                    Value value = semantic.getVariableValue(lexeme);
 
                     references.push(new ConstantReference(value.value));
                     dataTypes.push(value.type);
@@ -141,7 +144,7 @@ public class Compiler {
                         System.out.println(">>> PUSH CONSTANT " + value.value + " <<<");
                         System.out.println(identifiers + " " + dataTypes + " " + references);
                     }
-                } else if (lexeme.type == Type.KeyReturn) {
+                } else if (lexeme.type == Types.TypeReturn) {
                     returns.push(lexeme);
                 }
 
@@ -197,16 +200,16 @@ public class Compiler {
 
     /* Delta functions */
 
-    private void pushTypeI() {
-        dataTypes.push(DataType.tInt);
+    private void pushTypeInt() {
+        dataTypes.push(DataType.TInt);
     }
 
-    private void pushTypeLI() {
-        dataTypes.push(DataType.tLongInt);
+    private void pushTypeBool() {
+        dataTypes.push(DataType.TBoolean);
     }
 
-    private void pushTypeLLI() {
-        dataTypes.push(DataType.tLongLongInt);
+    private void pushTypeUser() {
+        dataTypes.push(DataType.TUserType);
     }
 
     private void popType() {
@@ -215,7 +218,7 @@ public class Compiler {
 
     private void startFunction() {
         Lexeme identifier = identifiers.pop();
-        addTriad(new Triad(Action.proc, new FunctionReference(identifier.value)));
+        addTriad(new Triad(Action.proc, new FunctionReference(identifier.getName())));
 
         semantic.startFunction(dataTypes.peek(), identifier);
     }
@@ -252,12 +255,19 @@ public class Compiler {
         semantic.addVariable(dataTypes.peek(), identifiers.peek());
     }
 
+    private void startClass() {
+        Lexeme identifier = identifiers.pop();
+      //  addTriad(new Triad(Action.clazz, new ClassReference(identifier.getName())));
+
+        semantic.startClass(identifier);
+    }
+
     private void popVar() {
         identifiers.pop();
     }
 
     private void checkAssignment() {
-        SemanticAnalyzer.Node val = semantic.getVariable(identifiers.peek());
+        Tree val = semantic.getVariable(identifiers.peek());
 
         semantic.checkAssignment(identifiers.peek(), val.type, dataTypes.peek());
         triads.add(new Triad(Action.assign, getVariableReference(identifiers.peek()), references.peek()));
@@ -295,7 +305,7 @@ public class Compiler {
         references.push(addTriad(new Triad(action, first, second)));
 
         dataTypes.pop(); dataTypes.pop();
-        dataTypes.push(DataType.tInt);
+        dataTypes.push(DataType.TInt);
     }
 
     private void add() {
@@ -333,19 +343,30 @@ public class Compiler {
         semantic.goToParentLevel();
     }
 
-    private void _do() {
-        addresses.push(addTriad(new Triad(Action.nop).setTransferControl(Transfer.LOOP)));
-    }
+    //прописать правильно
+    private void _if() {
 
-    private void _while() {
-        Reference ref = references.pop();
+      /*  Reference ref = references.pop();
         dataTypes.pop();
 
         if (ref instanceof VariableReference || ref instanceof ConstantReference) {
             addTriad(new Triad(Action.cmp, ref, new ConstantReference(0)));
         }
 
-        addTriad(new Triad(Action.jg, addresses.pop()).setTransferControl(Transfer.LOOPBACK));
+        addresses.push(addTriad(new Triad(Action.jg).setTransferControl(Transfer.IF)));*/
+
+      //  addresses.push(addTriad(new Triad(Action.nop).setTransferControl(Transfer.IF)));
+    }
+
+    private void _else() {
+      /*  Reference ref = references.pop();
+        dataTypes.pop();
+
+        if (ref instanceof VariableReference || ref instanceof ConstantReference) {
+            addTriad(new Triad(Action.cmp, ref, new ConstantReference(0)));
+        }
+
+        addTriad(new Triad(Action.jg, addresses.pop()).setTransferControl(Transfer.ELSE));*/
     }
 
     private void checkReturnType() {
@@ -370,13 +391,13 @@ public class Compiler {
         }
 
         dataTypes.push(semantic.finishFunctionCall(prevLexeme));
-        references.push(addTriad(new Triad(Action.call, new FunctionReference(identifiers.pop().value))));
+        references.push(addTriad(new Triad(Action.call, new FunctionReference(identifiers.pop().getName()))));
     }
 
     private void unary() {
         Reference ref = references.pop();
         if (ref instanceof ConstantReference) {
-            references.push(new ConstantReference(-((ConstantReference) ref).value));
+            references.push(new ConstantReference(((Integer) ((ConstantReference) ref).value) * -1));
         } else {
             references.push(addTriad(new Triad(Action.neg, ref)));
         }

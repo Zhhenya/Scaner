@@ -1,0 +1,41 @@
+S -> public class N [startClass] { C }
+C -> GR D C | S C | #
+GR -> T N1
+D -> [addVariable] I1 ; | M | #
+I1 -> P1 | , a [addVariable] P1 I1 | #
+P1 -> = V [checkAssignment] [popVar] | # [popVar]
+T -> int [pushTypeInt] | boolean [pushTypeBool] | [pushTypeUser] a
+N -> a
+M -> [startFunction] [popType] ( F ) [prolog] B [epilog] [goToParentLevel]
+N1 -> a | main | ;
+R -> T | #
+F -> P F10
+F10 -> , P F10 | #
+B -> { [startBlock] O } [goToParentLevel]
+P -> JJ [addVariable] [popType] [popVar]
+JJ -> T a
+O -> O1 O | S O | #
+O1 -> a OP | U | ; | RR | T | B | V ;
+OP -> = V [checkAssignment] [popVar] | H ; | N3 ; | N2 ; | ,
+RR -> return V [checkReturnType] ;
+N2 -> a [addVariable] N3
+N3 -> . a [addVariable] N3 | = V [checkAssignment] [popVar] | H | #
+N5 -> a N6
+N6 -> . a N6 | #
+U -> if ( V ) { O1 } [_if] U1
+U1 -> # | else { O1 } [_else]
+H -> [startFunctionCall] ( F1 ) [finishFunctionCall]
+F1 -> V [checkFunctionArgument] F11
+F11 -> , V [checkFunctionArgument] F11 | #
+K -> d | true | false
+V -> A2 D1
+D1 -> && A2 D1 | #
+A2 -> A3 D2
+D2 -> > A3 [cGT] D2 | < A3 [cLT] D2 | <= A3 [cLE] D2 | >= D2 | == A3 [cEQ] D2 | != A3 [cNE] D2 | #
+A3 -> A4 D3
+D3 -> + A4 [add] D3 | - A4 [sub] D3 | #
+A4 -> A5 D4
+D4 -> * A5 [mul] D4 | / A5 [div] D4 | % A5 [mod] D4 | #
+A5 -> - A5 [unary] | + A5 | A6
+A6 -> N5 D6 | K | ( V )
+D6 -> H | [ref] # | #

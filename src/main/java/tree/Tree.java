@@ -1,54 +1,77 @@
 package tree;
 
+import llkAnalyzer.AnalyzeError;
 import org.apache.log4j.Logger;
 import scanner.Lexeme;
+import scanner.Scanner;
 import service.DataType;
 import service.SemanticsException;
+import service.Types;
 
 public class Tree {
     protected Logger LOGGER = Logger.getLogger(Tree.class);
-    public Node node;
-    public String value;
+    public Lexeme lexeme = new Lexeme(new StringBuilder(), Types.TypeVoid);
+    public DataType type;
+    public tree.Tree classLink;
+    public Value value;
+    public DataType returnType;
     public Tree parent, left, right;
     public static Tree current;
     public boolean global = false;
     public int address;
+    private Scanner scanner;
 
-    public Tree(Tree parent, Tree left, Tree right, Node node) {
-        this.node = node;
+    public Tree(Tree p, DataType t, Lexeme l) {
+        parent = p;
+        type = t;
+        lexeme = l;
+    }
+
+
+    public Tree getRoot() {
+        return this;
+    }
+
+    public Tree(Tree parent, Tree left, Tree right) {
         this.parent = parent;
         this.left = left;
         this.right = right;
     }
 
     public Tree() {
-        node = new Node();
         parent = this;
         left = null;
         right = null;
-        //   current = this;
     }
 
-    public void setLeft(Node leftNode) {
-        Tree vertex = new Tree(this, null, null, leftNode);
-        left = vertex;
+    public void setLeft(Tree leftNode) {
+        left = leftNode;
     }
 
-    public void setRight(Node rightNode) {
-        Tree vertex = new Tree(this, null, null, rightNode);
-        right = vertex;
+    public void setRight(Tree rightNode) {
+        right = new Tree(this, null, rightNode.lexeme);
     }
 
-    public Tree findUp(String lexemeID) {
-        return findUp(this, lexemeID);
+    public Value getIntValue(Lexeme lexeme) {
+        Integer value = Integer.parseInt(lexeme.lexeme.toString());
+
+        if (lexeme.type.equals(Types.TypeInt) || lexeme.type.equals(Types.TypeConstInt)) {
+            return new Value(DataType.TInt, value);
+        }
+
+        throw new AnalyzeError(scanner, lexeme, "Неверное число типа int");
     }
 
-    public Tree findUp(Tree from, String lexemeID) {
+    public Tree findUp(String name) {
+        return findUp(this, name);
+    }
+
+    public Tree findUp(Tree from, String name) {
         Tree vertex = from;
-        Tree vertex1 = null;
-        while ((vertex != null) && (vertex != vertex.parent) && !lexemeID.equals(vertex.node.lexemeName)) {
+        Tree vertex1;
+        while ((vertex != null) && (vertex != vertex.parent) && !name.equals(vertex.lexeme.getName())) {
             vertex = vertex.parent;
-            vertex1 = findByName(vertex, lexemeID);
+            vertex1 = findByName(vertex, name);
             if (vertex1 != null) {
                 return vertex1;
             }
@@ -65,7 +88,7 @@ public class Tree {
         if (vertex == null || vertex == vertex.parent) {
             return null;
         }
-        if (vertex.node.lexemeName.equals(lexeme)) {
+        if (vertex.lexeme.getName().equals(lexeme)) {
             return vertex;
         }
         if (vertex.left != null) {
@@ -80,7 +103,7 @@ public class Tree {
         if (vertex == null || vertex == vertex.parent) {
             return null;
         }
-        if (vertex.node.lexemeName.equals(lexeme)) {
+        if (vertex.lexeme.getName().equals(lexeme)) {
             return vertex;
         }
         if (vertex.right != null) {
@@ -100,7 +123,7 @@ public class Tree {
 
     public Tree findUp() {
         Tree vertex = current;
-        while (vertex != null && vertex.node.type != DataType.TClass && vertex.node.type != DataType.TFunction && (vertex != vertex.parent)) {
+        while (vertex != null && vertex.type != DataType.TClass && vertex.type != DataType.TFunction && (vertex != vertex.parent)) {
             vertex = vertex.parent;
         }
         if (vertex == vertex.parent) {
@@ -111,7 +134,7 @@ public class Tree {
 
     public Tree findUpFunction() {
         Tree vertex = current;
-        while (vertex != null && vertex.node.type != DataType.TFunction && (vertex != vertex.parent)) {
+        while (vertex != null && vertex.type != DataType.TFunction && (vertex != vertex.parent)) {
             vertex = vertex.parent;
         }
         if (vertex == vertex.parent) {
@@ -122,8 +145,8 @@ public class Tree {
 
     public Tree retrieveClassLick() {
         Tree vertex = current;
-        if (current.node.classLink != null) {
-            return current.node.classLink;
+        if (current.classLink != null) {
+            return current.classLink;
         } else {
             return findUpFunction();
         }
@@ -133,8 +156,8 @@ public class Tree {
     public Tree findUpName(String className) {
         Tree vertex = current;
         while (vertex != null && (vertex != vertex.parent) &&
-                ((vertex.node.type == DataType.TClass || vertex.node.type == DataType.TFunction) && !vertex.node.lexemeName.equals(className)) ||
-                (vertex.node.type != DataType.TClass && vertex.node.type != DataType.TFunction) && !vertex.node.lexemeName.equals(className)) {
+                ((vertex.type == DataType.TClass || vertex.type == DataType.TFunction) && !vertex.lexeme.getName().equals(className)) ||
+                (vertex.type != DataType.TClass && vertex.type != DataType.TFunction) && !vertex.lexeme.getName().equals(className)) {
             vertex = vertex.parent;
         }
         if (vertex == vertex.parent) {
@@ -149,7 +172,7 @@ public class Tree {
 
     public Tree findRightLeft(Tree from, String lexemeID) {
         Tree vertex = from.right;
-        while ((vertex != null) && !lexemeID.equals(vertex.node.lexemeName)) {
+        while ((vertex != null) && !lexemeID.equals(vertex.lexeme.getName())) {
             vertex = vertex.left;
         }
         return vertex;
@@ -164,15 +187,15 @@ public class Tree {
 
         vertex = vertex.left;
 
-        if (vertex.node.type.toString() != typeOfParameter) {
-            if (vertex.node.classLink != null) {
-                if (vertex.node.classLink.node.lexemeName != typeOfParameter) {
+        if (vertex.type.toString() != typeOfParameter) {
+            if (vertex.classLink != null) {
+                if (vertex.classLink.lexeme.getName() != typeOfParameter) {
                     throw new SemanticsException("Тип формальной и фактической переменной не совпадают: ",
-                                                 vertex.node.classLink.node.lexemeName + " " + typeOfParameter);
+                                                 vertex.classLink.lexeme.getName() + " " + typeOfParameter);
                 }
             } else {
                 throw new SemanticsException("Тип формальной и фактической переменной не совпадают: ",
-                                             vertex.node.type.toString() + " " + typeOfParameter);
+                                             vertex.type.toString() + " " + typeOfParameter);
             }
         }
 
@@ -180,12 +203,12 @@ public class Tree {
     }
 
     public void printTree() {
-        System.out.println("Вершина: " + node.lexemeName);
+        System.out.println("Вершина: " + lexeme.getName());
         if (left != null) {
-            System.out.println("     слева: " + left.node.lexemeName);
+            System.out.println("     слева: " + left.lexeme.getName());
         }
         if (right != null) {
-            System.out.println("     справа: " + right.node.lexemeName);
+            System.out.println("     справа: " + right.lexeme.getName());
         }
         System.out.println();
         if (left != null) {
@@ -196,26 +219,27 @@ public class Tree {
         }
     }
 
-    private void print(Node node) {
-        switch (node.type) {
+    private void print(Tree node) {
+        System.out.println(node.value.value);
+       /* switch (node.type) {
             case TBoolean:
-                System.out.println(node.dataValue.value.constant);
+                System.out.println(node.value.value);
             case TInt:
-                System.out.println(node.dataValue.value.valueInt);
+                System.out.println(node..value.valueInt);
             case TUserType:
-                System.out.println(node.dataValue.value.clazz.node.lexemeName);
-        }
+                System.out.println(node.dataValue.value.clazz.lexeme.getName());
+        }*/
     }
 
     public void printVariables() {
-        System.out.println("Вершина: " + node.lexemeName);
+        System.out.println("Вершина: " + lexeme.getName());
         if (left != null) {
-            System.out.println("     слева: " + left.node.lexemeName);
-            print(left.node);
+            System.out.println("     слева: " + left.lexeme.getName());
+            print(left);
         }
         if (right != null) {
-            System.out.println("     справа: " + right.node.lexemeName);
-            //  print(right.node);
+            System.out.println("     справа: " + right.lexeme.getName());
+            //  print(right);
         }
         System.out.println();
         if (left != null) {
@@ -227,16 +251,13 @@ public class Tree {
     }
 
     public void printValueTree() {
-        System.out.println("Вершина: " + node.lexemeName);
+        System.out.println("Вершина: " + lexeme);
         if (left != null) {
-            if (left.node.type == DataType.TInt) {
-                System.out.println("     слева: " + left.node.lexemeName + " = " + left.node.dataValue.value.valueInt);
-            } else {
-                System.out.println("     слева: " + left.node.lexemeName);
-            }
+            System.out.println("     слева: " + left.lexeme.getName() + " = " + left.value.value);
+
         }
         if (right != null) {
-            System.out.println("     справа: " + right.node.lexemeName);
+            System.out.println("     справа: " + right.lexeme.getName());
         }
         System.out.println();
         if (left != null) {
@@ -247,20 +268,10 @@ public class Tree {
         }
     }
 
-  /*  public Tree find(Tree from, String lexeme) {
-        Tree vertex = from;
-        do {
-            if (vertex.node.lexemeName.equals(lexeme)) {
-                return vertex;
-            }
-            vertex = vertex.parent;
-        }while(vertex != null);
-    }*/
-
     public Tree findUpOnLevel(Tree from, String lexemeID) {
         Tree vertex = from;
         while ((vertex != null) && vertex.parent.right != vertex) {
-            if (lexemeID.equals(vertex.node.lexemeName)) {
+            if (lexemeID.equals(vertex.lexeme.getName())) {
                 return vertex;
             }
             vertex = vertex.parent;
@@ -283,86 +294,72 @@ public class Tree {
         return current;
     }
 
-    public Tree include(Lexeme lexeme, DataType lexemeType, String className) throws SemanticsException {
-        duplicateControl(current, lexeme.lexeme.toString());
+    public Tree include(Lexeme lexeme, DataType lexemeType) throws SemanticsException {
+     //   duplicateControl(current, lexeme.lexeme.toString());
         Tree vertex = new Tree();
-        Node newNode = new Node();
-        node.dataValue = new DataValue();
-        newNode.lexemeName = lexeme.lexeme.toString();
-        newNode.ptrStart = lexeme.ptr;
-        newNode.line = lexeme.line;
-        newNode.type = lexemeType;
-        /*и еще ссылка на значение*/
-        current.setLeft(newNode);
+        vertex.initLexeme(lexeme);
+        vertex.type = lexemeType;
+        vertex.parent = current;
+        current.setLeft(vertex);
         current = current.left;
         if (lexemeType != DataType.TFunction && lexemeType != DataType.TClass) {
             Tree link;
-            if (className != null) {
-                link = findUpName(className);
-                newNode.classLink = link;
-            } else {
-                link = findUp();
-                newNode.classLink = link;
+            link = findUp();
+            vertex.classLink = link;
+            if (link != null && (link.type == DataType.TClass || link.type == DataType.TUserType)) {
+                vertex.global = true;
             }
-            if(link.node.type == DataType.TClass || link.node.type == DataType.TUserType)
-                global = true;
             return current;
         } else {
-            vertex = current;
-            /*page 141*/
-            current.setRight(new Node());
+            current.setRight(new Tree());
             current = current.right;
             return vertex;
         }
     }
 
+    private void initLexeme(Lexeme lexeme) {
+        this.lexeme = new Lexeme();
+        this.lexeme.type = lexeme.type;
+        this.lexeme.lexeme.append(lexeme.lexeme.toString());
+        this.lexeme.ptr = lexeme.ptr;
+        this.lexeme.line = lexeme.line;
+    }
 
-    public Tree include(Lexeme lexeme, DataType lexemeType, DataType returnType, String className) throws
+
+    public Tree include(Lexeme lexeme, DataType lexemeType, DataType returnType) throws
             SemanticsException {
-        duplicateControl(current, lexeme.lexeme.toString());
-        Tree vertex;
-        Node newNode = new Node();
-        newNode.dataValue = new DataValue();
-        newNode.lexemeName = lexeme.lexeme.toString();
-        newNode.ptrStart = lexeme.ptr;
-        newNode.line = lexeme.line;
-        newNode.type = lexemeType;
-        newNode.dataValue.type = returnType;
-        Tree link;
-        if (className != null) {
-            link = findUpName(className);
-            newNode.classLink = link;
-        } else {
-            link = findUp();
-            newNode.classLink = link;
+      //  duplicateControl(current, lexeme.lexeme.toString());
+        Tree vertex = new Tree();
+        vertex.initLexeme(lexeme);
+        vertex.parent = current;
+        vertex.type = lexemeType;
+        vertex.returnType = returnType;
+        Tree link = findUp();
+        this.classLink = link;
+
+        if (link != null && (link.type == DataType.TClass || link.type == DataType.TUserType)) {
+            global = true;
         }
 
-        if(link.node.type == DataType.TClass || link.node.type == DataType.TUserType)
-            global = true;
-
         /*и еще ссылка на значение*/
-        current.setLeft(newNode);
+        current.setLeft(vertex);
         current = current.left;
-        vertex = current;
-        /*page 141*/
-        current.setRight(new Node());
+        current.setRight(new Tree());
         current = current.right;
         return vertex;
     }
 
     public void setType(Tree vertex, DataType type) {
-        vertex.node.type = type;
+        vertex.type = type;
     }
 
-    public void setNumberOfParameters(Tree vertex, Integer numberOfParameters) {
-        vertex.node.numberOfParameters = numberOfParameters;
-    }
 
-    public void controlNumberOfParameters(Tree vertex, Integer numberOfParameters) throws SemanticsException {
-        if (!numberOfParameters.equals(vertex.node.numberOfParameters)) {
-            throw new SemanticsException("Число параметров не совпадает");
-        }
-    }
+//
+//    public void controlNumberOfParameters(Tree vertex, Integer numberOfParameters) throws SemanticsException {
+//        if (!numberOfParameters.equals(vertex.numberOfParameters)) {
+//            throw new SemanticsException("Число параметров не совпадает");
+//        }
+//    }
 
 
     public DataType getType(String lexeme) throws SemanticsException {
@@ -384,7 +381,7 @@ public class Tree {
             default:
                 Tree vertex = findUp(current, lexeme);
                 if (vertex != null) {
-                    return vertex.node.type;
+                    return vertex.type;
                 }
                 getClass(lexeme); return DataType.TClass;
         }
@@ -395,10 +392,10 @@ public class Tree {
         if (vertex == null) {
             throw new SemanticsException("Отсутствует описание идентификатора", lexeme);
         }
-        if (vertex.node.type == DataType.TFunction) {
+        if (vertex.type == DataType.TFunction) {
             throw new SemanticsException("Неверное использование вызова функции", lexeme);
         }
-        if (vertex.node.type == DataType.TClass) {
+        if (vertex.type == DataType.TClass) {
             throw new SemanticsException("Неверное использование вызова объекта класса", lexeme);
         }
         return vertex;
@@ -409,7 +406,7 @@ public class Tree {
         if (vertex == null) {
             throw new SemanticsException("Отсутствует описание функции", lexeme);
         }
-        if (vertex.node.type != DataType.TFunction) {
+        if (vertex.type != DataType.TFunction) {
             throw new SemanticsException("Неверный вызов функции", lexeme);
         }
 
@@ -421,7 +418,7 @@ public class Tree {
         if (vertex == null) {
             throw new SemanticsException("Отсутствует описание функции");
         }
-        if (vertex.node.type != DataType.TFunction) {
+        if (vertex.type != DataType.TFunction) {
             throw new SemanticsException("Неверный вызов функции");
         }
 
@@ -432,7 +429,7 @@ public class Tree {
 //        Tree vertex = findRightLeft(from, lexeme);
 //        if(vertex == null)
 //            throw new SemanticsException("Отсутствует описание функции", lexeme);
-//        if(vertex.node.type != DataType.TFunction)
+//        if(vertex.type != DataType.TFunction)
 //            throw new SemanticsException("Неверный вызов функции", lexeme);
 //
 //        return vertex;
@@ -440,13 +437,10 @@ public class Tree {
 
     public Tree getClass(String lexeme) throws SemanticsException {
         Tree vertex = findUp(current, lexeme);
-//        LOGGER.info("Метод getClass()");
-//        LOGGER.info(vertex);
-//        LOGGER.info(lexeme);
         if (vertex == null) {
             throw new SemanticsException("Отсутствует описание класса", lexeme);
         }
-        if (vertex.node.type != DataType.TClass) {
+        if (vertex.type != DataType.TClass) {
             throw new SemanticsException("Неверное использование вызова объекта класса", lexeme);
         }
 
@@ -461,11 +455,6 @@ public class Tree {
         if (vertex == null) {
             throw new SemanticsException("Отсутствует описание идентфикатора", lexeme);
         }
-      /*  if(vertex.node.type != DataType.TClass && vertex.node.type != DataType.TBoolean && vertex.node.type !=
-      DataType.TInt && vertex.node.type != DataType.TFunction)
-            throw new SemanticsException("Такой идентификатор не объявлен", lexeme);*/
-
-
         return vertex;
     }
 
@@ -476,20 +465,9 @@ public class Tree {
         if (vertex == null) {
             throw new SemanticsException("Отсутствует описание идентфикатора", lexeme);
         }
-      /*  if(vertex.node.type != DataType.TClass && vertex.node.type != DataType.TBoolean && vertex.node.type !=
-      DataType.TInt && vertex.node.type != DataType.TFunction)
-            throw new SemanticsException("Такой идентификатор не объявлен", lexeme);*/
-
-
         return vertex;
     }
 
-
-    public Tree forReset(Tree vertex) {
-        Tree newVertex = new Tree();
-
-        return newVertex;
-    }
 
     public void duplicateControl(Tree vertex, String lexeme) throws SemanticsException {
         if (findUp(vertex, lexeme) != null) {
@@ -497,48 +475,4 @@ public class Tree {
         }
     }
 
-
-    public Node getNode() {
-        return node;
-    }
-
-    public Tree getParent() {
-        return parent;
-    }
-
-    public Tree getLeft() {
-        return left;
-    }
-
-    public Tree getRight() {
-        return right;
-    }
-
-    public Tree clone(Tree vertex) {
-        Tree tree = new Tree();
-        tree.node = vertex.node.clone();
-        tree.right = new Tree();
-        tree.right.node = vertex.right.node.clone();
-        tree.right.parent = tree;
-        tree.right.left = vertex.cloneLeft(vertex.right.left);
-        tree.right.left.parent = tree.right;
-        return tree;
-    }
-
-    public Tree cloneLeft(Tree vertex) {
-        Tree tree = new Tree();
-        tree.node = vertex.node.clone();
-        if (vertex.left != null) {
-            tree.left = vertex.cloneLeft(vertex.left);
-            tree.left.parent = tree;
-        }
-        if (vertex.right != null) {
-            tree.right = vertex.cloneLeft(vertex.right);
-            tree.right.parent = tree;
-        }
-        if (vertex.right == null && vertex.left == null) {
-            return tree;
-        }
-        return tree;
-    }
 }

@@ -3,7 +3,7 @@ package triad;
 public class Triad {
 
     public enum Action {
-        proc, push, call, endp, nop, cmp, jg, jmp,
+        proc, clazz, push, call, endp, nop, cmp, jg, jmp,
         assign("="), ret("return"),
         eq("=="), ne("!="), lt("<"), le("<="), gt(">"), ge(">="),
         add("+"), sub("-"), mul("*"), div("/"), mod("%"), neg,
@@ -28,7 +28,7 @@ public class Triad {
         }
     }
 
-    public enum Transfer {FUNCTION, LOOP, LOOPBACK}
+    public enum Transfer {FUNCTION, IF, ELSE}
 
     public Action action;
     public Reference ref1 = null, ref2 = null;

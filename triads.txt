@@ -1,0 +1,21 @@
+  0) =          y        0       
+  1) proc       fact             
+  2) call       #prolog  0       
+  3) ==         n        0       
+  4) return     0                
+  5) jmp        [9]              
+  6) *          n        2       
+  7) return     [6]              
+  8) jmp        [9]              
+  9) call       #epilog  0       
+ 10) endp                        
+ 11) proc       main             
+ 12) call       #prolog  0       
+ 13) push       6                
+ 14) call       fact             
+ 15) +          y        [14]    
+ 16) =          y        [15]    
+ 17) return     0                
+ 18) jmp        [19]             
+ 19) call       #epilog  0       
+ 20) endp                        

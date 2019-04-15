@@ -38,6 +38,9 @@ public class Lexeme {
     public Types setGetType(Types type) {
         this.type = type; return type;
     }
+    public String getName(){
+        return lexeme.toString();
+    }
 
     public Lexeme() {
     }

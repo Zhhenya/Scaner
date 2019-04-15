@@ -9,9 +9,7 @@ public class DataValue {
     public DataValue clone() {
         DataValue dataValue = new DataValue();
         dataValue.type = this.type;
-        dataValue.value.valueInt = this.value.valueInt;
-        dataValue.value.constant = this.value.constant;
-        dataValue.value.clazz = this.value.clazz;
+        dataValue.value  =this.value;
         return dataValue;
     }
 }

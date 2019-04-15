@@ -10,11 +10,11 @@ import java.util.*;
 
 public class Grammar implements Serializable {
 
-
-
     public HashMap<String, ArrayList<Rule>> map = new HashMap<>();
     public ArrayList<String> nonTerminals = new ArrayList<>();
     public HashMap<String, Types> terminals = new HashMap<>();
+
+    public HashSet<String> deltas = new HashSet<>();
 
     public Scanner scanner;
     private int surrogates = 0;
@@ -27,7 +27,7 @@ public class Grammar implements Serializable {
         return nonTerminals;
     }
 
-    public void setScanner(Scanner scanner){
+    public void setScanner(Scanner scanner) {
         this.scanner = scanner;
     }
 
@@ -36,17 +36,25 @@ public class Grammar implements Serializable {
 
         String s;
         // Чтение и парсинг грамматики, определение нетерминалов
-        while((s = in.readLine()) != null && !s.equals("")) {
+        while ((s = in.readLine()) != null && !s.equals("")) {
             String[] data = s.split("->");
             String nt = data[0].trim();
             nonTerminals.add(nt);
 
-            if(nt.startsWith("$")) surrogates = Math.max(surrogates, Integer.parseInt(nt.substring(1)) + 1);
+            if (nt.startsWith("$")) {
+                surrogates = Math.max(surrogates, Integer.parseInt(nt.substring(1)) + 1);
+            }
 
             ArrayList<Rule> list = new ArrayList<>();
-            for(String sr : data[1].trim().split("\\|")) {
+            for (String sr : data[1].trim().split("\\|")) {
                 Rule rule = new Rule(nt);
-                for(String so : sr.trim().split("\\s")) rule.add(so.trim());
+                for (String so : sr.trim().split("\\s")) {
+                    if(!so.startsWith("["))
+                        rule.add(so.trim());
+                    else
+                        deltas.add(so);
+                    rule.full.add(so.trim());
+                }
                 list.add(rule);
             }
 
@@ -55,21 +63,25 @@ public class Grammar implements Serializable {
 
         // Определение терминалов
         HashSet<String> terminalsSet = new HashSet<>();
-        for(ArrayList<Rule> rules : map.values()) {
-            for (Rule rule : rules)
-                for (String t : rule)
-                    if (!map.containsKey(t))
+        for (ArrayList<Rule> rules : map.values()) {
+            for (Rule rule : rules) {
+                for (String t : rule) {
+                    if (!map.containsKey(t)) {
                         terminalsSet.add(t);
+                    }
+                }
+            }
 
         }
 
         // Определение типов терминалов
-        for(String t : terminalsSet)
+        for (String t : terminalsSet) {
             terminals.put(t, getTerminalType(t));
+        }
     }
 
     private Types getTerminalType(String t) throws Exception {
-        switch(t) {
+        switch (t) {
             case "#":
                 return Types.TypeEnd;
             case "d":
@@ -97,30 +109,44 @@ public class Grammar implements Serializable {
 
     public ArrayList<Rule> rules() {
         ArrayList<Rule> rules = new ArrayList<>();
-        for(ArrayList<Rule> r : map.values()) rules.addAll(r);
+        for (ArrayList<Rule> r : map.values()) {
+            rules.addAll(r);
+        }
         return rules;
     }
 
     private void removeEps(String a, boolean full, HashSet<String> used) {
         used.add(a);
-        for(Map.Entry<String, ArrayList<Rule>> e : map.entrySet()) {
-            if(used.contains(e.getKey())) continue;
+        for (Map.Entry<String, ArrayList<Rule>> e : map.entrySet()) {
+            if (used.contains(e.getKey())) {
+                continue;
+            }
 
             Iterator<Rule> i = e.getValue().iterator();
             ArrayList<Rule> add = new ArrayList<>();
 
-            while(i.hasNext()) {
+            while (i.hasNext()) {
                 Rule rule = i.next();
-                if(rule.size() == 1 && rule.get(0).equals(a)) {
-                    if(full) i.remove();
+                if (rule.size() == 1 && rule.get(0).equals(a)) {
+                    if (full) {
+                        i.remove();
+                    }
                     removeEps(e.getKey(), e.getValue().size() == 0, used);
                 } else {
                     boolean contains = false;
-                    for(String r : rule) if(r.equals(a)) contains = true;
+                    for (String r : rule) {
+                        if (r.equals(a)) {
+                            contains = true;
+                        }
+                    }
 
-                    if(contains) {
+                    if (contains) {
                         Rule nw = new Rule(e.getKey());
-                        for(String s : rule) if(!s.equals(a)) nw.add(s);
+                        for (String s : rule) {
+                            if (!s.equals(a)) {
+                                nw.add(s);
+                            }
+                        }
                         add.add(nw);
                     }
                 }
@@ -149,11 +175,15 @@ public class Grammar implements Serializable {
     }
 
     public String hasRule(List<String> rule) {
-        for(Map.Entry<String, ArrayList<Rule>> e : map.entrySet())
-            for(Rule r : e.getValue())
-                if(
+        for (Map.Entry<String, ArrayList<Rule>> e : map.entrySet()) {
+            for (Rule r : e.getValue()) {
+                if (
                         e.getKey().startsWith("$") &&
-                                isRulesEquals(r, rule)) return e.getKey();
+                                isRulesEquals(r, rule)) {
+                    return e.getKey();
+                }
+            }
+        }
         return null;
     }
 
@@ -162,18 +192,25 @@ public class Grammar implements Serializable {
     }
 
     public static boolean isRulesEquals(List<String> rule, List<String> other) {
-        if(rule.size() != other.size()) return false;
-        for(int i = 0; i < rule.size(); i++)
-            if(!rule.get(i).equals(other.get(i))) return false;
+        if (rule.size() != other.size()) {
+            return false;
+        }
+        for (int i = 0; i < rule.size(); i++) {
+            if (!rule.get(i).equals(other.get(i))) {
+                return false;
+            }
+        }
         return true;
     }
 
     public void print() {
-        for(String s : nonTerminals) {
+        for (String s : nonTerminals) {
             ArrayList<Rule> rules = map.get(s);
             System.out.print(s + " -> ");
-            for(int i = 0; i < rules.size(); i++) {
-                if(i != 0) System.out.print(" | ");
+            for (int i = 0; i < rules.size(); i++) {
+                if (i != 0) {
+                    System.out.print(" | ");
+                }
                 System.out.print(String.join(" ", rules.get(i)));
             }
             System.out.println();
@@ -184,11 +221,19 @@ public class Grammar implements Serializable {
 
         public final String from;
 
-        public Rule(String f) { super(); from = f; }
-        public Rule(String f, Collection<? extends String> c) { super(c); from = f; }
+        public Rule(String f) {
+            super(); from = f;
+        }
+
+        public Rule(String f, Collection<? extends String> c) {
+            super(c); from = f;
+        }
 
         public final HashSet<String> first = new HashSet<>();
         private final Set<String> last = new HashSet<>();
+
+        public ArrayList<String> full = new ArrayList<>();
+
         public Set<String> getLast() {
             return last;
         }

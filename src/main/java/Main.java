@@ -1,10 +1,6 @@
-import diagrams.Diagrams;
 import llkAnalyzer.AnalyzeError;
 import llkAnalyzer.LLkAnalyzer;
 import scanner.Scanner;
-import service.DiagramsException;
-import service.SemanticsException;
-import service.Types;
 
 import java.io.*;
 
@@ -27,7 +23,8 @@ public class Main {
             types = diagrams.S();
 
             if(types != Types.TypeEnd) {
-                System.out.println("Ошибка: конец файла не достигнут, проверьте правильность расстановки фигурных скобок");
+                System.out.println("Ошибка: конец файла не достигнут, проверьте правильность расстановки фигурных
+                скобок");
                 return;
             }
 
@@ -47,18 +44,13 @@ public class Main {
         BufferedReader reader = null;
         try {
             reader = new BufferedReader(new InputStreamReader(new FileInputStream(filePath)));
-            scanner.setText(scanner.reader(filePath, reader));
-            scanner.setReader(reader);
+            scanner.createLines(filePath);
             LLkAnalyzer lLkAnalyzer = new LLkAnalyzer(new File("table.llk"), scanner, new File("firstFollowTable.fft"));
             boolean t = lLkAnalyzer.program();
-            if (lLkAnalyzer.countOfCloseBrace != lLkAnalyzer.countOfOpenBrace) {
-                System.out.println("Не верное количество скобок");
-            } else if (!t || !scanner.getLexeme().lexeme.toString().equals("#"))
-                System.out.println("Конец программы не достигнут");
-            else
-                System.out.println("Анализ завершен");
+
+            System.out.println("Анализ завершен");
         } catch (FileNotFoundException e) {
-              e.printStackTrace();
+            e.printStackTrace();
         } catch (AnalyzeError e) {
             System.out.println(e.getDisplayMessage());
         }

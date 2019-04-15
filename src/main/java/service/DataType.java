@@ -10,5 +10,6 @@ public enum DataType {
     TClass,
     TConstant,
     TVoid,
-    Empty;
+    Empty,
+    TBlock;
 }
