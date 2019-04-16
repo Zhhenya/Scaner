@@ -24,6 +24,8 @@ import java.util.Arrays;
 
 public class Translator {
 
+    private static final String DISK = "e";
+
     private Triad[] triads;
     private SemanticAnalyzer semantic;
 
@@ -71,13 +73,30 @@ public class Translator {
             current = current.left;
         }
 
+      /*  addInstruction(".386");
+        addInstruction(".MODEL flat, stdcall");
+        emptyLine();*/
+
         addInstruction(".386");
         addInstruction(".MODEL flat, stdcall");
+        addInstruction("option casemap :none");
+        emptyLine();
+        addInstruction(String.format("include %s:\\masm32\\include\\windows.inc", DISK));
+        addInstruction(String.format("include %s:\\masm32\\include\\masm32.inc", DISK));
+        addInstruction(String.format("include %s:\\masm32\\include\\msvcrt.inc", DISK));
+        addInstruction(String.format("include %s:\\masm32\\include\\kernel32.inc", DISK));
+        emptyLine();
+        addInstruction(String.format("includelib %s:\\masm32\\lib\\msvcrt.lib", DISK));
+        addInstruction(String.format("includelib %s:\\masm32\\lib\\kernel32.lib", DISK));
+        addInstruction(String.format("includelib %s:\\masm32\\lib\\masm32.lib", DISK));
         emptyLine();
 
+        addInstruction(".DATA");
+        increaseOffset();
+
         if (global.size() != 0) {
-            addInstruction(".DATA");
-            increaseOffset();
+          //  addInstruction(".DATA");
+          //  increaseOffset();
             for (Tree tree : global) {
                 addInstruction(String.format("%-12s", tree.lexeme.getName()), "DD");
             }
@@ -85,18 +104,37 @@ public class Translator {
             emptyLine();
         }
 
-
         addInstruction(String.format("%-12s", "_break"), "DD 13");
         decreaseOffset();
         emptyLine();
 
         addInstruction(".CODE");
+        addInstruction("start:");
         increaseOffset();
+        String function = "";
+        boolean isFirst = true;
         for (int i = 0; i < triads.length; i++) {
             Triad triad = triads[i];
             switch (triad.action) {
                 case proc:
-                    addInstruction("proc", ((FunctionReference) triad.ref1).name);
+                    if (isFirst) {
+                        addInstruction("call main");
+                        emptyLine();
+                        for (Tree node : global) {
+                            addInstruction(String.format("mov eax, dword ptr [%s]", node.lexeme.getName()));
+                            addInstruction(String.format("invoke dwtoa, eax, ADDR %s", node.lexeme.getName()));
+                            addInstruction(String.format("mov eax, dword ptr [%s]", node.lexeme.getName()));
+                            addInstruction(String.format("invoke crt_printf, addr %s, eax", node.lexeme.getName()));
+                            addInstruction(String.format("invoke crt_printf, addr %s, eax", "_break"));
+                            emptyLine();
+                        }
+                        emptyLine();
+                        addInstruction("invoke  ExitProcess,0 ");
+                        emptyLine();
+                        isFirst = false;
+                    }
+                    addInstruction(((FunctionReference) triad.ref1).name, "proc");
+                    function = ((FunctionReference) triad.ref1).name;
                     increaseOffset();
                     break;
                 case call: {
@@ -131,7 +169,7 @@ public class Translator {
                 }
                 case endp:
                     decreaseOffset();
-                    addInstruction("endp");
+                    addInstruction(function, "endp");
                     if (i != triads.length - 1) {
                         emptyLine();
                     }
@@ -165,6 +203,10 @@ public class Translator {
                     emptyLine();
                     break;
                 }
+                case ge:
+                case gt:
+                case le:
+                case lt:
                 case cmp: {
                     Storage operand = getOperand(triad.ref1);
                     if (operand instanceof Immediate) {

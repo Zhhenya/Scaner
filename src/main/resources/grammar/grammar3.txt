@@ -22,8 +22,8 @@ N2 -> a [addVariable] N3
 N3 -> . a [addVariable] N3 | = V [checkAssignment] [popVar] | H | #
 N5 -> a N6
 N6 -> . a N6 | #
-U -> if ( V ) [_if] { O1 } U1
-U1 -> [_else] # | else [_else] { O1 }
+U -> if ( V ) [_if] { O } U1
+U1 -> [_else] # | else [_else] { O } [end_else]
 H -> [startFunctionCall] ( F1 ) [finishFunctionCall]
 F1 -> V [checkFunctionArgument] F11
 F11 -> , V [checkFunctionArgument] F11 | #

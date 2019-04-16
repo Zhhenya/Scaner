@@ -14,23 +14,26 @@
  13) endp                        
  14) proc       func2            
  15) call       #prolog  0       
- 16) >          r        1       
- 17) jg         [20]             
- 18) return     r                
- 19) jmp        [24]             
- 20) nop                         
- 21) -          r        1       
- 22) return     [21]             
- 23) jmp        [24]             
- 24) call       #epilog  0       
- 25) endp                        
- 26) proc       main             
- 27) call       #prolog  0       
- 28) push       5                
- 29) call       func             
- 30) =          k        [29]    
- 31) push       6                
- 32) call       func2            
- 33) =          l        [32]    
- 34) call       #epilog  0       
- 35) endp                        
+ 16) =          tt       0       
+ 17) =          yyy      0       
+ 18) >          r        1       
+ 19) jg         [23]             
+ 20) =          uuu      0       
+ 21) +          uuu      9       
+ 22) =          uuu      [21]    
+ 23) nop                         
+ 24) -          r        1       
+ 25) return     [24]             
+ 26) jmp        [27]             
+ 27) call       #epilog  0       
+ 28) endp                        
+ 29) proc       main             
+ 30) call       #prolog  0       
+ 31) push       5                
+ 32) call       func             
+ 33) =          k        [32]    
+ 34) push       6                
+ 35) call       func2            
+ 36) =          l        [35]    
+ 37) call       #epilog  0       
+ 38) endp                        

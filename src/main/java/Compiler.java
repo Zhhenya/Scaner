@@ -113,12 +113,6 @@ public class Compiler {
             return false;
         }
 
-       /* PrintWriter out = new PrintWriter(new FileWriter("triads.txt"));
-        for (int i = 0; i < triads.size(); i++) {
-            out.println(triads.get(i).toString(i));
-        }
-        out.close();*/
-
         if (!silent) {
             System.out.println();
         }

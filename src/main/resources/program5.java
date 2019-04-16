@@ -5,8 +5,11 @@ public class TestClass {
     }
 
     int func2(int r) {
+        int tt = 0;
+        int yyy = 0;
         if (r > 1) {
-            return r;
+           int uuu = 0;
+           uuu = uuu + 9;
         }
         return r - 1;
     }
