@@ -1,5 +1,6 @@
 import llkAnalyzer.AnalyzeError;
 import llkAnalyzer.Table;
+import optimizer.Optimizer;
 import org.apache.commons.lang3.SerializationUtils;
 import scanner.Lexeme;
 import scanner.Scanner;
@@ -61,8 +62,30 @@ public class Compiler {
         if (!compiler.compile(false)) {
             return;
         }
-        Triad[] triads = compiler.triads.toArray(new Triad[compiler.triads.size()]);
-        (new Translator(triads, compiler.semantic)).translate(true);
+
+        List<Triad> original = compiler.triads;
+
+        PrintWriter out = new PrintWriter(new FileWriter("triads.txt"));
+        for (int i = 0; i < original.size(); i++) {
+            out.println(original.get(i).toString(i));
+        }
+        out.close();
+
+        Triad[] optimized = (new Optimizer(compiler.triads)).optimize(true);
+
+        out = new PrintWriter(new FileWriter("optimization.txt"));
+        for (int k = 0; k < original.size(); k++) {
+            String x = original.get(k).toString(k);
+            if (k < optimized.length) {
+                out.println(x + "\t\t\t" + optimized[k].toString(k));
+            } else {
+                out.println(x);
+            }
+        }
+        out.close();
+
+      //  Triad[] triads = compiler.triads.toArray(new Triad[compiler.triads.size()]);
+        (new Translator(optimized, compiler.semantic)).translate(true);
     }
 
     public Compiler(File table, Scanner source) throws Exception {
@@ -90,11 +113,11 @@ public class Compiler {
             return false;
         }
 
-        PrintWriter out = new PrintWriter(new FileWriter("triads.txt"));
+       /* PrintWriter out = new PrintWriter(new FileWriter("triads.txt"));
         for (int i = 0; i < triads.size(); i++) {
             out.println(triads.get(i).toString(i));
         }
-        out.close();
+        out.close();*/
 
         if (!silent) {
             System.out.println();

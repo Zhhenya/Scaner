@@ -4,24 +4,52 @@
 _break       DD 13 
 
 .CODE 
-proc fact 
+proc func 
 	push ebp 
 	mov ebp, esp 
 	sub esp, [0 + 0] 
 
-jg label_6 
-
-mov eax, 0 
-jmp label_10 
-
-label_6: nop 
-	mov eax, dword ptr [n] 
-	mov ebx, 2 
+	mov eax, 5 
+	mov ebx, 5 
 	mul ebx 
-	mov eax, eax 
-	jmp label_10 
+	mov ebx, eax 
+	mov eax, 5 
+	mov ebx, 6 
+	mul ebx 
+	add eax, ebx 
+	add eax, ebx 
+	mov edx, 0 
+	mov ebx, eax 
+	mov eax, dword ptr [y] 
+	mov ebx, 2 
+	div ebx 
+	add ebx, eax 
+	sub ebx, 1 
+	mov eax, ebx 
+	jmp label_12 
 
-	label_10: mov esp, ebp 
+	label_12: mov esp, ebp 
+	pop ebp 
+	ret 0 
+endp 
+
+proc func2 
+	push ebp 
+	mov ebp, esp 
+	sub esp, [0 + 0] 
+
+jg label_20 
+
+mov eax, dword ptr [r] 
+jmp label_24 
+
+label_20: nop 
+	mov eax, dword ptr [r] 
+	sub eax, 1 
+	mov eax, eax 
+	jmp label_24 
+
+	label_24: mov esp, ebp 
 	pop ebp 
 	ret 0 
 endp 
@@ -31,16 +59,17 @@ proc main
 	mov ebp, esp 
 	sub esp, [0 + 0] 
 
+	push 5 
+	call func 
+
+	mov dword ptr [k], eax 
+
 	push 6 
-	call fact 
+	call func2 
 
-	add eax, dword ptr [y] 
-	mov dword ptr [y], eax 
+	mov dword ptr [l], eax 
 
-	mov eax, 0 
-	jmp label_20 
-
-	label_20: mov esp, ebp 
+	label_34: mov esp, ebp 
 	pop ebp 
 	ret 0 
 endp 
