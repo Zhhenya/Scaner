@@ -20,14 +20,13 @@ public class IfOptimizer {
         int i = 0;
         while (i < original.size()) {
             Triad triad = original.get(i);
-            if (triad.transfer.equals(Triad.Transfer.IF)) {
+            if (triad.transfer != null && triad.transfer.equals(Triad.Transfer.IF)) {
                 List<Triad> ifTriads = retrieveIf(original, i);
                 List<Triad> elseTriads = retrieveElse(original, i);
                 recalculateTriads(processIf(ifTriads, elseTriads), i);
                 i += ifTriads.size() + elseTriads.size();
                 continue;
             }
-            optimized.add(triad);
             i++;
         }
 
@@ -64,12 +63,16 @@ public class IfOptimizer {
             }
         }
 
+        boolean isElseEnd = false;
         for (int i = start; i < origin.size(); i++) {
             if (origin.get(i).transfer == Triad.Transfer.END_ELSE) {
+                isElseEnd = true;
                 break;
             }
             elseTriads.add(origin.get(i));
         }
+        if(!isElseEnd)
+            return null;
         return elseTriads;
     }
 
@@ -93,8 +96,12 @@ public class IfOptimizer {
             }
             if (!isEquals) {
                 i++;
-            }
+            }else isEquals = false;
         }
+        if(ifTriad.size() == 1)
+            ifTriad.clear();
+        if(elseTriad.size() == 1)
+            elseTriad.clear();
         ifTriad.addAll(elseTriad);
         return new OptimizedTriads(operators, ifTriad);
     }
@@ -123,6 +130,7 @@ public class IfOptimizer {
                 }
                 break;
             }
+            i++;
         }
     }
 

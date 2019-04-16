@@ -1,5 +1,6 @@
 import llkAnalyzer.AnalyzeError;
 import llkAnalyzer.Table;
+import optimizer.IfOptimizer;
 import optimizer.Optimizer;
 import org.apache.commons.lang3.SerializationUtils;
 import scanner.Lexeme;
@@ -26,10 +27,9 @@ import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Stack;
+import java.util.*;
+
+import static org.apache.commons.lang3.ArrayUtils.toArray;
 
 public class Compiler {
 
@@ -71,7 +71,15 @@ public class Compiler {
         }
         out.close();
 
-        Triad[] optimized = (new Optimizer(compiler.triads)).optimize(true);
+        Triad[] optimizedExpression = (new Optimizer(compiler.triads)).optimize(true);
+
+        List<Triad> ifOptimized = new IfOptimizer(Arrays.asList(optimizedExpression)).optimize();
+
+        Triad[] optimized = ifOptimized.toArray(new Triad[0]);
+
+
+
+
 
         out = new PrintWriter(new FileWriter("optimization.txt"));
         for (int k = 0; k < original.size(); k++) {
@@ -374,6 +382,9 @@ public class Compiler {
         addresses.push(addTriad(new Triad(Action.jg).setTransferControl(Transfer.IF)));*/
 
       //  addresses.push(addTriad(new Triad(Action.nop).setTransferControl(Transfer.IF)));
+    }
+    private void end_else(){
+        addTriad(new Triad(Action.nothing).setTransferControl(Transfer.END_ELSE));
     }
 
     private void _else() {

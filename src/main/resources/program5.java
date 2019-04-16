@@ -7,9 +7,15 @@ public class TestClass {
     int func2(int r) {
         int tt = 0;
         int yyy = 0;
+        yyy = tt + 9;
+        yyy = tt + 9;
         if (r > 1) {
-           int uuu = 0;
-           uuu = uuu + 9;
+            yyy = 5 + 9;
+            int uuu = 0;
+            uuu = uuu + 9;
+        } else {
+            yyy = 5 + 9;
+            int ll = 56 - 88;
         }
         return r - 1;
     }

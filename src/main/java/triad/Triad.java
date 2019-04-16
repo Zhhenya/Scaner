@@ -7,7 +7,7 @@ public class Triad {
         assign("="), ret("return"),
         eq("=="), ne("!="), lt("<"), le("<="), gt(">"), ge(">="),
         add("+"), sub("-"), mul("*"), div("/"), mod("%"), neg,
-        skip;
+        skip, nothing;
 
         private final String representation;
 
