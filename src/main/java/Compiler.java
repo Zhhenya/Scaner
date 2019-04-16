@@ -345,6 +345,7 @@ public class Compiler {
 
     //прописать правильно
     private void _if() {
+        addresses.push(addTriad(new Triad(Action.jg).setTransferControl(Transfer.IF)));
 
       /*  Reference ref = references.pop();
         dataTypes.pop();
@@ -359,14 +360,10 @@ public class Compiler {
     }
 
     private void _else() {
-      /*  Reference ref = references.pop();
-        dataTypes.pop();
+        Triad update = triads.get(addresses.pop().index);
 
-        if (ref instanceof VariableReference || ref instanceof ConstantReference) {
-            addTriad(new Triad(Action.cmp, ref, new ConstantReference(0)));
-        }
+        update.ref1 = addTriad(new Triad(Action.nop).setTransferControl(Transfer.ELSE));
 
-        addTriad(new Triad(Action.jg, addresses.pop()).setTransferControl(Transfer.ELSE));*/
     }
 
     private void checkReturnType() {

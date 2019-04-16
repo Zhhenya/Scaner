@@ -1,29 +1,27 @@
 .386 
 .MODEL flat, stdcall 
 
-.DATA 
-	y            DD 
-
 _break       DD 13 
 
 .CODE 
-mov dword ptr [y], 0 
-
 proc fact 
 	push ebp 
 	mov ebp, esp 
 	sub esp, [0 + 0] 
 
-	mov eax, 0 
-	jmp label_9 
+jg label_6 
 
+mov eax, 0 
+jmp label_10 
+
+label_6: nop 
 	mov eax, dword ptr [n] 
 	mov ebx, 2 
 	mul ebx 
 	mov eax, eax 
-	jmp label_9 
+	jmp label_10 
 
-	label_9: mov esp, ebp 
+	label_10: mov esp, ebp 
 	pop ebp 
 	ret 0 
 endp 
@@ -40,9 +38,9 @@ proc main
 	mov dword ptr [y], eax 
 
 	mov eax, 0 
-	jmp label_19 
+	jmp label_20 
 
-	label_19: mov esp, ebp 
+	label_20: mov esp, ebp 
 	pop ebp 
 	ret 0 
 endp 

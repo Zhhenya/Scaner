@@ -15,15 +15,15 @@ B -> { [startBlock] O } [goToParentLevel]
 P -> JJ [addVariable] [popType] [popVar]
 JJ -> T a
 O -> O1 O | S O | #
-O1 -> a OP | U | ; | RR | T | B | V ;
-OP -> = V [checkAssignment] [popVar] | H ; | N3 ; | N2 ; | ,
+O1 -> a OP | U | ; | RR | B | V ; | GR D
+OP -> = V [checkAssignment] [popVar] ; | H ; | N3 ; | N2 ; | ,
 RR -> return V [checkReturnType] ;
 N2 -> a [addVariable] N3
 N3 -> . a [addVariable] N3 | = V [checkAssignment] [popVar] | H | #
 N5 -> a N6
 N6 -> . a N6 | #
-U -> if ( V ) { O1 } [_if] U1
-U1 -> # | else { O1 } [_else]
+U -> if ( V ) [_if] { O1 } U1
+U1 -> [_else] # | else [_else] { O1 }
 H -> [startFunctionCall] ( F1 ) [finishFunctionCall]
 F1 -> V [checkFunctionArgument] F11
 F11 -> , V [checkFunctionArgument] F11 | #
