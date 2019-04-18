@@ -386,6 +386,9 @@ public class Compiler {
     private void end_else(){
         addTriad(new Triad(Action.nothing).setTransferControl(Transfer.END_ELSE));
     }
+    private void start_if(){
+        addTriad(new Triad(Action.nothing).setTransferControl(Transfer.START_IF));
+    }
 
     private void _else() {
         Triad update = triads.get(addresses.pop().index);

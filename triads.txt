@@ -20,31 +20,32 @@
  19) =          yyy      [18]    
  20) +          tt       9       
  21) =          yyy      [20]    
- 22) >          r        1       
- 23) jg         [29]             
- 24) +          5        9       
- 25) =          yyy      [24]    
- 26) =          uuu      0       
- 27) +          uuu      9       
- 28) =          uuu      [27]    
- 29) nop                         
- 30) +          5        9       
- 31) =          yyy      [30]    
- 32) -          56       88      
- 33) =          ll       [32]    
- 34) nothing                     
- 35) -          r        1       
- 36) return     [35]             
- 37) jmp        [38]             
- 38) call       #epilog  0       
- 39) endp                        
- 40) proc       main             
- 41) call       #prolog  0       
- 42) push       5                
- 43) call       func             
- 44) =          k        [43]    
- 45) push       6                
- 46) call       func2            
- 47) =          l        [46]    
- 48) call       #epilog  0       
- 49) endp                        
+ 22) nothing                     
+ 23) >          r        1       
+ 24) jg         [30]             
+ 25) +          5        9       
+ 26) =          yyy      [25]    
+ 27) =          uuu      0       
+ 28) +          uuu      9       
+ 29) =          uuu      [28]    
+ 30) nop                         
+ 31) +          5        9       
+ 32) =          yyy      [31]    
+ 33) -          56       88      
+ 34) =          ll       [33]    
+ 35) nothing                     
+ 36) -          r        1       
+ 37) return     [36]             
+ 38) jmp        [39]             
+ 39) call       #epilog  0       
+ 40) endp                        
+ 41) proc       main             
+ 42) call       #prolog  0       
+ 43) push       5                
+ 44) call       func             
+ 45) =          k        [44]    
+ 46) push       6                
+ 47) call       func2            
+ 48) =          l        [47]    
+ 49) call       #epilog  0       
+ 50) endp                        

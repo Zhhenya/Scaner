@@ -28,7 +28,7 @@ public class Triad {
         }
     }
 
-    public enum Transfer {FUNCTION, IF, ELSE, END_ELSE}
+    public enum Transfer {FUNCTION, IF, ELSE, END_ELSE, START_IF}
 
     public Action action;
     public Reference ref1 = null, ref2 = null;
